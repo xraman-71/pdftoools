@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cookie Policy | PDF Tools</title>
+  <meta name="description" content="Cookie Policy for PDF Tools - Learn about our use of cookies and local storage.">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    :root {
+      --pure-white: #ffffff;
+      --off-white: #fafafa;
+      --light-gray: #f5f5f5;
+      --medium-gray: #e5e5e5;
+      --dark-gray: #737373;
+      --light-black: #404040;
+      --black: #171717;
+      --pure-black: #000000;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--pure-white);
+      color: var(--black);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Header */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--medium-gray);
+    }
+
+    .header-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--pure-black);
+      letter-spacing: -0.03em;
+      text-decoration: none;
+    }
+
+    .logo span {
+      font-weight: 400;
+      color: var(--dark-gray);
+    }
+
+    .back-link {
+      color: var(--light-black);
+      text-decoration: none;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover {
+      color: var(--pure-black);
+    }
+
+    /* Main Content */
+    main {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 8rem 2rem 4rem;
+    }
+
+    .page-header {
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--medium-gray);
+    }
+
+    .page-header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--pure-black);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .last-updated {
+      color: var(--dark-gray);
+      font-size: 0.9375rem;
+    }
+
+    .content-section {
+      margin-bottom: 2.5rem;
+    }
+
+    .content-section h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--pure-black);
+      margin-bottom: 1rem;
+    }
+
+    .content-section p {
+      color: var(--light-black);
+      font-size: 1rem;
+      line-height: 1.8;
+      margin-bottom: 1rem;
+    }
+
+    .content-section ul {
+      margin-left: 1.5rem;
+      color: var(--light-black);
+    }
+
+    .content-section li {
+      margin-bottom: 0.5rem;
+      line-height: 1.7;
+    }
+
+    .highlight-box {
+      background: var(--off-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .highlight-box p {
+      margin: 0;
+      font-weight: 500;
+    }
+
+    .cookie-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-size: 0.9375rem;
+    }
+
+    .cookie-table th,
+    .cookie-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--medium-gray);
+    }
+
+    .cookie-table th {
+      background: var(--off-white);
+      font-weight: 600;
+      color: var(--pure-black);
+    }
+
+    .cookie-table td {
+      color: var(--light-black);
+    }
+
+    /* Footer */
+    footer {
+      background: var(--off-white);
+      border-top: 1px solid var(--medium-gray);
+      padding: 2rem;
+      text-align: center;
+    }
+
+    footer p {
+      color: var(--dark-gray);
+      font-size: 0.875rem;
+    }
+
+    footer a {
+      color: var(--light-black);
+      text-decoration: none;
+      margin: 0 1rem;
+    }
+
+    footer a:hover {
+      color: var(--pure-black);
+    }
+
+    @media (max-width: 768px) {
+      main {
+        padding: 6rem 1.5rem 3rem;
+      }
+
+      .page-header h1 {
+        font-size: 2rem;
+      }
+
+      .cookie-table {
+        font-size: 0.875rem;
+      }
+
+      .cookie-table th,
+      .cookie-table td {
+        padding: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <a href="index.html" class="logo">PDF<span>Tools</span></a>
+      <a href="index.html" class="back-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Back to Home
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-header">
+      <h1>Cookie Policy</h1>
+      <p class="last-updated">Last updated: February 11, 2026</p>
+    </div>
+
+    <div class="highlight-box">
+      <p>🍪 <strong>Good News:</strong> We use minimal cookies. No tracking, no advertising cookies, and no third-party analytics.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>1. What Are Cookies?</h2>
+      <p>Cookies are small text files stored on your device when you visit websites. They help websites function properly and can remember your preferences.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>2. Our Cookie Usage</h2>
+      <p>PDF Tools uses an absolute minimum of cookies. Here's what we use:</p>
+      
+      <table class="cookie-table">
+        <thead>
+          <tr>
+            <th>Cookie Name</th>
+            <th>Purpose</th>
+            <th>Duration</th>
+            <th>Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>theme_preference</td>
+            <td>Remembers your light/dark mode preference</td>
+            <td>1 year</td>
+            <td>Functional</td>
+          </tr>
+          <tr>
+            <td>tool_settings</td>
+            <td>Saves your last used tool settings</td>
+            <td>Session</td>
+            <td>Functional</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="content-section">
+      <h2>3. What We Don't Use</h2>
+      <p>We intentionally do NOT use:</p>
+      <ul>
+        <li><strong>Analytics cookies:</strong> No Google Analytics or similar tracking</li>
+        <li><strong>Advertising cookies:</strong> No ad targeting or retargeting</li>
+        <li><strong>Third-party cookies:</strong> No social media or external service cookies</li>
+        <li><strong>Session tracking:</strong> We don't track your browsing behavior</li>
+      </ul>
+    </div>
+
+    <div class="content-section">
+      <h2>4. Local Storage</h2>
+      <p>We use browser Local Storage (not cookies) for:</p>
+      <ul>
+        <li>Temporary file processing data (cleared when you close the tab)</li>
+        <li>User interface preferences</li>
+      </ul>
+      <p>This data never leaves your device and is not transmitted to our servers.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>5. Managing Cookies</h2>
+      <p>You can control cookies through your browser settings:</p>
+      <ul>
+        <li><strong>Chrome:</strong> Settings → Privacy and security → Cookies</li>
+        <li><strong>Firefox:</strong> Options → Privacy & Security → Cookies</li>
+        <li><strong>Safari:</strong> Preferences → Privacy → Cookies</li>
+        <li><strong>Edge:</strong> Settings → Cookies and site permissions</li>
+      </ul>
+      <p>Blocking cookies may affect some features, but core functionality will remain available.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>6. Changes to This Policy</h2>
+      <p>We may update this Cookie Policy to reflect changes in technology or legal requirements. Updates will be posted here.</p>
+    </div>
+
+    <div class="content-section">
+      <h2>7. Contact Us</h2>
+      <p>If you have questions about our cookie usage, please contact us at privacy@pdftools.com</p>
+    </div>
+  </main>
+
+  <footer>
+    <p>
+      <a href="index.html">Home</a>
+      <a href="privacy-policy.html">Privacy</a>
+      <a href="terms-of-service.html">Terms</a>
+      <a href="cookie-policy.html">Cookies</a>
+    </p>
+    <p style="margin-top: 1rem;">© 2026 PDFTools. All rights reserved.</p>
+  </footer>
+
+</body>
+</html>

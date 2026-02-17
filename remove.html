@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Remove Pages | PDF Tools</title>
+  <meta name="description" content="Delete specific pages from your PDF with precision. Visual thumbnail selection for easy page management. Free, private, browser-based tool.">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    :root {
+      --pure-white: #ffffff;
+      --off-white: #fafafa;
+      --light-gray: #f5f5f5;
+      --medium-gray: #e5e5e5;
+      --dark-gray: #737373;
+      --light-black: #404040;
+      --black: #171717;
+      --pure-black: #000000;
+      --danger: #ef4444;
+      --danger-light: #fef2f2;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--pure-white);
+      color: var(--black);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--medium-gray);
+    }
+
+    .header-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--pure-black);
+      letter-spacing: -0.03em;
+      text-decoration: none;
+    }
+
+    .logo span {
+      font-weight: 400;
+      color: var(--dark-gray);
+    }
+
+    .back-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--light-black);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9375rem;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover {
+      color: var(--pure-black);
+    }
+
+    main {
+      flex: 1;
+      padding: 8rem 2rem 4rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .tool-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .tool-icon {
+      width: 80px;
+      height: 80px;
+      background: var(--off-white);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      border: 1px solid var(--medium-gray);
+    }
+
+    .tool-icon svg {
+      width: 40px;
+      height: 40px;
+      stroke-width: 1.5;
+    }
+
+    .tool-header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--pure-black);
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.02em;
+    }
+
+    .tool-header p {
+      color: var(--dark-gray);
+      font-size: 1.125rem;
+    }
+
+    .upload-container {
+      max-width: 800px;
+      margin: 0 auto 2rem;
+    }
+
+    .tool-container {
+      background: var(--off-white);
+      border-radius: 24px;
+      padding: 2.5rem;
+      border: 1px solid var(--medium-gray);
+    }
+
+    .drop-zone {
+      background: var(--pure-white);
+      border: 2px dashed var(--medium-gray);
+      border-radius: 16px;
+      padding: 3rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--pure-black);
+      background: var(--light-gray);
+    }
+
+    .drop-zone-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--off-white);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      border: 1px solid var(--medium-gray);
+    }
+
+    .drop-zone-icon svg {
+      width: 32px;
+      height: 32px;
+      color: var(--light-black);
+    }
+
+    .drop-zone h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--pure-black);
+      margin-bottom: 0.5rem;
+    }
+
+    .drop-zone p {
+      color: var(--dark-gray);
+      font-size: 0.9375rem;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .pages-container {
+      display: none;
+      animation: slideIn 0.4s ease;
+    }
+
+    .pages-container.active {
+      display: block;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .pages-toolbar {
+      background: var(--off-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 16px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .toolbar-info {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .file-info-compact {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .file-icon-small {
+      width: 36px;
+      height: 36px;
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .file-icon-small svg {
+      width: 18px;
+      height: 18px;
+      color: var(--light-black);
+    }
+
+    .file-meta {
+      font-size: 0.875rem;
+    }
+
+    .file-name-small {
+      font-weight: 600;
+      color: var(--pure-black);
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-pages {
+      color: var(--dark-gray);
+      font-size: 0.8125rem;
+    }
+
+    .selection-stats {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.5rem 1rem;
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 8px;
+      font-size: 0.875rem;
+    }
+
+    .selection-count {
+      font-weight: 700;
+      color: var(--danger);
+      min-width: 24px;
+      text-align: center;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn-tool {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1rem;
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--light-black);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-tool:hover {
+      border-color: var(--pure-black);
+      color: var(--pure-black);
+    }
+
+    .btn-tool.danger {
+      color: var(--danger);
+      border-color: var(--danger);
+    }
+
+    .btn-tool.danger:hover {
+      background: var(--danger-light);
+    }
+
+    .btn-tool svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .pages-grid-container {
+      background: var(--off-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 16px;
+      padding: 2rem;
+      min-height: 400px;
+    }
+
+    .pages-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .page-thumbnail {
+      position: relative;
+      background: var(--pure-white);
+      border: 2px solid var(--medium-gray);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s;
+      aspect-ratio: 1/1.414;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page-thumbnail:hover {
+      border-color: var(--light-black);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .page-thumbnail.selected {
+      border-color: var(--danger);
+      background: var(--danger-light);
+    }
+
+    .page-thumbnail.selected::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(239, 68, 68, 0.1);
+      pointer-events: none;
+    }
+
+    .page-number {
+      position: absolute;
+      top: 0.5rem;
+      left: 0.5rem;
+      width: 28px;
+      height: 28px;
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--light-black);
+      z-index: 2;
+      transition: all 0.2s;
+    }
+
+    .page-thumbnail.selected .page-number {
+      background: var(--danger);
+      color: var(--pure-white);
+      border-color: var(--danger);
+    }
+
+    .page-check {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      width: 24px;
+      height: 24px;
+      background: var(--danger);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: scale(0.8);
+      transition: all 0.2s;
+      z-index: 2;
+    }
+
+    .page-thumbnail.selected .page-check {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .page-check svg {
+      width: 14px;
+      height: 14px;
+      color: var(--pure-white);
+    }
+
+    .page-canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .loading-spinner {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--dark-gray);
+      font-size: 0.75rem;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .range-selector {
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .range-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .range-title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--light-black);
+    }
+
+    .range-input-group {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .range-input {
+      padding: 0.625rem 1rem;
+      border: 1px solid var(--medium-gray);
+      border-radius: 8px;
+      font-size: 0.9375rem;
+      font-family: inherit;
+      width: 200px;
+      transition: all 0.2s;
+    }
+
+    .range-input:focus {
+      outline: none;
+      border-color: var(--pure-black);
+    }
+
+    .range-btn {
+      padding: 0.625rem 1.25rem;
+      background: var(--pure-black);
+      color: var(--pure-white);
+      border: none;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .range-btn:hover {
+      background: var(--light-black);
+    }
+
+    .range-presets {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .preset-btn {
+      padding: 0.375rem 0.875rem;
+      background: var(--off-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 6px;
+      font-size: 0.8125rem;
+      color: var(--light-black);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .preset-btn:hover {
+      border-color: var(--light-black);
+      color: var(--pure-black);
+    }
+
+    .action-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--pure-white);
+      border-top: 1px solid var(--medium-gray);
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      z-index: 100;
+      transform: translateY(100%);
+      transition: transform 0.3s;
+    }
+
+    .action-bar.active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      padding: 0.875rem 1.5rem;
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 10px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--light-black);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--pure-black);
+      color: var(--pure-black);
+    }
+
+    .btn-primary {
+      padding: 0.875rem 2rem;
+      background: var(--pure-black);
+      color: var(--pure-white);
+      border: none;
+      border-radius: 10px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--light-black);
+      transform: translateY(-2px);
+    }
+
+    .btn-primary:disabled {
+      background: var(--medium-gray);
+      color: var(--dark-gray);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background: #dc2626;
+    }
+
+    .file-item {
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 12px;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      animation: slideIn 0.3s ease;
+    }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .file-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--off-white);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .file-icon svg {
+      width: 20px;
+      height: 20px;
+      color: var(--light-black);
+    }
+
+    .file-details {
+      min-width: 0;
+    }
+
+    .file-name {
+      font-weight: 600;
+      color: var(--pure-black);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 0.25rem;
+    }
+
+    .file-size {
+      font-size: 0.875rem;
+      color: var(--dark-gray);
+    }
+
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--medium-gray);
+      background: var(--pure-white);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--light-black);
+    }
+
+    .btn-icon:hover {
+      border-color: var(--pure-black);
+      color: var(--pure-black);
+    }
+
+    .btn-icon.remove:hover {
+      background: var(--danger-light);
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .progress-container {
+      display: none;
+      max-width: 600px;
+      margin: 2rem auto;
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .progress-container.active {
+      display: block;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      font-size: 0.875rem;
+      color: var(--light-black);
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: var(--medium-gray);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--pure-black);
+      width: 0%;
+      transition: width 0.3s;
+      border-radius: 4px;
+    }
+
+    .result-container {
+      display: none;
+      max-width: 600px;
+      margin: 2rem auto;
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 16px;
+      padding: 2.5rem;
+      text-align: center;
+      animation: slideIn 0.4s ease;
+    }
+
+    .result-container.active {
+      display: block;
+    }
+
+    .result-icon {
+      width: 64px;
+      height: 64px;
+      background: #f0fdf4;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+    }
+
+    .result-icon svg {
+      width: 32px;
+      height: 32px;
+      color: #22c55e;
+    }
+
+    .result-container h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--pure-black);
+      margin-bottom: 0.5rem;
+    }
+
+    .result-stats {
+      color: var(--dark-gray);
+      margin-bottom: 1.5rem;
+      font-size: 0.9375rem;
+      line-height: 1.6;
+    }
+
+    .result-stats .stat-highlight {
+      color: var(--pure-black);
+      font-weight: 600;
+    }
+
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #22c55e;
+      color: var(--pure-white);
+      padding: 0.875rem 1.5rem;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .btn-download:hover {
+      background: #16a34a;
+      transform: translateY(-2px);
+    }
+
+    .btn-reset {
+      display: block;
+      margin: 1rem auto 0;
+      background: none;
+      border: none;
+      color: var(--dark-gray);
+      font-size: 0.9375rem;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .btn-reset:hover {
+      color: var(--pure-black);
+    }
+
+    .info-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem;
+      background: var(--pure-white);
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      border: 1px solid var(--medium-gray);
+    }
+
+    .info-box svg {
+      width: 20px;
+      height: 20px;
+      color: var(--dark-gray);
+      flex-shrink: 0;
+      margin-top: 0.125rem;
+    }
+
+    .info-box p {
+      font-size: 0.875rem;
+      color: var(--dark-gray);
+      line-height: 1.6;
+    }
+
+    @media (max-width: 768px) {
+      main {
+        padding: 7rem 1rem 6rem;
+      }
+
+      .tool-container {
+        padding: 1.5rem;
+      }
+
+      .pages-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .toolbar-info {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .pages-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 1rem;
+      }
+
+      .pages-grid-container {
+        padding: 1rem;
+      }
+
+      .action-bar {
+        padding: 1rem;
+        flex-direction: column;
+      }
+
+      .btn-secondary, .btn-primary {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .range-input {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <a href="index.html" class="logo">PDF<span>Tools</span></a>
+      <a href="index.html" class="back-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Back to Tools
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <div class="tool-header">
+      <div class="tool-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 6h18M3 12h18M3 18h18"></path>
+          <line x1="8" y1="6" x2="8" y2="18" stroke-dasharray="4 4"></line>
+        </svg>
+      </div>
+      <h1>Remove Pages</h1>
+      <p>Delete specific pages with precision</p>
+    </div>
+
+    <div class="info-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="16" x2="12" y2="12"></line>
+        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+      </svg>
+      <p>Click on page thumbnails to select pages for deletion. Selected pages will be permanently removed from your PDF. You can also use the range selector to remove multiple pages at once (e.g., "2-5, 8, 10-12"). All processing happens in your browser. Supports files up to 500MB.</p>
+    </div>
+
+    <div class="upload-container" id="uploadContainer">
+      <div class="tool-container">
+        <div class="drop-zone" id="dropZone">
+          <div class="drop-zone-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </div>
+          <h3>Drop PDF here or click to browse</h3>
+          <p>Supports PDF files up to 500MB</p>
+          <input type="file" class="file-input" id="fileInput" accept=".pdf">
+        </div>
+
+        <div id="fileInfo" style="margin-top: 1.5rem;"></div>
+      </div>
+    </div>
+
+    <div class="pages-container" id="pagesContainer">
+      <div class="range-selector">
+        <div class="range-header">
+          <span class="range-title">Quick Select Range</span>
+        </div>
+        <div class="range-input-group">
+          <input type="text" class="range-input" id="rangeInput" placeholder="e.g., 2-5, 8, 10-12">
+          <button class="range-btn" onclick="selectRange()">Select Pages</button>
+        </div>
+        <div class="range-presets">
+          <button class="preset-btn" onclick="selectPreset('odd')">Odd pages</button>
+          <button class="preset-btn" onclick="selectPreset('even')">Even pages</button>
+          <button class="preset-btn" onclick="selectPreset('first')">First 5</button>
+          <button class="preset-btn" onclick="selectPreset('last')">Last 5</button>
+          <button class="preset-btn" onclick="selectPreset('all')">Select All</button>
+        </div>
+      </div>
+
+      <div class="pages-toolbar">
+        <div class="toolbar-info">
+          <div class="file-info-compact">
+            <div class="file-icon-small">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+            </div>
+            <div class="file-meta">
+              <div class="file-name-small" id="toolbarFileName">document.pdf</div>
+              <div class="file-pages" id="toolbarPageCount">0 pages</div>
+            </div>
+          </div>
+          <div class="selection-stats">
+            <span>Selected:</span>
+            <span class="selection-count" id="selectionCount">0</span>
+            <span>pages to remove</span>
+          </div>
+        </div>
+        <div class="toolbar-actions">
+          <button class="btn-tool" onclick="invertSelection()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 3h3v3h-3zM8 3h3v3H8zM5 3h3v3H5zM3 8h18v13H3z"></path>
+            </svg>
+            Invert
+          </button>
+          <button class="btn-tool danger" onclick="clearSelection()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            Clear All
+          </button>
+        </div>
+      </div>
+
+      <div class="pages-grid-container">
+        <div class="pages-grid" id="pagesGrid"></div>
+      </div>
+    </div>
+
+    <div class="progress-container" id="progressContainer">
+      <div class="progress-header">
+        <span>Removing pages...</span>
+        <span id="progressPercent">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <div class="result-container" id="resultContainer">
+      <div class="result-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+      </div>
+      <h3>Pages Removed Successfully!</h3>
+      <p class="result-stats">
+        Removed <span class="stat-highlight" id="removedCount">0 pages</span><br>
+        New document: <span class="stat-highlight" id="newPageCount">0 pages</span>
+      </p>
+      <a href="#" class="btn-download" id="downloadBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Download Modified PDF
+      </a>
+      <button class="btn-reset" id="resetBtn">Remove pages from another file</button>
+    </div>
+  </main>
+
+  <div class="action-bar" id="actionBar">
+    <button class="btn-secondary" onclick="resetTool()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+      Cancel
+    </button>
+    <button class="btn-primary btn-danger" id="removePagesBtn" onclick="removePages()" disabled>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="3 6 5 6 21 6"></polyline>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+      </svg>
+      Remove Selected Pages
+    </button>
+  </div>
+
+  <footer>
+    <p>&copy; 2024 PDF Tools. All processing happens locally in your browser.</p>
+  </footer>
+
+  <script>
+    // Configure PDF.js worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    // DOM Elements
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const uploadContainer = document.getElementById('uploadContainer');
+    const fileInfo = document.getElementById('fileInfo');
+    const pagesContainer = document.getElementById('pagesContainer');
+    const pagesGrid = document.getElementById('pagesGrid');
+    const actionBar = document.getElementById('actionBar');
+    const removePagesBtn = document.getElementById('removePagesBtn');
+    const selectionCount = document.getElementById('selectionCount');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressFill = document.getElementById('progressFill');
+    const progressPercent = document.getElementById('progressPercent');
+    const resultContainer = document.getElementById('resultContainer');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    // State
+    let currentFile = null;
+    let pdfDocument = null;
+    let totalPages = 0;
+    let selectedPages = new Set();
+    let pdfBytes = null;
+    let originalFileData = null; // Keep original file for re-reading if needed
+
+    // File handling
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) handleFile(files[0]);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) handleFile(e.target.files[0]);
+    });
+
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    async function handleFile(file) {
+      if (file.type !== 'application/pdf' && !file.name.endsWith('.pdf')) {
+        alert('Please upload a PDF file');
+        return;
+      }
+      
+      if (file.size > 500 * 1024 * 1024) {
+        alert('File size must be less than 500MB');
+        return;
+      }
+
+      currentFile = file;
+      originalFileData = file; // Keep reference to original file
+      showFileInfo(file);
+      
+      try {
+        // Read the file as array buffer and create a copy to prevent detachment
+        const arrayBuffer = await file.arrayBuffer();
+        pdfBytes = arrayBuffer.slice(0); // Create a copy of the ArrayBuffer
+        
+        // Load PDF with PDF.js using a copy
+        const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(pdfBytes) });
+        pdfDocument = await loadingTask.promise;
+        totalPages = pdfDocument.numPages;
+        
+        await initPageSelector();
+      } catch (error) {
+        console.error('Error loading PDF:', error);
+        alert('Error loading PDF. Please try another file.');
+      }
+    }
+
+    function showFileInfo(file) {
+      fileInfo.innerHTML = `
+        <div class="file-item">
+          <div class="file-info">
+            <div class="file-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+            </div>
+            <div class="file-details">
+              <div class="file-name">${file.name}</div>
+              <div class="file-size">${formatFileSize(file.size)}</div>
+            </div>
+          </div>
+          <button class="btn-icon remove" onclick="resetTool()" title="Remove file">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      `;
+    }
+
+    async function initPageSelector() {
+      selectedPages.clear();
+      
+      document.getElementById('toolbarFileName').textContent = currentFile.name;
+      document.getElementById('toolbarPageCount').textContent = totalPages + ' page' + (totalPages !== 1 ? 's' : '');
+      
+      uploadContainer.style.display = 'none';
+      pagesContainer.classList.add('active');
+      
+      await renderPages();
+      updateSelection();
+    }
+
+    async function renderPages() {
+      pagesGrid.innerHTML = '';
+      
+      for (let i = 1; i <= totalPages; i++) {
+        const pageThumb = document.createElement('div');
+        pageThumb.className = 'page-thumbnail';
+        pageThumb.dataset.page = i;
+        
+        const isSelected = selectedPages.has(i);
+        if (isSelected) pageThumb.classList.add('selected');
+        
+        pageThumb.innerHTML = `
+          <div class="page-number">${i}</div>
+          <div class="page-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <div class="loading-spinner">Loading...</div>
+        `;
+        
+        pageThumb.onclick = () => togglePage(i);
+        pagesGrid.appendChild(pageThumb);
+        
+        // Render page thumbnail
+        renderPageThumbnail(i, pageThumb);
+      }
+    }
+
+    async function renderPageThumbnail(pageNum, container) {
+      try {
+        const page = await pdfDocument.getPage(pageNum);
+        const viewport = page.getViewport({ scale: 1.2 });
+        
+        const canvas = document.createElement('canvas');
+        canvas.className = 'page-canvas';
+        const context = canvas.getContext('2d');
+        
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        
+        await page.render({
+          canvasContext: context,
+          viewport: viewport
+        }).promise;
+        
+        const spinner = container.querySelector('.loading-spinner');
+        if (spinner) {
+          spinner.remove();
+          container.appendChild(canvas);
+        }
+      } catch (error) {
+        console.error('Error rendering page:', pageNum, error);
+      }
+    }
+
+    function togglePage(pageNum) {
+      if (selectedPages.has(pageNum)) {
+        selectedPages.delete(pageNum);
+      } else {
+        selectedPages.add(pageNum);
+      }
+      
+      const thumb = document.querySelector(`[data-page="${pageNum}"]`);
+      if (thumb) {
+        thumb.classList.toggle('selected');
+      }
+      
+      updateSelection();
+    }
+
+    function updateSelection() {
+      const count = selectedPages.size;
+      selectionCount.textContent = count;
+      
+      if (count > 0) {
+        actionBar.classList.add('active');
+        removePagesBtn.disabled = false;
+        removePagesBtn.innerHTML = `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+          Remove ${count} Page${count !== 1 ? 's' : ''}
+        `;
+      } else {
+        actionBar.classList.remove('active');
+        removePagesBtn.disabled = true;
+        removePagesBtn.innerHTML = `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+          Remove Selected Pages
+        `;
+      }
+    }
+
+    function selectRange() {
+      const input = document.getElementById('rangeInput').value.trim();
+      if (!input) return;
+      
+      const pages = parseRange(input);
+      pages.forEach(p => {
+        if (p >= 1 && p <= totalPages) selectedPages.add(p);
+      });
+      
+      // Update UI for all selected pages
+      pages.forEach(p => {
+        if (p >= 1 && p <= totalPages) {
+          const thumb = document.querySelector(`[data-page="${p}"]`);
+          if (thumb) thumb.classList.add('selected');
+        }
+      });
+      
+      updateSelection();
+    }
+
+    function parseRange(input) {
+      const pages = new Set();
+      const parts = input.split(',').map(p => p.trim());
+      
+      parts.forEach(part => {
+        if (part.includes('-')) {
+          const [start, end] = part.split('-').map(Number);
+          for (let i = start; i <= end; i++) pages.add(i);
+        } else {
+          pages.add(Number(part));
+        }
+      });
+      
+      return Array.from(pages).filter(p => !isNaN(p));
+    }
+
+    function selectPreset(type) {
+      selectedPages.clear();
+      
+      switch(type) {
+        case 'odd':
+          for (let i = 1; i <= totalPages; i += 2) selectedPages.add(i);
+          break;
+        case 'even':
+          for (let i = 2; i <= totalPages; i += 2) selectedPages.add(i);
+          break;
+        case 'first':
+          for (let i = 1; i <= Math.min(5, totalPages); i++) selectedPages.add(i);
+          break;
+        case 'last':
+          for (let i = Math.max(1, totalPages - 4); i <= totalPages; i++) selectedPages.add(i);
+          break;
+        case 'all':
+          for (let i = 1; i <= totalPages; i++) selectedPages.add(i);
+          break;
+      }
+      
+      // Update all thumbnails
+      document.querySelectorAll('.page-thumbnail').forEach(thumb => {
+        const pageNum = parseInt(thumb.dataset.page);
+        if (selectedPages.has(pageNum)) {
+          thumb.classList.add('selected');
+        } else {
+          thumb.classList.remove('selected');
+        }
+      });
+      
+      updateSelection();
+    }
+
+    function invertSelection() {
+      const newSelection = new Set();
+      for (let i = 1; i <= totalPages; i++) {
+        if (!selectedPages.has(i)) newSelection.add(i);
+      }
+      selectedPages = newSelection;
+      
+      // Update all thumbnails
+      document.querySelectorAll('.page-thumbnail').forEach(thumb => {
+        const pageNum = parseInt(thumb.dataset.page);
+        if (selectedPages.has(pageNum)) {
+          thumb.classList.add('selected');
+        } else {
+          thumb.classList.remove('selected');
+        }
+      });
+      
+      updateSelection();
+    }
+
+    function clearSelection() {
+      if (selectedPages.size === 0) return;
+      if (confirm('Clear all selections?')) {
+        selectedPages.clear();
+        document.querySelectorAll('.page-thumbnail').forEach(thumb => {
+          thumb.classList.remove('selected');
+        });
+        updateSelection();
+      }
+    }
+
+    async function removePages() {
+      if (selectedPages.size === 0) return;
+      if (selectedPages.size === totalPages) {
+        alert('You cannot remove all pages. At least one page must remain.');
+        return;
+      }
+      
+      pagesContainer.classList.remove('active');
+      actionBar.classList.remove('active');
+      progressContainer.classList.add('active');
+      
+      try {
+        // Update progress
+        updateProgress(10);
+        
+        // Re-read the file from the original source to ensure fresh ArrayBuffer
+        let freshPdfBytes;
+        if (originalFileData) {
+          const arrayBuffer = await originalFileData.arrayBuffer();
+          freshPdfBytes = arrayBuffer.slice(0);
+        } else {
+          // Fallback to existing buffer with copy
+          freshPdfBytes = new Uint8Array(pdfBytes).buffer;
+        }
+        
+        updateProgress(20);
+        
+        // Load PDF with pdf-lib
+        const pdfDoc = await PDFLib.PDFDocument.load(freshPdfBytes);
+        updateProgress(35);
+        
+        // Get pages to keep (inverse of selected pages)
+        const pagesToKeep = [];
+        for (let i = 0; i < totalPages; i++) {
+          if (!selectedPages.has(i + 1)) {
+            pagesToKeep.push(i);
+          }
+        }
+        
+        // Create new PDF with only the pages to keep
+        const newPdfDoc = await PDFLib.PDFDocument.create();
+        updateProgress(50);
+        
+        // Copy pages in batches to prevent memory issues with large PDFs
+        const batchSize = Math.max(1, Math.floor(pagesToKeep.length / 10) || 10);
+        for (let i = 0; i < pagesToKeep.length; i += batchSize) {
+          const batch = pagesToKeep.slice(i, Math.min(i + batchSize, pagesToKeep.length));
+          const copiedPages = await newPdfDoc.copyPages(pdfDoc, batch);
+          copiedPages.forEach(page => {
+            newPdfDoc.addPage(page);
+          });
+          
+          // Update progress based on pages copied
+          const progress = 50 + ((i + batch.length) / pagesToKeep.length) * 35;
+          updateProgress(Math.min(progress, 85));
+        }
+        
+        updateProgress(90);
+        
+        // Save the new PDF
+        const newPdfBytes = await newPdfDoc.save();
+        updateProgress(100);
+        
+        // Create blob and download link
+        const blob = new Blob([newPdfBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        
+        setTimeout(() => {
+          showResult(url);
+        }, 500);
+        
+      } catch (error) {
+        console.error('Error removing pages:', error);
+        alert('Error processing PDF: ' + error.message + '. Please try again or use a different file.');
+        progressContainer.classList.remove('active');
+        pagesContainer.classList.add('active');
+        actionBar.classList.add('active');
+      }
+    }
+
+    function updateProgress(percent) {
+      progressFill.style.width = percent + '%';
+      progressPercent.textContent = Math.floor(percent) + '%';
+    }
+
+    function showResult(downloadUrl) {
+      progressContainer.classList.remove('active');
+      resultContainer.classList.add('active');
+      
+      const removed = selectedPages.size;
+      const remaining = totalPages - removed;
+      
+      document.getElementById('removedCount').textContent = removed + ' page' + (removed !== 1 ? 's' : '');
+      document.getElementById('newPageCount').textContent = remaining + ' page' + (remaining !== 1 ? 's' : '');
+      
+      downloadBtn.href = downloadUrl;
+      downloadBtn.download = 'modified_' + currentFile.name;
+    }
+
+    function resetTool() {
+      // Cleanup
+      if (downloadBtn.href && downloadBtn.href.startsWith('blob:')) {
+        URL.revokeObjectURL(downloadBtn.href);
+      }
+      
+      currentFile = null;
+      pdfDocument = null;
+      pdfBytes = null;
+      originalFileData = null;
+      selectedPages.clear();
+      totalPages = 0;
+      
+      fileInfo.innerHTML = '';
+      uploadContainer.style.display = 'block';
+      pagesContainer.classList.remove('active');
+      actionBar.classList.remove('active');
+      progressContainer.classList.remove('active');
+      resultContainer.classList.remove('active');
+      
+      progressFill.style.width = '0%';
+      progressPercent.textContent = '0%';
+      
+      document.getElementById('rangeInput').value = '';
+      fileInput.value = '';
+    }
+
+    resetBtn.addEventListener('click', resetTool);
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (!pagesContainer.classList.contains('active')) return;
+      
+      if (e.key === 'Escape') {
+        if (selectedPages.size > 0) {
+          clearSelection();
+        }
+      }
+      
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'a') {
+          e.preventDefault();
+          selectPreset('all');
+        }
+      }
+    });
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      if (downloadBtn.href && downloadBtn.href.startsWith('blob:')) {
+        URL.revokeObjectURL(downloadBtn.href);
+      }
+    });
+  </script>
+</body>
+</html>

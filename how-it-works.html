@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>How It Works | PDF Tools</title>
+  <meta name="description" content="Learn how to use PDF Tools - Step by step guide to merge, compress, protect and edit PDFs in your browser.">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    :root {
+      --pure-white: #ffffff;
+      --off-white: #fafafa;
+      --light-gray: #f5f5f5;
+      --medium-gray: #e5e5e5;
+      --dark-gray: #737373;
+      --light-black: #404040;
+      --black: #171717;
+      --pure-black: #000000;
+      --accent-blue: #3b82f6;
+      --success-green: #22c55e;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--pure-white);
+      color: var(--black);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Header */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--medium-gray);
+    }
+
+    .header-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--pure-black);
+      letter-spacing: -0.03em;
+      text-decoration: none;
+    }
+
+    .logo span {
+      font-weight: 400;
+      color: var(--dark-gray);
+    }
+
+    .back-link {
+      color: var(--light-black);
+      text-decoration: none;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover {
+      color: var(--pure-black);
+    }
+
+    /* Hero Section */
+    .page-hero {
+      padding: 8rem 2rem 4rem;
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .page-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      color: var(--pure-black);
+      margin-bottom: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .page-hero p {
+      color: var(--dark-gray);
+      font-size: 1.125rem;
+      line-height: 1.7;
+    }
+
+    /* Main Steps Section */
+    .main-steps {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 2rem 2rem 4rem;
+    }
+
+    .step-detail {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 2rem;
+      margin-bottom: 3rem;
+      padding: 2rem;
+      background: var(--off-white);
+      border-radius: 20px;
+      border: 1px solid var(--medium-gray);
+    }
+
+    .step-number-large {
+      width: 80px;
+      height: 80px;
+      background: var(--pure-black);
+      color: var(--pure-white);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 800;
+    }
+
+    .step-content h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--pure-black);
+      margin-bottom: 0.75rem;
+    }
+
+    .step-content p {
+      color: var(--light-black);
+      font-size: 1rem;
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+
+    .step-tip {
+      background: var(--pure-white);
+      padding: 1rem 1.25rem;
+      border-radius: 12px;
+      border-left: 4px solid var(--accent-blue);
+      font-size: 0.9375rem;
+      color: var(--light-black);
+    }
+
+    .step-tip strong {
+      color: var(--pure-black);
+    }
+
+    /* Tool Specific Steps */
+    .tool-steps {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 4rem 2rem;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .section-title h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--pure-black);
+      margin-bottom: 0.5rem;
+    }
+
+    .section-title p {
+      color: var(--dark-gray);
+      font-size: 1.125rem;
+    }
+
+    .tools-grid-detailed {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .tool-detail-card {
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: all 0.3s;
+    }
+
+    .tool-detail-card:hover {
+      border-color: var(--pure-black);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+    }
+
+    .tool-icon-small {
+      width: 48px;
+      height: 48px;
+      background: var(--off-white);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    .tool-icon-small svg {
+      width: 24px;
+      height: 24px;
+      color: var(--pure-black);
+    }
+
+    .tool-detail-card h3 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--pure-black);
+      margin-bottom: 0.5rem;
+    }
+
+    .tool-detail-card ol {
+      margin-left: 1.25rem;
+      color: var(--light-black);
+      font-size: 0.9375rem;
+      line-height: 1.7;
+    }
+
+    .tool-detail-card li {
+      margin-bottom: 0.5rem;
+    }
+
+    /* Video/Visual Placeholder */
+    .visual-demo {
+      max-width: 900px;
+      margin: 4rem auto;
+      padding: 0 2rem;
+    }
+
+    .demo-box {
+      background: linear-gradient(135deg, var(--off-white) 0%, var(--light-gray) 100%);
+      border: 2px dashed var(--medium-gray);
+      border-radius: 24px;
+      padding: 4rem 2rem;
+      text-align: center;
+    }
+
+    .demo-box svg {
+      width: 64px;
+      height: 64px;
+      color: var(--dark-gray);
+      margin-bottom: 1rem;
+    }
+
+    .demo-box h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--pure-black);
+      margin-bottom: 0.5rem;
+    }
+
+    .demo-box p {
+      color: var(--dark-gray);
+      font-size: 1rem;
+    }
+
+    /* CTA Section */
+    .cta-section {
+      background: var(--pure-black);
+      margin: 4rem 2rem;
+      padding: 4rem 2rem;
+      border-radius: 24px;
+      text-align: center;
+    }
+
+    .cta-section h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--pure-white);
+      margin-bottom: 1rem;
+    }
+
+    .cta-section p {
+      color: var(--dark-gray);
+      font-size: 1.125rem;
+      margin-bottom: 2rem;
+    }
+
+    .btn-primary-large {
+      background: var(--pure-white);
+      color: var(--pure-black);
+      padding: 1rem 2.5rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s;
+    }
+
+    .btn-primary-large:hover {
+      background: var(--off-white);
+      transform: translateY(-2px);
+    }
+
+    /* Footer */
+    footer {
+      background: var(--off-white);
+      border-top: 1px solid var(--medium-gray);
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+
+    footer p {
+      color: var(--dark-gray);
+      font-size: 0.875rem;
+    }
+
+    footer a {
+      color: var(--light-black);
+      text-decoration: none;
+      margin: 0 0.75rem;
+    }
+
+    footer a:hover {
+      color: var(--pure-black);
+    }
+
+    @media (max-width: 1024px) {
+      .tools-grid-detailed {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .page-hero {
+        padding: 6rem 1.5rem 3rem;
+      }
+
+      .step-detail {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .step-number-large {
+        margin: 0 auto;
+      }
+
+      .tools-grid-detailed {
+        grid-template-columns: 1fr;
+      }
+
+      .cta-section {
+        margin: 2rem 1rem;
+        padding: 3rem 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="header-container">
+      <a href="index.html" class="logo">PDF<span>Tools</span></a>
+      <a href="index.html" class="back-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Back to Home
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="page-hero">
+    <h1>How It Works</h1>
+    <p>Get started with PDF Tools in minutes. No downloads, no registration, no technical skills required. Just open your browser and start processing PDFs.</p>
+  </section>
+
+  <!-- Main 4 Steps -->
+  <section class="main-steps">
+    
+    <div class="step-detail">
+      <div class="step-number-large">1</div>
+      <div class="step-content">
+        <h2>Choose Your Tool</h2>
+        <p>Browse our collection of 9 professional PDF utilities. Whether you need to merge documents, compress file size, add password protection, or redact sensitive information - we have a tool for every task.</p>
+        <div class="step-tip">
+          <strong>💡 Tip:</strong> All tools are accessible from the homepage grid. Hover over any card to see a brief description of what it does.
+        </div>
+      </div>
+    </div>
+
+    <div class="step-detail">
+      <div class="step-number-large">2</div>
+      <div class="step-content">
+        <h2>Upload Your Files</h2>
+        <p>Drag and drop your PDF files directly onto the tool page, or click the upload area to browse your device. You can select multiple files at once for tools like Merge PDFs. Maximum recommended file size is 100MB per file.</p>
+        <div class="step-tip">
+          <strong>💡 Tip:</strong> For best performance, close other heavy browser tabs before processing large PDFs. Everything happens in your browser, so your device's memory matters.
+        </div>
+      </div>
+    </div>
+
+    <div class="step-detail">
+      <div class="step-number-large">3</div>
+      <div class="step-content">
+        <h2>Adjust Settings</h2>
+        <p>Customize the processing options to match your needs. Set compression levels, choose password strength, select specific pages to remove, or position your watermark. Preview changes in real-time when available.</p>
+        <div class="step-tip">
+          <strong>💡 Tip:</strong> Not sure about a setting? Most tools have recommended defaults that work great for most users. You can always re-process if needed.
+        </div>
+      </div>
+    </div>
+
+    <div class="step-detail">
+      <div class="step-number-large">4</div>
+      <div class="step-content">
+        <h2>Download & Done</h2>
+        <p>Click the process button and watch the magic happen. Your file will be ready for download in seconds. Click once to save to your device. That's it - no waiting, no email confirmations, no watermarks.</p>
+        <div class="step-tip">
+          <strong>💡 Tip:</strong> Your files are automatically cleared from browser memory after processing. For security, we recommend downloading immediately and closing the tab when done.
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- Tool-Specific Instructions -->
+  <section class="tool-steps">
+    <div class="section-title">
+      <h2>Tool-Specific Guides</h2>
+      <p>Quick reference for each PDF utility</p>
+    </div>
+
+    <div class="tools-grid-detailed">
+      
+      <div class="tool-detail-card">
+        <div class="tool-icon-small">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M8 7v8a2 2 0 0 0 2 2h6M8 7V5a2 2 0 0 1 2-2h4.586a1 1 0 0 1 .707.293l4.414 4.414a1 1 0 0 1 .293.707V15a2 2 0 0 1-2 2h-2"/>
+            <path d="M12 12v6"/><path d="M9 15l3 3 3-3"/>
+          </svg>
+        </div>
+        <h3>Merge PDFs</h3>
+        <ol>
+          <li>Upload 2 or more PDF files</li>
+          <li>Drag to reorder if needed</li>
+          <li>Click Merge and download</li>
+        </ol>
+      </div>
+
+      <div class="tool-detail-card">
+        <div class="tool-icon-small">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <h3>Compress PDF</h3>
+        <ol>
+          <li>Upload your PDF file</li>
+          <li>Select compression level</li>
+          <li>Download smaller file</li>
+        </ol>
+      </div>
+
+      <div class="tool-detail-card">
+        <div class="tool-icon-small">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+        </div>
+        <h3>Password Protect</h3>
+        <ol>
+          <li>Upload PDF to encrypt</li>
+          <li>Set your password</li>
+          <li>Download secured file</li>
+        </ol>
+      </div>
+
+      <div class="tool-detail-card">
+        <div class="tool-icon-small">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 7h18M3 12h18M3 17h12"/>
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+          </svg>
+        </div>
+        <h3>Redact PDF</h3>
+        <ol>
+          <li>Upload your document</li>
+          <li>Select areas to black out</li>
+          <li>Download redacted version</li>
+        </ol>
+      </div>
+
+      <div class="tool-detail-card">
+        <div class="tool-icon-small">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 7h18M3 12h18M3 17h12"/>
+            <circle cx="18" cy="17" r="3"/>
+            <line x1="16.5" y1="17" x2="19.5" y2="17"/>
+          </svg>
+        </div>
+        <h3>Remove Pages</h3>
+        <ol>
+          <li>Upload your PDF</li>
+          <li>Select pages to delete</li>
+          <li>Download modified file</li>
+        </ol>
+      </div>
+
+      <div class="tool-detail-card">
+        <div class="tool-icon-small">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+            <path d="M21 3v5h-5"/>
+          </svg>
+        </div>
+        <h3>Rotate PDF</h3>
+        <ol>
+          <li>Upload your document</li>
+          <li>Choose rotation angle</li>
+          <li>Apply to all or select pages</li>
+        </ol>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Visual Demo Placeholder -->
+  <section class="visual-demo">
+    <div class="demo-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+        <line x1="8" y1="21" x2="16" y2="21"></line>
+        <line x1="12" y1="17" x2="12" y2="21"></line>
+      </svg>
+      <h3>See It In Action</h3>
+      <p>Video tutorial coming soon! For now, try any tool above - it's free and takes less than a minute.</p>
+    </div>
+  </section>
+
+
+  <!-- Footer -->
+  <footer>
+    <p>
+      <a href="index.html">Home</a>
+      <a href="privacy-policy.html">Privacy</a>
+      <a href="terms-of-service.html">Terms</a>
+      <a href="cookie-policy.html">Cookies</a>
+    </p>
+    <p style="margin-top: 1rem;">© 2026 PDFTools. All rights reserved.</p>
+  </footer>
+
+</body>
+</html>

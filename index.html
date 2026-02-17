@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PDF Tools | Professional PDF Utilities</title>
+  <meta name="description" content="Professional PDF tools that run entirely in your browser. No uploads, no waiting, complete privacy.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* ─────────────────────────────────────────
+       TOKENS  (same palette as the DPI webapp)
+    ───────────────────────────────────────── */
+    :root {
+      --primary:      #1a1a1a;
+      --primary-h:    #000000;
+      --bg:           #FFFFFF;
+      --bg-soft:      #F5F5F0;
+      --border-main:  #2d2d2d;
+      --border-light: #DDDDD8;
+      --text:         #111111;
+      --text-sub:     #3a3a3a;
+      --text-muted:   #7a7a72;
+
+      --font-body: 'Poppins', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --radius-sm:  6px;
+      --radius-md:  10px;
+      --radius-lg:  16px;
+      --radius-xl:  24px;
+
+      --shadow-card: 0 4px 24px rgba(0,0,0,0.07);
+      --shadow-lift: 0 12px 40px rgba(0,0,0,0.13);
+    }
+
+    /* ─── RESET ─── */
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-soft);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ─────────────────────────────────────────
+       LAYOUT HELPERS
+    ───────────────────────────────────────── */
+    .wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    section { padding: 6rem 0; }
+
+    /* ─────────────────────────────────────────
+       HEADER / NAV
+    ───────────────────────────────────────── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 900;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-light);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    header.scrolled {
+      background: rgba(255,255,255,0.97);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+
+    .header-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.03em;
+    }
+
+    .logo span {
+      font-weight: 400;
+      color: var(--text-muted);
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    nav a {
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: color .2s;
+    }
+
+    nav a:hover { color: var(--text); }
+
+    .nav-cta {
+      background: var(--primary);
+      color: #fff !important;
+      padding: 0.5rem 1.25rem;
+      border-radius: var(--radius-sm);
+      font-weight: 600 !important;
+      transition: background .2s, transform .2s !important;
+    }
+
+    .nav-cta:hover {
+      background: var(--primary-h) !important;
+      transform: translateY(-1px);
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: 1.5px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      padding: 0.4rem 0.6rem;
+      cursor: pointer;
+      font-size: 1.1rem;
+      color: var(--text);
+    }
+
+    /* ─────────────────────────────────────────
+       HERO
+    ───────────────────────────────────────── */
+    .hero {
+      background: var(--bg);
+      padding: 8rem 0 6rem;
+      border-bottom: 1px solid var(--border-light);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      /* override grid layout from code2 */
+      display: block;
+      min-height: unset;
+    }
+
+    /* subtle dot-grid texture */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, #c8c8be 1px, transparent 1px);
+      background-size: 28px 28px;
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    .hero-content {
+      max-width: 760px;
+      margin: 0 auto;
+      animation: fadeUp .6s ease both;
+      position: relative;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--bg-soft);
+      border: 1.5px solid var(--border-light);
+      border-radius: 999px;
+      padding: 0.35rem 1rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-sub);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      animation: fadeUp .6s ease both;
+    }
+
+    .badge::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      background: #4caf50;
+      border-radius: 50%;
+      animation: none;
+      box-shadow: none;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: var(--text);
+      line-height: 1.15;
+      max-width: 760px;
+      margin: 0 auto 1.5rem;
+      animation: fadeUp .6s .1s ease both;
+      /* override gradient text from code2 */
+      background: none;
+      -webkit-background-clip: unset;
+      -webkit-text-fill-color: unset;
+      background-clip: unset;
+    }
+
+    .hero p {
+      font-size: 1.125rem;
+      color: var(--text-muted);
+      max-width: 520px;
+      margin: 0 auto 2.5rem;
+      font-weight: 400;
+      animation: fadeUp .6s .2s ease both;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeUp .6s .3s ease both;
+    }
+
+    /* hide hero visual (right-side image panel) since code1 is centered hero */
+    .hero-visual {
+      display: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      padding: 0.875rem 2rem;
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: background .25s, transform .2s, box-shadow .25s;
+      box-shadow: 0 4px 14px rgba(0,0,0,.18);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary::before { display: none; }
+
+    .btn-primary:hover {
+      background: var(--primary-h);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,.22);
+    }
+
+    .btn-primary svg { transition: transform 0.3s ease; }
+    .btn-primary:hover svg { transform: translateX(4px); }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--primary);
+      padding: 0.875rem 2rem;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--border-main);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background .25s, transform .2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: none;
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-soft);
+      transform: translateY(-2px);
+    }
+
+    /* ─────────────────────────────────────────
+       STATS SECTION
+    ───────────────────────────────────────── */
+    .stats {
+      background: var(--bg-soft);
+      border-top: 1px solid var(--border-light);
+      border-bottom: 1px solid var(--border-light);
+      padding: 5rem 0;
+    }
+
+    .stats-container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      background: var(--bg);
+      border: 2px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      transition: border-color .25s, box-shadow .25s, transform .25s;
+      box-shadow: var(--shadow-card);
+    }
+
+    .stat-item:hover {
+      border-color: var(--border-main);
+      box-shadow: var(--shadow-lift);
+      transform: translateY(-4px);
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+      /* remove gradient */
+      background: none;
+      -webkit-background-clip: unset;
+      -webkit-text-fill-color: unset;
+      background-clip: unset;
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* ─────────────────────────────────────────
+       TOOLS SECTION
+    ───────────────────────────────────────── */
+    .tools-section {
+      background: var(--bg-soft);
+      padding: 6rem 0;
+      max-width: unset;
+      margin: unset;
+    }
+
+    .section-header {
+      text-align: left;
+      margin-bottom: 3.5rem;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .section-header h2 {
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      margin-bottom: 1rem;
+      /* remove gradient */
+      background: none;
+      -webkit-background-clip: unset;
+      -webkit-text-fill-color: unset;
+      background-clip: unset;
+    }
+
+    .section-header p {
+      font-size: 1rem;
+      color: var(--text-muted);
+      max-width: 480px;
+      margin: 0;
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .tool-card {
+      background: var(--bg);
+      border: 2px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      transition: border-color .25s, box-shadow .25s, transform .25s;
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+    }
+
+    .tool-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--primary);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s ease;
+    }
+
+    .tool-card:hover {
+      border-color: var(--border-main);
+      box-shadow: var(--shadow-lift);
+      transform: translateY(-4px);
+    }
+
+    .tool-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .tool-icon-large {
+      width: 56px;
+      height: 56px;
+      background: var(--bg-soft);
+      border: 1.5px solid var(--border-light);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .25s, border-color .25s, transform .25s;
+    }
+
+    .tool-card:hover .tool-icon-large {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+      transform: scale(1.08) rotate(4deg);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+    }
+
+    .tool-icon-large svg {
+      width: 26px;
+      height: 26px;
+      stroke-width: 2;
+      color: var(--text);
+      transition: color .2s;
+    }
+
+    .tool-card:hover .tool-icon-large svg {
+      color: #fff;
+    }
+
+    .tool-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      margin: 0;
+    }
+
+    .tool-card p {
+      font-size: 0.87rem;
+      color: var(--text-sub);
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .tool-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: auto;
+      background: var(--primary);
+      color: #fff;
+      padding: 0.6rem 1.25rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background .2s, transform .2s;
+      align-self: flex-start;
+    }
+
+    .tool-card:hover .tool-link {
+      background: var(--primary-h);
+      transform: translateY(-1px);
+      gap: 0.75rem;
+    }
+
+    /* ─────────────────────────────────────────
+       FEATURES SECTION
+    ───────────────────────────────────────── */
+    .features {
+      background: var(--bg);
+      border-top: 1px solid var(--border-light);
+      padding: 6rem 0;
+    }
+
+    .features-container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 5rem;
+      align-items: center;
+    }
+
+    .feature-content h2 {
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      margin-bottom: 1.25rem;
+      line-height: 1.25;
+      background: none;
+      -webkit-background-clip: unset;
+      -webkit-text-fill-color: unset;
+      background-clip: unset;
+    }
+
+    .feature-content p {
+      font-size: 1rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+      margin-bottom: 2rem;
+    }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .feature-list li {
+      font-size: 0.875rem;
+      color: var(--text-sub);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border-light);
+      font-weight: 500;
+      transition: color .2s, padding-left .2s;
+    }
+
+    .feature-list li:hover {
+      color: var(--text);
+      padding-left: 0.4rem;
+    }
+
+    .feature-list li::before {
+      content: '✓';
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      font-family: var(--font-body);
+    }
+
+    .feature-visual {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+      background: transparent;
+      padding: 0;
+    }
+
+    .security-badge {
+      background: var(--bg-soft);
+      border: 1.5px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 1.75rem;
+      transition: border-color .2s, transform .2s, box-shadow .2s;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInCard 0.6s ease-out forwards;
+    }
+
+    @keyframes fadeInCard {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .security-badge:nth-child(1) { animation-delay: 0.1s; }
+    .security-badge:nth-child(2) { animation-delay: 0.2s; }
+    .security-badge:nth-child(3) { animation-delay: 0.3s; }
+    .security-badge:nth-child(4) { animation-delay: 0.4s; }
+    .security-badge:nth-child(5) { animation-delay: 0.5s; }
+    .security-badge:nth-child(6) { animation-delay: 0.6s; }
+
+    .security-badge:hover {
+      border-color: var(--border-main);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lift);
+    }
+
+    .security-badge-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .security-badge-header svg {
+      width: 24px;
+      height: 24px;
+      color: var(--text);
+      stroke-width: 2;
+      flex-shrink: 0;
+    }
+
+    .security-badge h4 {
+      font-weight: 700;
+      color: var(--text);
+      font-size: 0.9rem;
+      line-height: 1.3;
+    }
+
+    .security-badge p {
+      color: var(--text-sub);
+      font-size: 0.82rem;
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    /* ─────────────────────────────────────────
+       HOW IT WORKS
+    ───────────────────────────────────────── */
+    .how-it-works {
+      background: var(--bg-soft);
+      border-top: 1px solid var(--border-light);
+      padding: 6rem 0;
+      max-width: unset;
+      margin: unset;
+    }
+
+    .how-it-works .wrap { max-width: 1080px; margin: 0 auto; padding: 0 2rem; }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      margin-top: 3.5rem;
+    }
+
+    .step {
+      position: relative;
+      padding: 2rem;
+      background: var(--bg);
+      border: 2px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      transition: border-color .25s, box-shadow .25s, transform .25s;
+      box-shadow: var(--shadow-card);
+    }
+
+    .step:hover {
+      border-color: var(--border-main);
+      box-shadow: var(--shadow-lift);
+      transform: translateY(-4px);
+    }
+
+    .step-number {
+      width: 36px;
+      height: 36px;
+      background: var(--primary);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .step h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+    }
+
+    .step p {
+      color: var(--text-sub);
+      font-size: 0.83rem;
+      line-height: 1.65;
+    }
+
+    .step:not(:last-child)::after {
+      content: '→';
+      position: absolute;
+      top: 2.25rem;
+      right: -1rem;
+      color: var(--text-muted);
+      font-size: 1.4rem;
+      font-weight: 700;
+      opacity: 0.4;
+    }
+
+    /* ─────────────────────────────────────────
+       CTA SECTION  (was privacy-strip in code1)
+    ───────────────────────────────────────── */
+    .cta {
+      background: var(--primary);
+      padding: 4rem 0;
+      margin: 0;
+      border-radius: 0;
+      overflow: hidden;
+      box-shadow: none;
+    }
+
+    .cta::before { display: none; }
+
+    .cta-container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      gap: 3rem;
+      flex-wrap: wrap;
+      text-align: left;
+    }
+
+    .cta h2 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+
+    .cta p {
+      font-size: 0.9rem;
+      color: rgba(255,255,255,.65);
+      line-height: 1.7;
+      margin-bottom: 0;
+    }
+
+    .cta-text { flex: 1; min-width: 280px; }
+
+    .btn-white {
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.2);
+      color: rgba(255,255,255,.85);
+      padding: 0.875rem 2rem;
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background .25s, transform .2s;
+      box-shadow: none;
+    }
+
+    .btn-white:hover {
+      background: rgba(255,255,255,.2);
+      transform: translateY(-2px);
+    }
+
+    .btn-white svg { transition: transform 0.3s ease; }
+    .btn-white:hover svg { transform: translateX(4px); }
+
+    /* ─────────────────────────────────────────
+       FOOTER
+    ───────────────────────────────────────── */
+    footer {
+      background: var(--bg-soft);
+      border-top: 1.5px solid var(--border-light);
+      padding: 4rem 0 2.5rem;
+    }
+
+    .footer-container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
+      gap: 3rem;
+      margin-bottom: 3rem;
+    }
+
+    .footer-brand .logo {
+      margin-bottom: 0.5rem;
+      display: flex;
+    }
+
+    .footer-brand p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.75rem;
+      line-height: 1.7;
+      max-width: 280px;
+    }
+
+    .footer-column h4 {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-sub);
+      margin-bottom: 1rem;
+    }
+
+    .footer-column ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .footer-column a {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color .2s, transform .2s;
+      display: inline-block;
+    }
+
+    .footer-column a:hover {
+      color: var(--text);
+      transform: translateX(3px);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid var(--border-light);
+      padding-top: 1.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-bottom p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .footer-social {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .footer-social a {
+      width: 36px;
+      height: 36px;
+      border: 1.5px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      transition: background .2s, color .2s, border-color .2s, transform .2s;
+      background: var(--bg);
+    }
+
+    .footer-social a:hover {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    /* ─────────────────────────────────────────
+       MOBILE MENU
+    ───────────────────────────────────────── */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--bg);
+      z-index: 2000;
+      padding: 2rem;
+      flex-direction: column;
+    }
+
+    .mobile-menu.active { display: flex; }
+
+    .mobile-menu-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 3rem;
+    }
+
+    .mobile-menu-close {
+      background: none;
+      border: 1.5px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text);
+      padding: 0.2rem 0.6rem;
+    }
+
+    .mobile-menu-links {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .mobile-menu-links a {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text);
+      text-decoration: none;
+      padding: 0.875rem 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    /* ─────────────────────────────────────────
+       ANIMATIONS
+    ───────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Scroll-triggered reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* stagger children */
+    .reveal-stagger > * {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity .5s ease, transform .5s ease;
+    }
+
+    .reveal-stagger.visible > *:nth-child(1)  { opacity:1; transform:none; transition-delay:.05s; }
+    .reveal-stagger.visible > *:nth-child(2)  { opacity:1; transform:none; transition-delay:.12s; }
+    .reveal-stagger.visible > *:nth-child(3)  { opacity:1; transform:none; transition-delay:.19s; }
+    .reveal-stagger.visible > *:nth-child(4)  { opacity:1; transform:none; transition-delay:.26s; }
+    .reveal-stagger.visible > *:nth-child(5)  { opacity:1; transform:none; transition-delay:.33s; }
+    .reveal-stagger.visible > *:nth-child(6)  { opacity:1; transform:none; transition-delay:.40s; }
+    .reveal-stagger.visible > *:nth-child(7)  { opacity:1; transform:none; transition-delay:.47s; }
+    .reveal-stagger.visible > *:nth-child(8)  { opacity:1; transform:none; transition-delay:.54s; }
+    .reveal-stagger.visible > *:nth-child(9)  { opacity:1; transform:none; transition-delay:.61s; }
+    .reveal-stagger.visible > *:nth-child(10) { opacity:1; transform:none; transition-delay:.68s; }
+    .reveal-stagger.visible > *:nth-child(11) { opacity:1; transform:none; transition-delay:.75s; }
+    .reveal-stagger.visible > *:nth-child(12) { opacity:1; transform:none; transition-delay:.82s; }
+
+    /* ─────────────────────────────────────────
+       RESPONSIVE
+    ───────────────────────────────────────── */
+    @media (max-width: 1024px) {
+      .tools-grid { grid-template-columns: repeat(2, 1fr); }
+      .stats-container { grid-template-columns: repeat(2, 1fr); }
+      .steps { grid-template-columns: repeat(2, 1fr); }
+      .step:nth-child(2)::after { display: none; }
+      .features-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: repeat(2, 1fr); }
+      .feature-visual { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 900px) {
+      .tools-grid { grid-template-columns: 1fr; }
+      .stats-container { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+      nav { display: none; }
+      .mobile-menu-btn { display: block; }
+      .tools-grid { grid-template-columns: 1fr; }
+      .stats-container { grid-template-columns: 1fr; gap: 1.25rem; }
+      .steps { grid-template-columns: 1fr; }
+      .step::after { display: none !important; }
+      .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .feature-visual { grid-template-columns: 1fr; }
+      .cta-container { flex-direction: column; gap: 2rem; }
+    }
+
+    @media (max-width: 640px) {
+      section { padding: 4rem 0; }
+      .wrap { padding: 0 1.25rem; }
+      .hero { padding: 5rem 0 4rem; }
+      .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header id="header">
+    <div class="header-container">
+      <a href="index.html" class="logo">PDF<span>Tools</span></a>
+      <nav>
+        <a href="#tools">Tools</a>
+        <a href="#features">Features</a>
+        <a href="how-it-works.html">How It Works</a>
+      </nav>
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+    </div>
+  </header>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-header">
+      <a href="index.html" class="logo">PDF<span>Tools</span></a>
+      <button class="mobile-menu-close" onclick="toggleMobileMenu()">×</button>
+    </div>
+    <div class="mobile-menu-links">
+      <a href="merge.html">Merge PDFs</a>
+      <a href="compress.html">Compress PDF</a>
+      <a href="protect.html">Password Protect</a>
+      <a href="redact.html">Redact PDF</a>
+      <a href="remove.html">Remove Pages</a>
+      <a href="rotate.html">Rotate PDF</a>
+      <a href="imagetopdf.html">Image to PDF</a>
+      <a href="watermark.html">Add Watermark</a>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="badge">100% Free & Private</div>
+      <h1>Professional PDF Tools. Zero Compromises.</h1>
+      <p>Powerful PDF utilities that run entirely in your browser. No uploads to servers, no watermarks, no registration required. Your files never leave your device.</p>
+      <div class="hero-buttons">
+        <a href="#tools" class="btn-primary">
+          Explore Tools
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+        <a href="#how-it-works" class="btn-secondary">Learn More</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-image">
+        <div class="floating-card floating-card-1">
+          <div class="file-card">
+            <div class="file-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+            </div>
+            <div class="file-card-info">
+              <h4>document.pdf</h4>
+              <p>2.4 MB</p>
+            </div>
+          </div>
+        </div>
+        <div class="floating-card floating-card-2">
+          <div class="secure-card">
+            <div class="secure-card-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            </div>
+            <div class="secure-card-info">
+              <h4>Protected</h4>
+              <p>AES-256</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats">
+    <div class="stats-container">
+      <div class="stat-item">
+        <div class="stat-number">9</div>
+        <div class="stat-label">Professional Tools</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">0</div>
+        <div class="stat-label">Server Uploads</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">100%</div>
+        <div class="stat-label">Free Forever</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">∞</div>
+        <div class="stat-label">Usage Limit</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tools Section -->
+  <section class="tools-section" id="tools">
+    <div class="wrap">
+      <div class="section-header reveal">
+        <div class="section-label">Our Tools</div>
+        <h2>All PDF Tools</h2>
+        <p>Every tool you need to work with PDFs, completely free and privacy-focused.</p>
+      </div>
+      <div class="tools-grid reveal-stagger">
+        
+        <a href="merge.html" class="tool-card">
+          <div class="tool-icon-large">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M8 7v8a2 2 0 0 0 2 2h6M8 7V5a2 2 0 0 1 2-2h4.586a1 1 0 0 1 .707.293l4.414 4.414a1 1 0 0 1 .293.707V15a2 2 0 0 1-2 2h-2"/>
+              <path d="M12 12v6"/><path d="M9 15l3 3 3-3"/>
+            </svg>
+          </div>
+          <h3>Merge PDFs</h3>
+          <p>Combine multiple PDF files into one document in your preferred order.</p>
+          <span class="tool-link">Use Tool →</span>
+        </a>
+
+        <a href="compress.html" class="tool-card">
+          <div class="tool-icon-large">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <h3>Compress PDF</h3>
+          <p>Reduce file size while maintaining quality for easy sharing.</p>
+          <span class="tool-link">Use Tool →</span>
+        </a>
+
+        <a href="protect.html" class="tool-card">
+          <div class="tool-icon-large">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+          </div>
+          <h3>Password Protect</h3>
+          <p>Encrypt PDFs with AES-256. Requires password to open.</p>
+          <span class="tool-link">Use Tool →</span>
+        </a>
+
+        <a href="redact.html" class="tool-card">
+          <div class="tool-icon-large">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 7h18M3 12h18M3 17h12"/>
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+            </svg>
+          </div>
+          <h3>Redact PDF</h3>
+          <p>Permanently black out sensitive information from your documents.</p>
+          <span class="tool-link">Use Tool →</span>
+        </a>
+
+        <a href="remove.html" class="tool-card">
+          <div class="tool-icon-large">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 7h18M3 12h18M3 17h12"/>
+              <circle cx="18" cy="17" r="3"/>
+              <line x1="16.5" y1="17" x2="19.5" y2="17"/>
+            </svg>
+          </div>
+          <h3>Remove Pages</h3>
+          <p>Delete specific pages from your PDF with precision.</p>
+          <span class="tool-link">Use Tool →</span>
+        </a>
+
+        <a href="rotate.html" class="tool-card">
+          <div class="tool-icon-large">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+              <path d="M21 3v5h-5"/>
+            </svg>
+          </div>
+          <h3>Rotate PDF</h3>
+          <p>Rotate pages 90°, 180°, or 270°. Apply to all or specific pages.</p>
+          <span class="tool-link">Use Tool →</span>
+        </a>
+
+        <a href="imagetopdf.html" class="tool-card">
+          <div class="tool-icon-large">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+          </div>
+          <h3>Image to PDF</h3>
+          <p>Convert JPG, PNG images to PDF while maintaining quality.</p>
+          <span class="tool-link">Use Tool →</span>
+        </a>
+
+        <a href="watermark.html" class="tool-card">
+          <div class="tool-icon-large">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+            </svg>
+          </div>
+          <h3>Add Watermark</h3>
+          <p>Add custom text watermarks to protect your documents.</p>
+          <span class="tool-link">Use Tool →</span>
+        </a>
+
+        <a href="security.html" class="tool-card">
+          <div class="tool-icon-large">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <path d="m9 12 2 2 4-4"/>
+            </svg>
+          </div>
+          <h3>Check Security</h3>
+          <p>Analyze PDF encryption status and document metadata.</p>
+          <span class="tool-link">Use Tool →</span>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features" id="features">
+    <div class="features-container">
+      <div class="features-grid reveal">
+        <div class="feature-content">
+          <h2>Your Privacy is Our Priority</h2>
+          <p>Unlike other PDF tools, we never upload your files to servers. All processing happens directly in your browser using cutting-edge WebAssembly technology.</p>
+          <ul class="feature-list">
+            <li>256-bit AES encryption for password protection</li>
+            <li>Zero server uploads - 100% client-side processing</li>
+            <li>No registration or personal data required</li>
+            <li>No watermarks on output files</li>
+            <li>Unlimited usage, completely free</li>
+          </ul>
+        </div>
+        <div class="feature-visual reveal-stagger">
+          
+          <div class="security-badge">
+            <div class="security-badge-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              <h4>AES-256 Encryption</h4>
+            </div>
+            <p>Military-grade encryption standards protect your sensitive documents.</p>
+          </div>
+
+          <div class="security-badge">
+            <div class="security-badge-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+              <h4>Zero Knowledge</h4>
+            </div>
+            <p>We cannot access your files. Only you hold the keys to your data.</p>
+          </div>
+
+          <div class="security-badge">
+            <div class="security-badge-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+              </svg>
+              <h4>GDPR Compliant</h4>
+            </div>
+            <p>Full compliance with EU data protection regulations.</p>
+          </div>
+
+          <div class="security-badge">
+            <div class="security-badge-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+              </svg>
+              <h4>Open Source</h4>
+            </div>
+            <p>Transparent code that anyone can audit. No hidden backdoors.</p>
+          </div>
+
+          <div class="security-badge">
+            <div class="security-badge-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <path d="m9 12 2 2 4-4"/>
+              </svg>
+              <h4>Secure by Design</h4>
+            </div>
+            <p>Your files are processed locally and automatically deleted after download.</p>
+          </div>
+
+          <div class="security-badge">
+            <div class="security-badge-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2a10 10 0 1 0 10 10H12V2z"/>
+                <path d="M12 2a10 10 0 0 1 10 10"/>
+                <path d="M12 12L2.5 12"/>
+              </svg>
+              <h4>No Data Collection</h4>
+            </div>
+            <p>We don't track, store, or sell your personal information. Ever.</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="how-it-works" id="how-it-works">
+    <div class="wrap">
+      <div class="section-header reveal">
+        <div class="section-label">How It Works</div>
+        <h2>Up and running in seconds.</h2>
+        <p class="section-sub" style="font-size:1rem;color:var(--text-muted);max-width:480px;">Simple workflow with no learning curve required.</p>
+      </div>
+      <div class="steps reveal-stagger">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Select Your Tool</h3>
+          <p>Choose from 9 professional PDF tools designed for every task.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Upload Your File</h3>
+          <p>Drag & drop or click to upload. Files stay on your device, always.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Configure Settings</h3>
+          <p>Set your options — password, pages to remove, rotation angle, and more.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <h3>Download Result</h3>
+          <p>Processing happens instantly in your browser. Download when ready.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <div class="cta">
+    <div class="cta-container">
+      <div class="cta-text">
+        <h2>Your files stay on your device.</h2>
+        <p>We don't have a server that receives your files. There's nothing to hack, nothing to leak, and nothing stored about you or your PDFs. It's just your browser doing the work.</p>
+      </div>
+      <a href="merge.html" class="btn-white">
+        Start Using Tools
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </a>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="logo">PDF<span>Tools</span></a>
+          <p>Professional PDF utilities that run entirely in your browser. No uploads, no watermarks, complete privacy.</p>
+        </div>
+        <div class="footer-column">
+          <h4>Tools</h4>
+          <ul>
+            <li><a href="merge.html">Merge PDFs</a></li>
+            <li><a href="compress.html">Compress PDF</a></li>
+            <li><a href="protect.html">Password Protect</a></li>
+            <li><a href="redact.html">Redact PDF</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4>More Tools</h4>
+          <ul>
+            <li><a href="remove.html">Remove Pages</a></li>
+            <li><a href="rotate.html">Rotate PDF</a></li>
+            <li><a href="imagetopdf.html">Image to PDF</a></li>
+            <li><a href="watermark.html">Add Watermark</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="privacy-policy.html">Privacy Policy</a></li>
+            <li><a href="terms-of-service.html">Terms of Service</a></li>
+            <li><a href="cookie-policy.html">Cookie Policy</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p class="footer-copy">© 2026 PDFTools. All Right Reserve. Made With ❤ By AMANXR. Free & Fast — No server uploads, no installs, no watermarks.</p>
+        <div class="footer-social">
+          <a href="https://x.com/home" aria-label="Twitter">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+            </svg>
+          </a>
+          <a href="https://github.com/xraman-71" aria-label="GitHub">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Header scroll effect
+    window.addEventListener('scroll', () => {
+      const header = document.getElementById('header');
+      if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobileMenu');
+      menu.classList.toggle('active');
+      document.body.style.overflow = menu.classList.contains('active') ? 'hidden' : '';
+    }
+
+    /* ── Scroll reveal ── */
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.05 });
+
+    document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>

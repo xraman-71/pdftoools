@@ -1,0 +1,1818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Add Watermark | PDF Tools</title>
+  <meta name="description" content="Add custom watermarks to PDF documents. Control angle, opacity, size, and layering. Free, private, browser-based tool.">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    :root {
+      --pure-white: #ffffff;
+      --off-white: #fafafa;
+      --light-gray: #f5f5f5;
+      --medium-gray: #e5e5e5;
+      --dark-gray: #737373;
+      --light-black: #404040;
+      --black: #171717;
+      --pure-black: #000000;
+      --accent: #3b82f6;
+      --accent-light: #eff6ff;
+      --success: #22c55e;
+      --warning: #f59e0b;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--pure-white);
+      color: var(--black);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--medium-gray);
+    }
+
+    .header-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--pure-black);
+      letter-spacing: -0.03em;
+      text-decoration: none;
+    }
+
+    .logo span {
+      font-weight: 400;
+      color: var(--dark-gray);
+    }
+
+    .back-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--light-black);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9375rem;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover {
+      color: var(--pure-black);
+    }
+
+    main {
+      flex: 1;
+      padding: 8rem 2rem 4rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .tool-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .tool-icon {
+      width: 80px;
+      height: 80px;
+      background: var(--off-white);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      border: 1px solid var(--medium-gray);
+    }
+
+    .tool-icon svg {
+      width: 40px;
+      height: 40px;
+      stroke-width: 1.5;
+    }
+
+    .tool-header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--pure-black);
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.02em;
+    }
+
+    .tool-header p {
+      color: var(--dark-gray);
+      font-size: 1.125rem;
+    }
+
+    .upload-section {
+      max-width: 800px;
+      margin: 0 auto 2rem;
+    }
+
+    .tool-container {
+      background: var(--off-white);
+      border-radius: 24px;
+      padding: 2.5rem;
+      border: 1px solid var(--medium-gray);
+    }
+
+    .drop-zone {
+      background: var(--pure-white);
+      border: 2px dashed var(--medium-gray);
+      border-radius: 16px;
+      padding: 3rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--pure-black);
+      background: var(--light-gray);
+    }
+
+    .drop-zone-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--off-white);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      border: 1px solid var(--medium-gray);
+    }
+
+    .drop-zone-icon svg {
+      width: 32px;
+      height: 32px;
+      color: var(--light-black);
+    }
+
+    .drop-zone h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--pure-black);
+      margin-bottom: 0.5rem;
+    }
+
+    .drop-zone p {
+      color: var(--dark-gray);
+      font-size: 0.9375rem;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .editor-container {
+      display: none;
+      animation: slideIn 0.4s ease;
+    }
+
+    .editor-container.active {
+      display: block;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .editor-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 2rem;
+    }
+
+    .settings-panel {
+      background: var(--off-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 16px;
+      padding: 1.5rem;
+      height: fit-content;
+    }
+
+    .settings-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .settings-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .settings-title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--light-black);
+      margin-bottom: 1rem;
+    }
+
+    .input-group {
+      margin-bottom: 1rem;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--pure-black);
+      margin-bottom: 0.5rem;
+    }
+
+    .text-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--medium-gray);
+      border-radius: 10px;
+      font-size: 0.9375rem;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .text-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-light);
+    }
+
+    .font-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+
+    .font-option {
+      position: relative;
+    }
+
+    .font-option input {
+      position: absolute;
+      opacity: 0;
+    }
+
+    .font-option label {
+      display: block;
+      padding: 0.625rem;
+      background: var(--pure-white);
+      border: 2px solid var(--medium-gray);
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+
+    .font-option input:checked + label {
+      border-color: var(--accent);
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .color-picker-wrapper {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .color-option {
+      position: relative;
+    }
+
+    .color-option input {
+      position: absolute;
+      opacity: 0;
+    }
+
+    .color-option label {
+      display: block;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .color-option input:checked + label {
+      border-color: var(--pure-black);
+      transform: scale(1.1);
+    }
+
+    .color-option input:checked + label::after {
+      content: '✓';
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--pure-white);
+      font-size: 14px;
+      font-weight: bold;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+
+    .angle-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+    }
+
+    .angle-option {
+      position: relative;
+    }
+
+    .angle-option input {
+      position: absolute;
+      opacity: 0;
+    }
+
+    .angle-option label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.75rem 0.5rem;
+      background: var(--pure-white);
+      border: 2px solid var(--medium-gray);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .angle-option input:checked + label {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .angle-icon {
+      width: 32px;
+      height: 32px;
+      color: var(--light-black);
+      transition: all 0.2s;
+    }
+
+    .angle-option input:checked + label .angle-icon {
+      color: var(--accent);
+    }
+
+    .angle-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--pure-black);
+    }
+
+    .slider-container {
+      margin-top: 0.5rem;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.8125rem;
+    }
+
+    .slider-value {
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .slider {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--medium-gray);
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: 2px solid var(--pure-white);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .slider::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: 2px solid var(--pure-white);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .layer-options {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .layer-option {
+      flex: 1;
+      position: relative;
+    }
+
+    .layer-option input {
+      position: absolute;
+      opacity: 0;
+    }
+
+    .layer-option label {
+      display: block;
+      padding: 0.75rem 0.5rem;
+      background: var(--pure-white);
+      border: 2px solid var(--medium-gray);
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 0.812rem;
+      transition: all 0.2s;
+    }
+
+    .layer-option input:checked + label {
+      border-color: var(--accent);
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+
+    .preview-panel {
+      background: var(--off-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .preview-title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--light-black);
+    }
+
+    .preview-badge {
+      padding: 0.25rem 0.75rem;
+      background: var(--accent-light);
+      color: var(--accent);
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .preview-canvas-container {
+      flex: 1;
+      background: var(--light-gray);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 500px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .preview-page {
+      width: 400px;
+      height: 566px;
+      background: var(--pure-white);
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .preview-content {
+      position: absolute;
+      inset: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .preview-text-line {
+      height: 8px;
+      background: var(--medium-gray);
+      border-radius: 4px;
+    }
+
+    .preview-text-line.short { width: 60%; }
+    .preview-text-line.medium { width: 80%; }
+    .preview-text-line.heading {
+      height: 16px;
+      width: 40%;
+      margin-bottom: 8px;
+    }
+
+    .watermark-layer {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .watermark-layer.behind {
+      z-index: 1;
+    }
+
+    .watermark-layer.front {
+      z-index: 10;
+    }
+
+    .watermark-text {
+      font-size: 48px;
+      font-weight: 700;
+      white-space: nowrap;
+      user-select: none;
+      transform-origin: center;
+    }
+
+    .page-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--medium-gray);
+    }
+
+    .page-btn {
+      width: 36px;
+      height: 36px;
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--light-black);
+      transition: all 0.2s;
+    }
+
+    .page-btn:hover:not(:disabled) {
+      border-color: var(--pure-black);
+      color: var(--pure-black);
+    }
+
+    .page-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .page-info {
+      font-size: 0.875rem;
+      color: var(--light-black);
+      font-weight: 500;
+    }
+
+    .action-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--pure-white);
+      border-top: 1px solid var(--medium-gray);
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      z-index: 100;
+      transform: translateY(100%);
+      transition: transform 0.3s;
+    }
+
+    .action-bar.active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      padding: 0.875rem 1.5rem;
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 10px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--light-black);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--pure-black);
+      color: var(--pure-black);
+    }
+
+    .btn-primary {
+      padding: 0.875rem 2rem;
+      background: var(--pure-black);
+      color: var(--pure-white);
+      border: none;
+      border-radius: 10px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--light-black);
+      transform: translateY(-2px);
+    }
+
+    .btn-primary:disabled {
+      background: var(--medium-gray);
+      color: var(--dark-gray);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .file-item {
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 12px;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      animation: slideIn 0.3s ease;
+    }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .file-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--off-white);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .file-icon svg {
+      width: 20px;
+      height: 20px;
+      color: var(--light-black);
+    }
+
+    .file-details {
+      min-width: 0;
+    }
+
+    .file-name {
+      font-weight: 600;
+      color: var(--pure-black);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 0.25rem;
+    }
+
+    .file-size {
+      font-size: 0.875rem;
+      color: var(--dark-gray);
+    }
+
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--medium-gray);
+      background: var(--pure-white);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--light-black);
+    }
+
+    .btn-icon:hover {
+      border-color: var(--pure-black);
+      color: var(--pure-black);
+    }
+
+    .btn-icon.remove:hover {
+      background: #fef2f2;
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+
+    .progress-container {
+      display: none;
+      max-width: 600px;
+      margin: 2rem auto;
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .progress-container.active {
+      display: block;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      font-size: 0.875rem;
+      color: var(--light-black);
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: var(--medium-gray);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--pure-black);
+      width: 0%;
+      transition: width 0.3s;
+      border-radius: 4px;
+    }
+
+    .result-container {
+      display: none;
+      max-width: 600px;
+      margin: 2rem auto;
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 16px;
+      padding: 2.5rem;
+      text-align: center;
+      animation: slideIn 0.4s ease;
+    }
+
+    .result-container.active {
+      display: block;
+    }
+
+    .result-icon {
+      width: 64px;
+      height: 64px;
+      background: #f0fdf4;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+    }
+
+    .result-icon svg {
+      width: 32px;
+      height: 32px;
+      color: var(--success);
+    }
+
+    .result-container h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--pure-black);
+      margin-bottom: 0.5rem;
+    }
+
+    .result-stats {
+      color: var(--dark-gray);
+      margin-bottom: 1.5rem;
+      font-size: 0.9375rem;
+    }
+
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--success);
+      color: var(--pure-white);
+      padding: 0.875rem 1.5rem;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .btn-download:hover {
+      background: #16a34a;
+      transform: translateY(-2px);
+    }
+
+    .btn-reset {
+      display: block;
+      margin: 1rem auto 0;
+      background: none;
+      border: none;
+      color: var(--dark-gray);
+      font-size: 0.9375rem;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .btn-reset:hover {
+      color: var(--pure-black);
+    }
+
+    .info-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem;
+      background: var(--pure-white);
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      border: 1px solid var(--medium-gray);
+    }
+
+    .info-box svg {
+      width: 20px;
+      height: 20px;
+      color: var(--dark-gray);
+      flex-shrink: 0;
+      margin-top: 0.125rem;
+    }
+
+    .info-box p {
+      font-size: 0.875rem;
+      color: var(--dark-gray);
+      line-height: 1.6;
+    }
+
+    footer {
+      background: var(--off-white);
+      border-top: 1px solid var(--medium-gray);
+      padding: 2rem;
+      text-align: center;
+    }
+
+    footer p {
+      color: var(--dark-gray);
+      font-size: 0.875rem;
+    }
+
+    @media (max-width: 968px) {
+      .editor-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .settings-panel {
+        order: 2;
+      }
+
+      .preview-panel {
+        order: 1;
+        min-height: 400px;
+      }
+
+      .preview-page {
+        width: 300px;
+        height: 425px;
+      }
+
+      .watermark-text {
+        font-size: 36px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      main {
+        padding: 7rem 1rem 6rem;
+      }
+
+      .tool-container {
+        padding: 1.5rem;
+      }
+
+      .action-bar {
+        padding: 1rem;
+        flex-direction: column;
+      }
+
+      .btn-secondary, .btn-primary {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .angle-options {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .angle-option label {
+        padding: 0.5rem 0.25rem;
+      }
+
+      .angle-icon {
+        width: 24px;
+        height: 24px;
+      }
+
+      .angle-label {
+        font-size: 0.625rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <a href="index.html" class="logo">PDF<span>Tools</span></a>
+      <a href="index.html" class="back-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Back to Tools
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <div class="tool-header">
+      <div class="tool-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+        </svg>
+      </div>
+      <h1>Add Watermark</h1>
+      <p>Customize and apply watermarks to PDF</p>
+    </div>
+
+    <div class="info-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="16" x2="12" y2="12"></line>
+        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+      </svg>
+      <p>Add text watermarks with full control over angle, opacity, size, and layering. Place watermarks behind text for subtle protection or in front for prominent marking. All processing happens locally in your browser.</p>
+    </div>
+
+    <div class="upload-section" id="uploadSection">
+      <div class="tool-container">
+        <div class="drop-zone" id="dropZone">
+          <div class="drop-zone-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+          </div>
+          <h3>Drop PDF here or click to browse</h3>
+          <p>Supports PDF files up to 1GB</p>
+          <input type="file" class="file-input" id="fileInput" accept=".pdf">
+        </div>
+        <div id="fileInfo"></div>
+      </div>
+    </div>
+
+    <div class="editor-container" id="editorContainer">
+      <div class="editor-layout">
+        <div class="settings-panel">
+          <div class="settings-section">
+            <div class="settings-title">Watermark Text</div>
+            <div class="input-group">
+              <input type="text" class="text-input" id="watermarkText" placeholder="Enter watermark text..." value="CONFIDENTIAL">
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-title">Font Style</div>
+            <div class="font-selector">
+              <div class="font-option">
+                <input type="radio" name="font" id="fontHelvetica" value="Helvetica" checked>
+                <label for="fontHelvetica">Helvetica</label>
+              </div>
+              <div class="font-option">
+                <input type="radio" name="font" id="fontTimes" value="Times-Roman">
+                <label for="fontTimes">Times</label>
+              </div>
+              <div class="font-option">
+                <input type="radio" name="font" id="fontCourier" value="Courier">
+                <label for="fontCourier">Courier</label>
+              </div>
+              <div class="font-option">
+                <input type="radio" name="font" id="fontHelveticaBold" value="Helvetica-Bold">
+                <label for="fontHelveticaBold">Bold</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-title">Color</div>
+            <div class="color-picker-wrapper">
+              <div class="color-option">
+                <input type="radio" name="color" id="colorGray" value="0.6,0.6,0.6" checked>
+                <label for="colorGray" style="background: #9ca3af;"></label>
+              </div>
+              <div class="color-option">
+                <input type="radio" name="color" id="colorRed" value="0.94,0.27,0.27">
+                <label for="colorRed" style="background: #ef4444;"></label>
+              </div>
+              <div class="color-option">
+                <input type="radio" name="color" id="colorBlue" value="0.23,0.51,0.96">
+                <label for="colorBlue" style="background: #3b82f6;"></label>
+              </div>
+              <div class="color-option">
+                <input type="radio" name="color" id="colorGreen" value="0.13,0.77,0.37">
+                <label for="colorGreen" style="background: #22c55e;"></label>
+              </div>
+              <div class="color-option">
+                <input type="radio" name="color" id="colorBlack" value="0.09,0.09,0.09">
+                <label for="colorBlack" style="background: #171717;"></label>
+              </div>
+              <div class="color-option">
+                <input type="radio" name="color" id="colorOrange" value="0.98,0.45,0.09">
+                <label for="colorOrange" style="background: #f97316;"></label>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-title">Angle Orientation</div>
+            <div class="angle-options">
+              <div class="angle-option">
+                <input type="radio" name="angle" id="angle0" value="0">
+                <label for="angle0">
+                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="4" y1="12" x2="20" y2="12"></line>
+                  </svg>
+                  <span class="angle-label">0°</span>
+                </label>
+              </div>
+              <div class="angle-option">
+                <input type="radio" name="angle" id="angle30" value="30">
+                <label for="angle30">
+                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform: rotate(30deg);">
+                    <line x1="4" y1="12" x2="20" y2="12"></line>
+                  </svg>
+                  <span class="angle-label">30°</span>
+                </label>
+              </div>
+              <div class="angle-option">
+                <input type="radio" name="angle" id="angle45" value="45" checked>
+                <label for="angle45">
+                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform: rotate(45deg);">
+                    <line x1="4" y1="12" x2="20" y2="12"></line>
+                  </svg>
+                  <span class="angle-label">45°</span>
+                </label>
+              </div>
+              <div class="angle-option">
+                <input type="radio" name="angle" id="angle90" value="90">
+                <label for="angle90">
+                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform: rotate(90deg);">
+                    <line x1="4" y1="12" x2="20" y2="12"></line>
+                  </svg>
+                  <span class="angle-label">90°</span>
+                </label>
+              </div>
+              <div class="angle-option">
+                <input type="radio" name="angle" id="angle135" value="135">
+                <label for="angle135">
+                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform: rotate(135deg);">
+                    <line x1="4" y1="12" x2="20" y2="12"></line>
+                  </svg>
+                  <span class="angle-label">135°</span>
+                </label>
+              </div>
+              <div class="angle-option">
+                <input type="radio" name="angle" id="angle180" value="180">
+                <label for="angle180">
+                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform: rotate(180deg);">
+                    <line x1="4" y1="12" x2="20" y2="12"></line>
+                  </svg>
+                  <span class="angle-label">180°</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-title">Opacity</div>
+            <div class="slider-container">
+              <div class="slider-header">
+                <span>Transparency</span>
+                <span class="slider-value" id="opacityValue">30%</span>
+              </div>
+              <input type="range" class="slider" id="opacitySlider" min="5" max="100" value="30">
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-title">Size</div>
+            <div class="slider-container">
+              <div class="slider-header">
+                <span>Scale</span>
+                <span class="slider-value" id="sizeValue">48pt</span>
+              </div>
+              <input type="range" class="slider" id="sizeSlider" min="24" max="120" value="48">
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-title">Alignment</div>
+            <div class="angle-options">
+              <div class="angle-option">
+                <input type="radio" name="alignment" id="alignTopLeft" value="top-left">
+                <label for="alignTopLeft">
+                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="4" y="4" width="6" height="6" fill="currentColor"></rect>
+                    <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                  </svg>
+                  <span class="angle-label">Top Left</span>
+                </label>
+              </div>
+              <div class="angle-option">
+                <input type="radio" name="alignment" id="alignTopCenter" value="top-center">
+                <label for="alignTopCenter">
+                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="4" width="6" height="6" fill="currentColor"></rect>
+                    <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                  </svg>
+                  <span class="angle-label">Top Center</span>
+                </label>
+              </div>
+              <div class="angle-option">
+                <input type="radio" name="alignment" id="alignTopRight" value="top-right">
+                <label for="alignTopRight">
+                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="14" y="4" width="6" height="6" fill="currentColor"></rect>
+                    <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                  </svg>
+                  <span class="angle-label">Top Right</span>
+                </label>
+              </div>
+              <div class="angle-option">
+                <input type="radio" name="alignment" id="alignMiddleLeft" value="middle-left">
+                <label for="alignMiddleLeft">
+                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="4" y="9" width="6" height="6" fill="currentColor"></rect>
+                    <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                  </svg>
+                  <span class="angle-label">Mid Left</span>
+                </label>
+              </div>
+              <div class="angle-option">
+                <input type="radio" name="alignment" id="alignCenter" value="center" checked>
+                <label for="alignCenter">
+                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="6" height="6" fill="currentColor"></rect>
+                    <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                  </svg>
+                  <span class="angle-label">Center</span>
+                </label>
+              </div>
+              <div class="angle-option">
+                <input type="radio" name="alignment" id="alignMiddleRight" value="middle-right">
+                <label for="alignMiddleRight">
+                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="14" y="9" width="6" height="6" fill="currentColor"></rect>
+                    <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                  </svg>
+                  <span class="angle-label">Mid Right</span>
+                </label>
+              </div>
+              <div class="angle-option">
+                <input type="radio" name="alignment" id="alignBottomLeft" value="bottom-left">
+                <label for="alignBottomLeft">
+                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="4" y="14" width="6" height="6" fill="currentColor"></rect>
+                    <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                  </svg>
+                  <span class="angle-label">Bot Left</span>
+                </label>
+              </div>
+              <div class="angle-option">
+                <input type="radio" name="alignment" id="alignBottomCenter" value="bottom-center">
+                <label for="alignBottomCenter">
+                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="14" width="6" height="6" fill="currentColor"></rect>
+                    <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                  </svg>
+                  <span class="angle-label">Bot Center</span>
+                </label>
+              </div>
+              <div class="angle-option">
+                <input type="radio" name="alignment" id="alignBottomRight" value="bottom-right">
+                <label for="alignBottomRight">
+                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="14" y="14" width="6" height="6" fill="currentColor"></rect>
+                    <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                  </svg>
+                  <span class="angle-label">Bot Right</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-title">Layer Position</div>
+            <div class="layer-options">
+              <div class="layer-option">
+                <input type="radio" name="layer" id="layerBehind" value="behind" checked>
+                <label for="layerBehind">Behind Text</label>
+              </div>
+              <div class="layer-option">
+                <input type="radio" name="layer" id="layerFront" value="front">
+                <label for="layerFront">In Front</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="preview-panel">
+          <div class="preview-header">
+            <span class="preview-title">Live Preview</span>
+            <span class="preview-badge">A4 Portrait</span>
+          </div>
+          <div class="preview-canvas-container">
+            <div class="preview-page" id="previewPage">
+              <!-- Content Layer -->
+              <div class="preview-content" style="z-index: 5; position: relative;">
+                <div class="preview-text-line heading"></div>
+                <div class="preview-text-line"></div>
+                <div class="preview-text-line medium"></div>
+                <div class="preview-text-line short"></div>
+                <div class="preview-text-line"></div>
+                <div class="preview-text-line medium"></div>
+                <div class="preview-text-line"></div>
+                <div class="preview-text-line short"></div>
+                <div class="preview-text-line medium"></div>
+                <div class="preview-text-line"></div>
+              </div>
+              
+              <!-- Watermark Layer -->
+              <div class="watermark-layer behind" id="watermarkLayer">
+                <div class="watermark-text" id="watermarkPreview">CONFIDENTIAL</div>
+              </div>
+            </div>
+          </div>
+          <div class="page-indicator">
+            <button class="page-btn" disabled>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <span class="page-info" id="pageInfo">Preview</span>
+            <button class="page-btn" disabled>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="progress-container" id="progressContainer">
+      <div class="progress-header">
+        <span>Applying watermark...</span>
+        <span id="progressPercent">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <div class="result-container" id="resultContainer">
+      <div class="result-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+      </div>
+      <h3>Watermark Applied!</h3>
+      <p class="result-stats">
+        Successfully added watermark to <span class="stat-highlight" id="pageCount">0 pages</span>
+      </p>
+      <a href="#" class="btn-download" id="downloadBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Download Watermarked PDF
+      </a>
+      <button class="btn-reset" id="resetBtn">Watermark another file</button>
+    </div>
+  </main>
+
+  <div class="action-bar" id="actionBar">
+    <button class="btn-secondary" onclick="resetTool()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+      Cancel
+    </button>
+    <button class="btn-primary" id="applyBtn" onclick="applyWatermark()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+      </svg>
+      Apply Watermark
+    </button>
+  </div>
+
+  <footer>
+    <p>&copy; 2024 PDF Tools. All processing happens locally in your browser.</p>
+  </footer>
+
+  <script>
+    const { PDFDocument, rgb, degrees, StandardFonts } = PDFLib;
+
+    // DOM Elements
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const uploadSection = document.getElementById('uploadSection');
+    const fileInfo = document.getElementById('fileInfo');
+    const editorContainer = document.getElementById('editorContainer');
+    const actionBar = document.getElementById('actionBar');
+    const watermarkPreview = document.getElementById('watermarkPreview');
+    const watermarkLayer = document.getElementById('watermarkLayer');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressFill = document.getElementById('progressFill');
+    const progressPercent = document.getElementById('progressPercent');
+    const resultContainer = document.getElementById('resultContainer');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const pageInfo = document.getElementById('pageInfo');
+
+    // State
+    let currentFile = null;
+    let pdfDoc = null;
+    let watermarkedPdfBytes = null;
+
+    // File handling
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) handleFile(e.target.files[0]);
+    });
+
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    async function handleFile(file) {
+      if (file.type !== 'application/pdf' && !file.name.endsWith('.pdf')) {
+        alert('Please upload a PDF file');
+        return;
+      }
+      
+      if (file.size > 1024 * 1024 * 1024) { // 1GB in bytes
+        alert('File size must be less than 1GB');
+        return;
+      }
+
+      currentFile = file;
+      
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        pdfDoc = await PDFDocument.load(arrayBuffer);
+        
+        showFileInfo(file);
+        initEditor();
+        
+        const numPages = pdfDoc.getPageCount();
+        pageInfo.textContent = `${numPages} page${numPages !== 1 ? 's' : ''}`;
+      } catch (error) {
+        console.error('Error loading PDF:', error);
+        alert('Error loading PDF file. Please try another file.');
+      }
+    }
+
+    function showFileInfo(file) {
+      fileInfo.innerHTML = `
+        <div class="file-item" style="margin-top: 1.5rem;">
+          <div class="file-info">
+            <div class="file-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+            </div>
+            <div class="file-details">
+              <div class="file-name">${file.name}</div>
+              <div class="file-size">${formatFileSize(file.size)}</div>
+            </div>
+          </div>
+          <button class="btn-icon remove" onclick="resetTool()" title="Remove file">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      `;
+    }
+
+    function initEditor() {
+      uploadSection.style.display = 'none';
+      editorContainer.classList.add('active');
+      actionBar.classList.add('active');
+      updatePreview();
+    }
+
+    // Live preview updates
+    document.getElementById('watermarkText').addEventListener('input', updatePreview);
+    
+    document.querySelectorAll('input[name="font"]').forEach(radio => {
+      radio.addEventListener('change', updatePreview);
+    });
+    
+    document.querySelectorAll('input[name="color"]').forEach(radio => {
+      radio.addEventListener('change', updatePreview);
+    });
+    
+    document.querySelectorAll('input[name="angle"]').forEach(radio => {
+      radio.addEventListener('change', updatePreview);
+    });
+    
+    document.querySelectorAll('input[name="alignment"]').forEach(radio => {
+      radio.addEventListener('change', updatePreview);
+    });
+    
+    document.querySelectorAll('input[name="layer"]').forEach(radio => {
+      radio.addEventListener('change', updatePreview);
+    });
+
+    document.getElementById('opacitySlider').addEventListener('input', (e) => {
+      document.getElementById('opacityValue').textContent = e.target.value + '%';
+      updatePreview();
+    });
+
+    document.getElementById('sizeSlider').addEventListener('input', (e) => {
+      document.getElementById('sizeValue').textContent = e.target.value + 'pt';
+      updatePreview();
+    });
+
+    function updatePreview() {
+      const text = document.getElementById('watermarkText').value || 'WATERMARK';
+      const fontValue = document.querySelector('input[name="font"]:checked').value;
+      const colorValue = document.querySelector('input[name="color"]:checked').value;
+      const angle = document.querySelector('input[name="angle"]:checked').value;
+      const alignment = document.querySelector('input[name="alignment"]:checked').value;
+      const opacity = document.getElementById('opacitySlider').value;
+      const size = document.getElementById('sizeSlider').value;
+      const layer = document.querySelector('input[name="layer"]:checked').value;
+
+      // Map font names to web-safe equivalents for preview
+      const fontMap = {
+        'Helvetica': 'Arial, sans-serif',
+        'Helvetica-Bold': 'Arial, sans-serif',
+        'Times-Roman': 'Georgia, serif',
+        'Courier': 'Courier New, monospace'
+      };
+
+      // Convert RGB values to hex for preview
+      const [r, g, b] = colorValue.split(',').map(parseFloat);
+      const hexColor = '#' + [r, g, b].map(v => {
+        const hex = Math.round(v * 255).toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+      }).join('');
+
+      watermarkPreview.textContent = text;
+      watermarkPreview.style.fontFamily = fontMap[fontValue] || fontMap['Helvetica'];
+      watermarkPreview.style.fontWeight = fontValue.includes('Bold') ? '700' : '400';
+      watermarkPreview.style.color = hexColor;
+      watermarkPreview.style.transform = `rotate(${angle}deg) scale(${size / 48})`;
+      watermarkPreview.style.opacity = opacity / 100;
+      
+      // Update watermark layer positioning
+      watermarkLayer.className = 'watermark-layer ' + layer;
+      
+      // Reset default centering
+      watermarkLayer.style.justifyContent = 'center';
+      watermarkLayer.style.alignItems = 'center';
+      watermarkLayer.style.padding = '0';
+      
+      // Apply alignment
+      switch(alignment) {
+        case 'top-left':
+          watermarkLayer.style.justifyContent = 'flex-start';
+          watermarkLayer.style.alignItems = 'flex-start';
+          watermarkLayer.style.padding = '40px';
+          break;
+        case 'top-center':
+          watermarkLayer.style.justifyContent = 'center';
+          watermarkLayer.style.alignItems = 'flex-start';
+          watermarkLayer.style.padding = '40px 0 0 0';
+          break;
+        case 'top-right':
+          watermarkLayer.style.justifyContent = 'flex-end';
+          watermarkLayer.style.alignItems = 'flex-start';
+          watermarkLayer.style.padding = '40px';
+          break;
+        case 'middle-left':
+          watermarkLayer.style.justifyContent = 'flex-start';
+          watermarkLayer.style.alignItems = 'center';
+          watermarkLayer.style.padding = '0 40px';
+          break;
+        case 'center':
+          watermarkLayer.style.justifyContent = 'center';
+          watermarkLayer.style.alignItems = 'center';
+          break;
+        case 'middle-right':
+          watermarkLayer.style.justifyContent = 'flex-end';
+          watermarkLayer.style.alignItems = 'center';
+          watermarkLayer.style.padding = '0 40px';
+          break;
+        case 'bottom-left':
+          watermarkLayer.style.justifyContent = 'flex-start';
+          watermarkLayer.style.alignItems = 'flex-end';
+          watermarkLayer.style.padding = '40px';
+          break;
+        case 'bottom-center':
+          watermarkLayer.style.justifyContent = 'center';
+          watermarkLayer.style.alignItems = 'flex-end';
+          watermarkLayer.style.padding = '0 0 40px 0';
+          break;
+        case 'bottom-right':
+          watermarkLayer.style.justifyContent = 'flex-end';
+          watermarkLayer.style.alignItems = 'flex-end';
+          watermarkLayer.style.padding = '40px';
+          break;
+      }
+    }
+
+    async function applyWatermark() {
+      if (!pdfDoc) {
+        alert('No PDF loaded');
+        return;
+      }
+
+      editorContainer.classList.remove('active');
+      actionBar.classList.remove('active');
+      progressContainer.classList.add('active');
+
+      try {
+        // Get settings
+        const text = document.getElementById('watermarkText').value || 'WATERMARK';
+        const fontName = document.querySelector('input[name="font"]:checked').value;
+        const colorValue = document.querySelector('input[name="color"]:checked').value;
+        const angle = parseInt(document.querySelector('input[name="angle"]:checked').value);
+        const alignment = document.querySelector('input[name="alignment"]:checked').value;
+        const opacity = parseFloat(document.getElementById('opacitySlider').value) / 100;
+        const fontSize = parseInt(document.getElementById('sizeSlider').value);
+        const layer = document.querySelector('input[name="layer"]:checked').value;
+
+        // Parse color
+        const [r, g, b] = colorValue.split(',').map(parseFloat);
+        
+        // Load font
+        let font;
+        try {
+          font = await pdfDoc.embedFont(fontName);
+        } catch (e) {
+          console.warn('Font not available, using Helvetica');
+          font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        }
+
+        const pages = pdfDoc.getPages();
+        const totalPages = pages.length;
+
+        // Process each page
+        for (let i = 0; i < totalPages; i++) {
+          const page = pages[i];
+          const { width, height } = page.getSize();
+          
+          const textWidth = font.widthOfTextAtSize(text, fontSize);
+          const textHeight = fontSize;
+          
+          // Calculate the center point where we want the watermark
+          let centerX, centerY;
+          const margin = 50;
+          
+          switch(alignment) {
+            case 'top-left':
+              centerX = margin;
+              centerY = height - margin;
+              break;
+            case 'top-center':
+              centerX = width / 2;
+              centerY = height - margin;
+              break;
+            case 'top-right':
+              centerX = width - margin;
+              centerY = height - margin;
+              break;
+            case 'middle-left':
+              centerX = margin;
+              centerY = height / 2;
+              break;
+            case 'center':
+              centerX = width / 2;
+              centerY = height / 2;
+              break;
+            case 'middle-right':
+              centerX = width - margin;
+              centerY = height / 2;
+              break;
+            case 'bottom-left':
+              centerX = margin;
+              centerY = margin;
+              break;
+            case 'bottom-center':
+              centerX = width / 2;
+              centerY = margin;
+              break;
+            case 'bottom-right':
+              centerX = width - margin;
+              centerY = margin;
+              break;
+            default:
+              centerX = width / 2;
+              centerY = height / 2;
+          }
+
+          // Calculate text starting position (bottom-left of text)
+          // Offset to center the text at centerX, centerY
+          const startX = centerX - (textWidth / 2);
+          const startY = centerY - (textHeight / 2);
+          
+          // Convert angle to radians
+          const angleRad = (angle * Math.PI) / 180;
+          
+          // Calculate the rotated position
+          // Rotate around the center point
+          const dx = startX - centerX;
+          const dy = startY - centerY;
+          
+          const rotatedX = centerX + (dx * Math.cos(angleRad) - dy * Math.sin(angleRad));
+          const rotatedY = centerY + (dx * Math.sin(angleRad) + dy * Math.cos(angleRad));
+
+          // Draw watermark
+          page.drawText(text, {
+            x: rotatedX,
+            y: rotatedY,
+            size: fontSize,
+            font: font,
+            color: rgb(r, g, b),
+            opacity: opacity,
+            rotate: degrees(angle),
+          });
+
+          // Update progress
+          const progress = Math.round(((i + 1) / totalPages) * 100);
+          progressFill.style.width = progress + '%';
+          progressPercent.textContent = progress + '%';
+
+          // Allow UI to update
+          await new Promise(resolve => setTimeout(resolve, 10));
+        }
+
+        // Save the PDF
+        watermarkedPdfBytes = await pdfDoc.save();
+        
+        setTimeout(() => {
+          showResult(totalPages);
+        }, 300);
+
+      } catch (error) {
+        console.error('Error applying watermark:', error);
+        alert('Error applying watermark: ' + error.message);
+        resetTool();
+      }
+    }
+
+    function showResult(numPages) {
+      progressContainer.classList.remove('active');
+      resultContainer.classList.add('active');
+      document.getElementById('pageCount').textContent = `${numPages} page${numPages !== 1 ? 's' : ''}`;
+      
+      // Create download link
+      const blob = new Blob([watermarkedPdfBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      downloadBtn.href = url;
+      
+      const originalName = currentFile.name.replace('.pdf', '');
+      downloadBtn.download = `${originalName}_watermarked.pdf`;
+    }
+
+    function resetTool() {
+      currentFile = null;
+      pdfDoc = null;
+      watermarkedPdfBytes = null;
+      fileInfo.innerHTML = '';
+      uploadSection.style.display = 'block';
+      editorContainer.classList.remove('active');
+      actionBar.classList.remove('active');
+      progressContainer.classList.remove('active');
+      resultContainer.classList.remove('active');
+      fileInput.value = '';
+      
+      // Clean up blob URL
+      if (downloadBtn.href && downloadBtn.href.startsWith('blob:')) {
+        URL.revokeObjectURL(downloadBtn.href);
+      }
+      
+      // Reset defaults
+      document.getElementById('watermarkText').value = 'CONFIDENTIAL';
+      document.getElementById('opacitySlider').value = 30;
+      document.getElementById('opacityValue').textContent = '30%';
+      document.getElementById('sizeSlider').value = 48;
+      document.getElementById('sizeValue').textContent = '48pt';
+      document.getElementById('angle45').checked = true;
+      document.getElementById('alignCenter').checked = true;
+      document.getElementById('layerBehind').checked = true;
+      document.getElementById('colorGray').checked = true;
+      document.getElementById('fontHelvetica').checked = true;
+      pageInfo.textContent = 'Preview';
+      updatePreview();
+    }
+
+    resetBtn.addEventListener('click', resetTool);
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      if (downloadBtn.href && downloadBtn.href.startsWith('blob:')) {
+        URL.revokeObjectURL(downloadBtn.href);
+      }
+    });
+  </script>
+</body>
+</html>

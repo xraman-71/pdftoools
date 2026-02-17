@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Redact PDF | PDF Tools</title>
+  <meta name="description" content="Permanently remove sensitive information from PDF files. Black out text and images securely. Free, private, browser-based tool.">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    :root {
+      --pure-white: #ffffff;
+      --off-white: #fafafa;
+      --light-gray: #f5f5f5;
+      --medium-gray: #e5e5e5;
+      --dark-gray: #737373;
+      --light-black: #404040;
+      --black: #171717;
+      --pure-black: #000000;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--pure-white);
+      color: var(--black);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--medium-gray);
+    }
+
+    .header-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--pure-black);
+      letter-spacing: -0.03em;
+      text-decoration: none;
+    }
+
+    .logo span {
+      font-weight: 400;
+      color: var(--dark-gray);
+    }
+
+    .back-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--light-black);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9375rem;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover {
+      color: var(--pure-black);
+    }
+
+    main {
+      flex: 1;
+      padding: 8rem 2rem 4rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .tool-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .tool-icon {
+      width: 80px;
+      height: 80px;
+      background: var(--off-white);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      border: 1px solid var(--medium-gray);
+    }
+
+    .tool-icon svg {
+      width: 40px;
+      height: 40px;
+      stroke-width: 1.5;
+    }
+
+    .tool-header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--pure-black);
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.02em;
+    }
+
+    .tool-header p {
+      color: var(--dark-gray);
+      font-size: 1.125rem;
+    }
+
+    .upload-container {
+      max-width: 800px;
+      margin: 0 auto 2rem;
+    }
+
+    .tool-container {
+      background: var(--off-white);
+      border-radius: 24px;
+      padding: 2.5rem;
+      border: 1px solid var(--medium-gray);
+    }
+
+    .drop-zone {
+      background: var(--pure-white);
+      border: 2px dashed var(--medium-gray);
+      border-radius: 16px;
+      padding: 3rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--pure-black);
+      background: var(--light-gray);
+    }
+
+    .drop-zone-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--off-white);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      border: 1px solid var(--medium-gray);
+    }
+
+    .drop-zone-icon svg {
+      width: 32px;
+      height: 32px;
+      color: var(--light-black);
+    }
+
+    .drop-zone h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--pure-black);
+      margin-bottom: 0.5rem;
+    }
+
+    .drop-zone p {
+      color: var(--dark-gray);
+      font-size: 0.9375rem;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .editor-container {
+      display: none;
+      background: var(--pure-white);
+      border-radius: 16px;
+      border: 1px solid var(--medium-gray);
+      overflow: hidden;
+    }
+
+    .editor-container.active {
+      display: block;
+      animation: slideIn 0.4s ease;
+    }
+
+    .editor-toolbar {
+      background: var(--off-white);
+      border-bottom: 1px solid var(--medium-gray);
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .toolbar-section {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .toolbar-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--light-black);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .tool-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1rem;
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--light-black);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tool-btn:hover {
+      border-color: var(--pure-black);
+      color: var(--pure-black);
+    }
+
+    .tool-btn.active {
+      background: var(--pure-black);
+      color: var(--pure-white);
+      border-color: var(--pure-black);
+    }
+
+    .tool-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .btn-icon-toolbar {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      justify-content: center;
+    }
+
+    .page-nav {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.9375rem;
+      color: var(--light-black);
+    }
+
+    .page-nav button {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--light-black);
+      transition: all 0.2s;
+    }
+
+    .page-nav button:hover:not(:disabled) {
+      border-color: var(--pure-black);
+      color: var(--pure-black);
+    }
+
+    .page-nav button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .editor-canvas-container {
+      position: relative;
+      background: var(--light-gray);
+      padding: 2rem;
+      min-height: 600px;
+      display: flex;
+      justify-content: center;
+      overflow: auto;
+    }
+
+    .pdf-page {
+      position: relative;
+      background: var(--pure-white);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      border-radius: 4px;
+      overflow: hidden;
+      transition: transform 0.2s;
+    }
+
+    .pdf-page canvas {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+
+    .redaction-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      cursor: crosshair;
+    }
+
+    .redaction-box {
+      position: absolute;
+      background: var(--pure-black);
+      border: 2px solid var(--pure-black);
+      cursor: move;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      min-height: 20px;
+    }
+
+    .redaction-box::after {
+      content: '';
+      width: 100%;
+      height: 100%;
+      background-image: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 5px,
+        rgba(255,255,255,0.1) 5px,
+        rgba(255,255,255,0.1) 10px
+      );
+    }
+
+    .redaction-box .delete-btn {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      width: 20px;
+      height: 20px;
+      background: #ef4444;
+      border: 2px solid var(--pure-white);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      z-index: 10;
+    }
+
+    .redaction-box:hover .delete-btn {
+      opacity: 1;
+    }
+
+    .redaction-box .delete-btn svg {
+      width: 10px;
+      height: 10px;
+      color: var(--pure-white);
+    }
+
+    .redaction-list {
+      background: var(--off-white);
+      border-top: 1px solid var(--medium-gray);
+      padding: 1.5rem;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .redaction-list h4 {
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--light-black);
+      margin-bottom: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .redaction-count {
+      background: var(--pure-black);
+      color: var(--pure-white);
+      padding: 0.25rem 0.625rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+    }
+
+    .redaction-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem;
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .redaction-item-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .redaction-preview {
+      width: 40px;
+      height: 30px;
+      background: var(--pure-black);
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .redaction-details {
+      color: var(--light-black);
+    }
+
+    .redaction-page {
+      font-weight: 600;
+      color: var(--pure-black);
+    }
+
+    .btn-text {
+      background: none;
+      border: none;
+      color: var(--dark-gray);
+      font-size: 0.8125rem;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0.25rem;
+    }
+
+    .btn-text:hover {
+      color: #ef4444;
+    }
+
+    .editor-actions {
+      background: var(--pure-white);
+      border-top: 1px solid var(--medium-gray);
+      padding: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-secondary {
+      padding: 0.875rem 1.5rem;
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 10px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--light-black);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--pure-black);
+      color: var(--pure-black);
+    }
+
+    .btn-primary {
+      padding: 0.875rem 2rem;
+      background: var(--pure-black);
+      color: var(--pure-white);
+      border: none;
+      border-radius: 10px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--light-black);
+      transform: translateY(-2px);
+    }
+
+    .btn-primary:disabled {
+      background: var(--medium-gray);
+      color: var(--dark-gray);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .file-item {
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 12px;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .file-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--off-white);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .file-icon svg {
+      width: 20px;
+      height: 20px;
+      color: var(--light-black);
+    }
+
+    .file-details {
+      min-width: 0;
+    }
+
+    .file-name {
+      font-weight: 600;
+      color: var(--pure-black);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 0.25rem;
+    }
+
+    .file-size {
+      font-size: 0.875rem;
+      color: var(--dark-gray);
+    }
+
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--medium-gray);
+      background: var(--pure-white);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--light-black);
+    }
+
+    .btn-icon:hover {
+      border-color: var(--pure-black);
+      color: var(--pure-black);
+    }
+
+    .btn-icon.remove:hover {
+      background: #fef2f2;
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+
+    .progress-container {
+      display: none;
+      background: var(--pure-white);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+
+    .progress-container.active {
+      display: block;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      font-size: 0.875rem;
+      color: var(--light-black);
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: var(--medium-gray);
+      border-radius: 4px;
+      overflow: hidden;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--pure-black);
+      width: 0%;
+      transition: width 0.3s;
+      border-radius: 4px;
+    }
+
+    .result-container {
+      display: none;
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+      margin-top: 1.5rem;
+      animation: slideIn 0.4s ease;
+    }
+
+    .result-container.active {
+      display: block;
+    }
+
+    .result-icon {
+      width: 64px;
+      height: 64px;
+      background: #f0fdf4;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+    }
+
+    .result-icon svg {
+      width: 32px;
+      height: 32px;
+      color: #22c55e;
+    }
+
+    .result-container h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--pure-black);
+      margin-bottom: 0.5rem;
+    }
+
+    .result-stats {
+      color: var(--dark-gray);
+      margin-bottom: 1.5rem;
+      font-size: 0.9375rem;
+    }
+
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #22c55e;
+      color: var(--pure-white);
+      padding: 0.875rem 1.5rem;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-download:hover {
+      background: #16a34a;
+      transform: translateY(-2px);
+    }
+
+    .btn-reset {
+      display: block;
+      margin: 1rem auto 0;
+      background: none;
+      border: none;
+      color: var(--dark-gray);
+      font-size: 0.9375rem;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .btn-reset:hover {
+      color: var(--pure-black);
+    }
+
+    .info-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem;
+      background: var(--pure-white);
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .info-box svg {
+      width: 20px;
+      height: 20px;
+      color: var(--dark-gray);
+      flex-shrink: 0;
+      margin-top: 0.125rem;
+    }
+
+    .info-box p {
+      font-size: 0.875rem;
+      color: var(--dark-gray);
+      line-height: 1.6;
+    }
+
+    footer {
+      background: var(--off-white);
+      border-top: 1px solid var(--medium-gray);
+      padding: 2rem;
+      text-align: center;
+    }
+
+    footer p {
+      color: var(--dark-gray);
+      font-size: 0.875rem;
+    }
+
+    @media (max-width: 768px) {
+      main {
+        padding: 7rem 1rem 2rem;
+      }
+
+      .tool-container {
+        padding: 1.5rem;
+      }
+
+      .editor-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .toolbar-section {
+        justify-content: center;
+      }
+
+      .editor-canvas-container {
+        padding: 1rem;
+        min-height: 400px;
+      }
+
+      .editor-actions {
+        flex-direction: column;
+      }
+
+      .btn-secondary, .btn-primary {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <a href="#" class="logo">PDF<span>Tools</span></a>
+      <a href="#" class="back-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Back to Tools
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <div class="tool-header">
+      <div class="tool-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="9" y1="9" x2="15" y2="15"></line>
+          <line x1="15" y1="9" x2="9" y2="15"></line>
+        </svg>
+      </div>
+      <h1>Redact PDF</h1>
+      <p>Permanently remove sensitive information</p>
+    </div>
+
+    <div class="info-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="16" x2="12" y2="12"></line>
+        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+      </svg>
+      <p>Draw black rectangles over sensitive content. Redactions are <strong>permanent</strong> and cannot be removed once applied. All processing happens locally in your browser.</p>
+    </div>
+
+    <div class="upload-container" id="uploadContainer">
+      <div class="tool-container">
+        <div class="drop-zone" id="dropZone">
+          <div class="drop-zone-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </div>
+          <h3>Drop PDF here or click to browse</h3>
+          <p>Supports PDF files up to 50MB</p>
+          <input type="file" class="file-input" id="fileInput" accept=".pdf">
+        </div>
+
+        <div id="fileInfo" style="margin-top: 1.5rem;"></div>
+      </div>
+    </div>
+
+    <div class="editor-container" id="editorContainer">
+      <div class="editor-toolbar">
+        <div class="toolbar-section">
+          <span class="toolbar-label">Tools</span>
+          <button class="tool-btn active" id="redactTool" title="Redaction tool">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="9" y1="9" x2="15" y2="15"></line>
+              <line x1="15" y1="9" x2="9" y2="15"></line>
+            </svg>
+            Redact
+          </button>
+          <button class="tool-btn" id="panTool" title="Pan tool">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 11l3 3L22 4"></path>
+              <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
+            </svg>
+            Select
+          </button>
+        </div>
+        
+        <div class="page-nav">
+          <button id="prevPage" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          <span id="pageIndicator">Page 1 of 1</span>
+          <button id="nextPage" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+
+        <div class="toolbar-section">
+          <button class="tool-btn btn-icon-toolbar" id="zoomOut" title="Zoom out">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              <line x1="8" y1="11" x2="14" y2="11"></line>
+            </svg>
+          </button>
+          <span id="zoomLevel" style="font-size: 0.875rem; color: var(--light-black); min-width: 50px; text-align: center;">100%</span>
+          <button class="tool-btn btn-icon-toolbar" id="zoomIn" title="Zoom in">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              <line x1="11" y1="8" x2="11" y2="14"></line>
+              <line x1="8" y1="11" x2="14" y2="11"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="editor-canvas-container" id="canvasContainer">
+        <div class="pdf-page" id="pdfPage">
+          <canvas id="pdfCanvas"></canvas>
+          <div class="redaction-layer" id="redactionLayer"></div>
+        </div>
+      </div>
+
+      <div class="redaction-list" id="redactionList" style="display: none;">
+        <h4>
+          Redactions
+          <span class="redaction-count" id="redactionCount">0</span>
+        </h4>
+        <div id="redactionItems"></div>
+      </div>
+
+      <div class="editor-actions">
+        <button class="btn-secondary" id="clearAllBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+          Clear All
+        </button>
+        <button class="btn-primary" id="applyRedactionsBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          Apply Redactions
+        </button>
+      </div>
+    </div>
+
+    <div class="progress-container" id="progressContainer">
+      <div class="progress-header">
+        <span>Applying redactions...</span>
+        <span id="progressPercent">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <div class="result-container" id="resultContainer">
+      <div class="result-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+      </div>
+      <h3>Redactions Applied!</h3>
+      <p class="result-stats">
+        Successfully redacted <span class="stat-highlight" id="redactionTotal">0 areas</span> across your document
+      </p>
+      <button class="btn-download" id="downloadBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Download Redacted PDF
+      </button>
+      <button class="btn-reset" id="resetBtn">Redact another file</button>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2024 PDF Tools. All processing happens locally in your browser.</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    // Set PDF.js worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    // DOM Elements
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const uploadContainer = document.getElementById('uploadContainer');
+    const fileInfo = document.getElementById('fileInfo');
+    const editorContainer = document.getElementById('editorContainer');
+    const canvasContainer = document.getElementById('canvasContainer');
+    const pdfCanvas = document.getElementById('pdfCanvas');
+    const redactionLayer = document.getElementById('redactionLayer');
+    const redactionList = document.getElementById('redactionList');
+    const redactionItems = document.getElementById('redactionItems');
+    const redactionCount = document.getElementById('redactionCount');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressFill = document.getElementById('progressFill');
+    const progressPercent = document.getElementById('progressPercent');
+    const resultContainer = document.getElementById('resultContainer');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    // State
+    let currentFile = null;
+    let pdfDoc = null;
+    let pdfBytes = null;
+    let currentPage = 1;
+    let totalPages = 1;
+    let zoom = 1;
+    let pageRedactions = {};
+    let pageDimensions = {};
+    let isDrawing = false;
+    let startX, startY;
+    let currentTool = 'redact';
+    let activeRedaction = null;
+
+    // File handling
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) handleFile(files[0]);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) handleFile(e.target.files[0]);
+    });
+
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    async function handleFile(file) {
+      if (file.type !== 'application/pdf' && !file.name.endsWith('.pdf')) {
+        alert('Please upload a PDF file');
+        return;
+      }
+      
+      if (file.size > 50 * 1024 * 1024) {
+        alert('File size must be less than 50MB');
+        return;
+      }
+
+      currentFile = file;
+      showFileInfo(file);
+      await initEditor();
+    }
+
+    function showFileInfo(file) {
+      fileInfo.innerHTML = `
+        <div class="file-item">
+          <div class="file-info">
+            <div class="file-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+            </div>
+            <div class="file-details">
+              <div class="file-name">${file.name}</div>
+              <div class="file-size">${formatFileSize(file.size)}</div>
+            </div>
+          </div>
+          <button class="btn-icon remove" onclick="window.resetEditor()" title="Remove file">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      `;
+    }
+
+    async function initEditor() {
+      try {
+        uploadContainer.style.display = 'none';
+        editorContainer.classList.add('active');
+        
+        const arrayBuffer = await currentFile.arrayBuffer();
+        pdfBytes = new Uint8Array(arrayBuffer);
+        pdfDoc = await pdfjsLib.getDocument({ data: pdfBytes }).promise;
+        totalPages = pdfDoc.numPages;
+        
+        document.getElementById('pageIndicator').textContent = `Page 1 of ${totalPages}`;
+        document.getElementById('nextPage').disabled = totalPages <= 1;
+        
+        for (let i = 1; i <= totalPages; i++) {
+          pageRedactions[i] = [];
+          const page = await pdfDoc.getPage(i);
+          const viewport = page.getViewport({ scale: 1.5 });
+          pageDimensions[i] = {
+            width: viewport.width,
+            height: viewport.height,
+            scale: 1.5
+          };
+        }
+        
+        await renderPage(1);
+      } catch (error) {
+        console.error('Error loading PDF:', error);
+        alert('Error loading PDF file. Please try again.');
+        resetEditor();
+      }
+    }
+
+    async function renderPage(pageNum) {
+      try {
+        const page = await pdfDoc.getPage(pageNum);
+        const viewport = page.getViewport({ scale: 1.5 });
+        
+        pdfCanvas.width = viewport.width;
+        pdfCanvas.height = viewport.height;
+        
+        const ctx = pdfCanvas.getContext('2d');
+        await page.render({
+          canvasContext: ctx,
+          viewport: viewport
+        }).promise;
+        
+        updateRedactionLayer();
+        renderPageRedactions();
+      } catch (error) {
+        console.error('Error rendering page:', error);
+      }
+    }
+
+    function renderPageRedactions() {
+      redactionLayer.innerHTML = '';
+      
+      const pageReds = pageRedactions[currentPage] || [];
+      pageReds.forEach((redaction, index) => {
+        const box = createRedactionBox(redaction, index);
+        redactionLayer.appendChild(box);
+      });
+      
+      updateRedactionList();
+    }
+
+    function createRedactionBox(redaction, index) {
+      const box = document.createElement('div');
+      box.className = 'redaction-box';
+      box.style.left = redaction.x + 'px';
+      box.style.top = redaction.y + 'px';
+      box.style.width = redaction.width + 'px';
+      box.style.height = redaction.height + 'px';
+      
+      const deleteBtn = document.createElement('div');
+      deleteBtn.className = 'delete-btn';
+      deleteBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
+      deleteBtn.onclick = (e) => {
+        e.stopPropagation();
+        removeRedaction(currentPage, index);
+      };
+      box.appendChild(deleteBtn);
+      
+      return box;
+    }
+
+    document.getElementById('redactTool').addEventListener('click', function() {
+      currentTool = 'redact';
+      this.classList.add('active');
+      document.getElementById('panTool').classList.remove('active');
+      redactionLayer.style.cursor = 'crosshair';
+    });
+
+    document.getElementById('panTool').addEventListener('click', function() {
+      currentTool = 'pan';
+      this.classList.add('active');
+      document.getElementById('redactTool').classList.remove('active');
+      redactionLayer.style.cursor = 'default';
+    });
+
+    document.getElementById('zoomIn').addEventListener('click', () => {
+      zoom = Math.min(zoom + 0.25, 3);
+      updateZoom();
+    });
+
+    document.getElementById('zoomOut').addEventListener('click', () => {
+      zoom = Math.max(zoom - 0.25, 0.5);
+      updateZoom();
+    });
+
+    function updateZoom() {
+      document.getElementById('zoomLevel').textContent = Math.round(zoom * 100) + '%';
+      const page = document.getElementById('pdfPage');
+      page.style.transform = `scale(${zoom})`;
+      page.style.transformOrigin = 'top center';
+    }
+
+    redactionLayer.addEventListener('mousedown', startRedaction);
+    redactionLayer.addEventListener('mousemove', drawRedaction);
+    redactionLayer.addEventListener('mouseup', endRedaction);
+    redactionLayer.addEventListener('mouseleave', endRedaction);
+
+    function startRedaction(e) {
+      if (currentTool !== 'redact') return;
+      
+      isDrawing = true;
+      const rect = redactionLayer.getBoundingClientRect();
+      startX = (e.clientX - rect.left) / zoom;
+      startY = (e.clientY - rect.top) / zoom;
+      
+      activeRedaction = document.createElement('div');
+      activeRedaction.className = 'redaction-box';
+      activeRedaction.style.left = startX + 'px';
+      activeRedaction.style.top = startY + 'px';
+      activeRedaction.style.width = '0px';
+      activeRedaction.style.height = '0px';
+      
+      redactionLayer.appendChild(activeRedaction);
+    }
+
+    function drawRedaction(e) {
+      if (!isDrawing || !activeRedaction) return;
+      
+      const rect = redactionLayer.getBoundingClientRect();
+      const currentX = (e.clientX - rect.left) / zoom;
+      const currentY = (e.clientY - rect.top) / zoom;
+      
+      const width = Math.abs(currentX - startX);
+      const height = Math.abs(currentY - startY);
+      const left = Math.min(currentX, startX);
+      const top = Math.min(currentY, startY);
+      
+      activeRedaction.style.width = width + 'px';
+      activeRedaction.style.height = height + 'px';
+      activeRedaction.style.left = left + 'px';
+      activeRedaction.style.top = top + 'px';
+    }
+
+    function endRedaction() {
+      if (!isDrawing) return;
+      isDrawing = false;
+      
+      if (activeRedaction) {
+        const width = parseInt(activeRedaction.style.width);
+        const height = parseInt(activeRedaction.style.height);
+        
+        if (width < 10 || height < 10) {
+          activeRedaction.remove();
+        } else {
+          const redaction = {
+            page: currentPage,
+            x: parseInt(activeRedaction.style.left),
+            y: parseInt(activeRedaction.style.top),
+            width: width,
+            height: height
+          };
+          
+          pageRedactions[currentPage].push(redaction);
+          activeRedaction.remove();
+          renderPageRedactions();
+        }
+      }
+      activeRedaction = null;
+    }
+
+    function removeRedaction(pageNum, index) {
+      pageRedactions[pageNum].splice(index, 1);
+      renderPageRedactions();
+    }
+
+    function updateRedactionList() {
+      const totalRedactions = Object.values(pageRedactions).reduce((sum, arr) => sum + arr.length, 0);
+      
+      if (totalRedactions === 0) {
+        redactionList.style.display = 'none';
+        return;
+      }
+      
+      redactionList.style.display = 'block';
+      redactionCount.textContent = totalRedactions;
+      
+      let html = '';
+      
+      for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+        const pageReds = pageRedactions[pageNum] || [];
+        pageReds.forEach((r, localIndex) => {
+          html += `
+            <div class="redaction-item">
+              <div class="redaction-item-info">
+                <div class="redaction-preview"></div>
+                <div class="redaction-details">
+                  <div class="redaction-page">Page ${pageNum} • Redaction ${localIndex + 1}</div>
+                  <div style="font-size: 0.75rem; color: var(--dark-gray);">${Math.round(r.width)}×${Math.round(r.height)}px</div>
+                </div>
+              </div>
+              <button class="btn-text" onclick="window.deleteRedactionByPageAndIndex(${pageNum}, ${localIndex})">Remove</button>
+            </div>
+          `;
+        });
+      }
+      
+      redactionItems.innerHTML = html;
+    }
+
+    window.deleteRedactionByPageAndIndex = function(pageNum, index) {
+      removeRedaction(pageNum, index);
+    };
+
+    document.getElementById('clearAllBtn').addEventListener('click', () => {
+      const totalRedactions = Object.values(pageRedactions).reduce((sum, arr) => sum + arr.length, 0);
+      if (totalRedactions === 0) return;
+      
+      if (confirm('Are you sure you want to remove all redactions?')) {
+        for (let i = 1; i <= totalPages; i++) {
+          pageRedactions[i] = [];
+        }
+        renderPageRedactions();
+      }
+    });
+
+    document.getElementById('applyRedactionsBtn').addEventListener('click', applyRedactions);
+
+    async function applyRedactions() {
+      const totalRedactions = Object.values(pageRedactions).reduce((sum, arr) => sum + arr.length, 0);
+      
+      if (totalRedactions === 0) {
+        alert('Please add at least one redaction before applying.');
+        return;
+      }
+
+      editorContainer.classList.remove('active');
+      progressContainer.classList.add('active');
+
+      try {
+        const { jsPDF } = window.jspdf;
+        
+        let progress = 0;
+        const progressStep = 95 / totalPages;
+        
+        // Create a new PDF
+        let pdf = null;
+        
+        // Process each page
+        for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+          const page = await pdfDoc.getPage(pageNum);
+          const viewport = page.getViewport({ scale: 2 }); // Higher resolution
+          
+          // Create a temporary canvas for this page
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = viewport.width;
+          tempCanvas.height = viewport.height;
+          const tempCtx = tempCanvas.getContext('2d');
+          
+          // Render the PDF page
+          await page.render({
+            canvasContext: tempCtx,
+            viewport: viewport
+          }).promise;
+          
+          // Apply redactions by drawing black rectangles
+          const pageReds = pageRedactions[pageNum] || [];
+          const renderDims = pageDimensions[pageNum];
+          const scaleX = viewport.width / renderDims.width;
+          const scaleY = viewport.height / renderDims.height;
+          
+          tempCtx.fillStyle = '#000000';
+          pageReds.forEach(redaction => {
+            const x = redaction.x * scaleX;
+            const y = redaction.y * scaleY;
+            const width = redaction.width * scaleX;
+            const height = redaction.height * scaleY;
+            tempCtx.fillRect(x, y, width, height);
+          });
+          
+          // Convert canvas to image
+          const imgData = tempCanvas.toDataURL('image/jpeg', 0.95);
+          
+          // Add to PDF
+          const pdfWidth = viewport.width / 2.835; // Convert pixels to mm
+          const pdfHeight = viewport.height / 2.835;
+          
+          if (!pdf) {
+            pdf = new jsPDF({
+              orientation: pdfWidth > pdfHeight ? 'landscape' : 'portrait',
+              unit: 'mm',
+              format: [pdfWidth, pdfHeight]
+            });
+          } else {
+            pdf.addPage([pdfWidth, pdfHeight]);
+          }
+          
+          pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+          
+          progress += progressStep;
+          progressFill.style.width = Math.min(progress, 95) + '%';
+          progressPercent.textContent = Math.floor(Math.min(progress, 95)) + '%';
+        }
+        
+        progressFill.style.width = '100%';
+        progressPercent.textContent = '100%';
+        
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Get the PDF as blob
+        const pdfBlob = pdf.output('blob');
+        showResult(totalRedactions, pdfBlob);
+      } catch (error) {
+        console.error('Error applying redactions:', error);
+        alert('Error processing PDF. Please try again.');
+        editorContainer.classList.add('active');
+        progressContainer.classList.remove('active');
+      }
+    }
+
+    function showResult(totalRedactions, pdfBlob) {
+      progressContainer.classList.remove('active');
+      resultContainer.classList.add('active');
+      document.getElementById('redactionTotal').textContent = totalRedactions + ' area' + (totalRedactions !== 1 ? 's' : '');
+      
+      const url = URL.createObjectURL(pdfBlob);
+      
+      downloadBtn.onclick = () => {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'redacted_' + currentFile.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      };
+    }
+
+    window.resetEditor = function() {
+      currentFile = null;
+      pdfDoc = null;
+      pdfBytes = null;
+      pageRedactions = {};
+      pageDimensions = {};
+      currentPage = 1;
+      totalPages = 1;
+      fileInfo.innerHTML = '';
+      uploadContainer.style.display = 'block';
+      editorContainer.classList.remove('active');
+      progressContainer.classList.remove('active');
+      resultContainer.classList.remove('active');
+      redactionLayer.innerHTML = '';
+      fileInput.value = '';
+      zoom = 1;
+      updateZoom();
+    };
+
+    resetBtn.addEventListener('click', window.resetEditor);
+
+    document.getElementById('prevPage').addEventListener('click', async () => {
+      if (currentPage > 1) {
+        currentPage--;
+        document.getElementById('pageIndicator').textContent = `Page ${currentPage} of ${totalPages}`;
+        document.getElementById('nextPage').disabled = false;
+        document.getElementById('prevPage').disabled = currentPage === 1;
+        await renderPage(currentPage);
+      }
+    });
+
+    document.getElementById('nextPage').addEventListener('click', async () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        document.getElementById('pageIndicator').textContent = `Page ${currentPage} of ${totalPages}`;
+        document.getElementById('prevPage').disabled = false;
+        document.getElementById('nextPage').disabled = currentPage === totalPages;
+        await renderPage(currentPage);
+      }
+    });
+
+    function updateRedactionLayer() {
+      redactionLayer.style.width = pdfCanvas.width + 'px';
+      redactionLayer.style.height = pdfCanvas.height + 'px';
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,2043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Image to PDF | PDF Tools</title>
+  <meta name="description" content="Convert images to PDF with custom paper sizes and cropping tools. Support for JPG, PNG, WEBP. Free, private, browser-based tool.">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    :root {
+      --pure-white: #ffffff;
+      --off-white: #fafafa;
+      --light-gray: #f5f5f5;
+      --medium-gray: #e5e5e5;
+      --dark-gray: #737373;
+      --light-black: #404040;
+      --black: #171717;
+      --pure-black: #000000;
+      --accent: #3b82f6;
+      --accent-light: #eff6ff;
+      --success: #22c55e;
+      --danger: #ef4444;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--pure-white);
+      color: var(--black);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--medium-gray);
+    }
+
+    .header-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--pure-black);
+      letter-spacing: -0.03em;
+      text-decoration: none;
+    }
+
+    .logo span {
+      font-weight: 400;
+      color: var(--dark-gray);
+    }
+
+    .back-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--light-black);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9375rem;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover {
+      color: var(--pure-black);
+    }
+
+    main {
+      flex: 1;
+      padding: 8rem 2rem 4rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .tool-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .tool-icon {
+      width: 80px;
+      height: 80px;
+      background: var(--off-white);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      border: 1px solid var(--medium-gray);
+    }
+
+    .tool-icon svg {
+      width: 40px;
+      height: 40px;
+      stroke-width: 1.5;
+    }
+
+    .tool-header h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--pure-black);
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.02em;
+    }
+
+    .tool-header p {
+      color: var(--dark-gray);
+      font-size: 1.125rem;
+    }
+
+    .upload-section {
+      max-width: 800px;
+      margin: 0 auto 2rem;
+    }
+
+    .tool-container {
+      background: var(--off-white);
+      border-radius: 24px;
+      padding: 2.5rem;
+      border: 1px solid var(--medium-gray);
+    }
+
+    .drop-zone {
+      background: var(--pure-white);
+      border: 2px dashed var(--medium-gray);
+      border-radius: 16px;
+      padding: 3rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: var(--pure-black);
+      background: var(--light-gray);
+    }
+
+    .drop-zone-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--off-white);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      border: 1px solid var(--medium-gray);
+    }
+
+    .drop-zone-icon svg {
+      width: 32px;
+      height: 32px;
+      color: var(--light-black);
+    }
+
+    .drop-zone h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--pure-black);
+      margin-bottom: 0.5rem;
+    }
+
+    .drop-zone p {
+      color: var(--dark-gray);
+      font-size: 0.9375rem;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .editor-container {
+      display: none;
+      animation: slideIn 0.4s ease;
+    }
+
+    .editor-container.active {
+      display: block;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .settings-panel {
+      background: var(--off-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .settings-title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--light-black);
+      margin-bottom: 1rem;
+    }
+
+    .paper-sizes {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .paper-size-option {
+      position: relative;
+    }
+
+    .paper-size-option input {
+      position: absolute;
+      opacity: 0;
+    }
+
+    .paper-size-option label {
+      display: block;
+      padding: 1rem 0.5rem;
+      background: var(--pure-white);
+      border: 2px solid var(--medium-gray);
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .paper-size-option input:checked + label {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .paper-size-name {
+      font-weight: 600;
+      color: var(--pure-black);
+      font-size: 0.9375rem;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+
+    .paper-size-dims {
+      font-size: 0.75rem;
+      color: var(--dark-gray);
+      display: block;
+    }
+
+    .orientation-toggle {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .orientation-option {
+      flex: 1;
+    }
+
+    .orientation-option input {
+      position: absolute;
+      opacity: 0;
+    }
+
+    .orientation-option label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem;
+      background: var(--pure-white);
+      border: 2px solid var(--medium-gray);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .orientation-option input:checked + label {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .orientation-icon {
+      width: 32px;
+      height: 32px;
+      color: var(--light-black);
+    }
+
+    .orientation-option input:checked + label .orientation-icon {
+      color: var(--accent);
+    }
+
+    .orientation-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--pure-black);
+    }
+
+    .filter-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .filter-option {
+      position: relative;
+    }
+
+    .filter-option input {
+      position: absolute;
+      opacity: 0;
+    }
+
+    .filter-option label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 0.5rem;
+      background: var(--pure-white);
+      border: 2px solid var(--medium-gray);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-option input:checked + label {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .filter-preview {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .filter-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .filter-circle.original {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .filter-circle.soft {
+      background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+      opacity: 0.85;
+    }
+
+    .filter-circle.minimalist {
+      background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+    }
+
+    .filter-circle.clear {
+      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    }
+
+    .filter-circle.vivid {
+      background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+    }
+
+    .filter-circle.warm {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .filter-label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--pure-black);
+      text-align: center;
+    }
+
+    .images-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .image-card {
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+
+    .image-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .image-preview-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1;
+      background: var(--light-gray);
+      overflow: hidden;
+    }
+
+    .image-preview {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: transform 0.3s;
+    }
+
+    .image-preview.cropped {
+      object-fit: cover;
+    }
+
+    .image-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .image-card:hover .image-overlay {
+      opacity: 1;
+    }
+
+    .image-btn {
+      width: 40px;
+      height: 40px;
+      background: var(--pure-white);
+      border: none;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--light-black);
+      transition: all 0.2s;
+    }
+
+    .image-btn:hover {
+      background: var(--accent);
+      color: var(--pure-white);
+    }
+
+    .image-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .image-info {
+      padding: 1rem;
+    }
+
+    .image-name {
+      font-weight: 600;
+      color: var(--pure-black);
+      font-size: 0.875rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 0.25rem;
+    }
+
+    .image-meta {
+      font-size: 0.75rem;
+      color: var(--dark-gray);
+    }
+
+    .image-order {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+
+    .order-btn {
+      width: 28px;
+      height: 28px;
+      background: var(--off-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--light-black);
+      transition: all 0.2s;
+    }
+
+    .order-btn:hover:not(:disabled) {
+      border-color: var(--pure-black);
+      color: var(--pure-black);
+    }
+
+    .order-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .order-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .order-number {
+      font-weight: 600;
+      color: var(--accent);
+      min-width: 24px;
+      text-align: center;
+    }
+
+    .add-more {
+      border: 2px dashed var(--medium-gray);
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      color: var(--dark-gray);
+      transition: all 0.2s;
+      min-height: 200px;
+    }
+
+    .add-more:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .add-more svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .add-more span {
+      font-weight: 500;
+      font-size: 0.9375rem;
+    }
+
+    .crop-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .crop-modal.active {
+      display: flex;
+    }
+
+    .crop-container {
+      background: var(--pure-white);
+      border-radius: 16px;
+      max-width: 900px;
+      width: 100%;
+      max-height: 90vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .crop-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--medium-gray);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .crop-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--pure-black);
+    }
+
+    .crop-close {
+      width: 36px;
+      height: 36px;
+      background: none;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--dark-gray);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .crop-close:hover {
+      background: var(--light-gray);
+      color: var(--pure-black);
+    }
+
+    .crop-area {
+      flex: 1;
+      padding: 1.5rem;
+      background: var(--light-gray);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
+      position: relative;
+    }
+
+    .crop-image-wrapper {
+      position: relative;
+      max-width: 100%;
+      max-height: 60vh;
+      user-select: none;
+    }
+
+    .crop-image {
+      max-width: 100%;
+      max-height: 60vh;
+      display: block;
+      user-select: none;
+    }
+
+    .crop-selection {
+      position: absolute;
+      border: 2px dashed var(--accent);
+      background: rgba(59, 130, 246, 0.1);
+      cursor: move;
+      display: none;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+    }
+
+    .crop-selection.active {
+      display: block;
+    }
+
+    .crop-handle {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: var(--accent);
+      border: 2px solid var(--pure-white);
+      border-radius: 50%;
+    }
+
+    .crop-handle.nw { top: -6px; left: -6px; cursor: nw-resize; }
+    .crop-handle.ne { top: -6px; right: -6px; cursor: ne-resize; }
+    .crop-handle.sw { bottom: -6px; left: -6px; cursor: sw-resize; }
+    .crop-handle.se { bottom: -6px; right: -6px; cursor: se-resize; }
+
+    .crop-toolbar {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--medium-gray);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .crop-presets {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .crop-preset {
+      padding: 0.5rem 1rem;
+      background: var(--off-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 6px;
+      font-size: 0.8125rem;
+      color: var(--light-black);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .crop-preset:hover, .crop-preset.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .crop-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn-secondary {
+      padding: 0.625rem 1.25rem;
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--light-black);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--pure-black);
+      color: var(--pure-black);
+    }
+
+    .btn-primary {
+      padding: 0.625rem 1.5rem;
+      background: var(--accent);
+      color: var(--pure-white);
+      border: none;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: #2563eb;
+    }
+
+    .action-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--pure-white);
+      border-top: 1px solid var(--medium-gray);
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      z-index: 100;
+      transform: translateY(100%);
+      transition: transform 0.3s;
+    }
+
+    .action-bar.active {
+      transform: translateY(0);
+    }
+
+    .btn-main {
+      padding: 0.875rem 2rem;
+      background: var(--pure-black);
+      color: var(--pure-white);
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s;
+    }
+
+    .btn-main:hover:not(:disabled) {
+      background: var(--light-black);
+      transform: translateY(-2px);
+    }
+
+    .btn-main:disabled {
+      background: var(--medium-gray);
+      color: var(--dark-gray);
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .progress-container {
+      display: none;
+      max-width: 600px;
+      margin: 2rem auto;
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 16px;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .progress-container.active {
+      display: block;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+      font-size: 0.875rem;
+      color: var(--light-black);
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: var(--medium-gray);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--pure-black);
+      width: 0%;
+      transition: width 0.3s;
+      border-radius: 4px;
+    }
+
+    .progress-status {
+      margin-top: 1rem;
+      font-size: 0.875rem;
+      color: var(--dark-gray);
+    }
+
+    .result-container {
+      display: none;
+      max-width: 600px;
+      margin: 2rem auto;
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 16px;
+      padding: 2.5rem;
+      text-align: center;
+      animation: slideIn 0.4s ease;
+    }
+
+    .result-container.active {
+      display: block;
+    }
+
+    .result-icon {
+      width: 64px;
+      height: 64px;
+      background: #f0fdf4;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+    }
+
+    .result-icon svg {
+      width: 32px;
+      height: 32px;
+      color: var(--success);
+    }
+
+    .result-container h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--pure-black);
+      margin-bottom: 0.5rem;
+    }
+
+    .result-stats {
+      color: var(--dark-gray);
+      margin-bottom: 1.5rem;
+      font-size: 0.9375rem;
+    }
+
+    .btn-download {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--success);
+      color: var(--pure-white);
+      padding: 0.875rem 1.5rem;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .btn-download:hover {
+      background: #16a34a;
+      transform: translateY(-2px);
+    }
+
+    .btn-reset {
+      display: block;
+      margin: 1rem auto 0;
+      background: none;
+      border: none;
+      color: var(--dark-gray);
+      font-size: 0.9375rem;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .btn-reset:hover {
+      color: var(--pure-black);
+    }
+
+    .info-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1rem;
+      background: var(--pure-white);
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      border: 1px solid var(--medium-gray);
+    }
+
+    .info-box svg {
+      width: 20px;
+      height: 20px;
+      color: var(--dark-gray);
+      flex-shrink: 0;
+      margin-top: 0.125rem;
+    }
+
+    .info-box p {
+      font-size: 0.875rem;
+      color: var(--dark-gray);
+      line-height: 1.6;
+    }
+
+    footer {
+      background: var(--off-white);
+      border-top: 1px solid var(--medium-gray);
+      padding: 2rem;
+      text-align: center;
+    }
+
+    footer p {
+      color: var(--dark-gray);
+      font-size: 0.875rem;
+    }
+
+    @media (max-width: 768px) {
+      main {
+        padding: 7rem 1rem 6rem;
+      }
+
+      .tool-container {
+        padding: 1.5rem;
+      }
+
+      .paper-sizes {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .images-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      }
+
+      .crop-presets {
+        flex-wrap: wrap;
+      }
+
+      .action-bar {
+        padding: 1rem;
+        flex-direction: column;
+      }
+
+      .btn-main {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <a href="index.html" class="logo">PDF<span>Tools</span></a>
+      <a href="index.html" class="back-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Back to Tools
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <div class="tool-header">
+      <div class="tool-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <circle cx="8.5" cy="8.5" r="1.5"></circle>
+          <polyline points="21 15 16 10 5 21"></polyline>
+        </svg>
+      </div>
+      <h1>Image to PDF</h1>
+      <p>Convert images with custom sizes & cropping</p>
+    </div>
+
+    <div class="info-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="16" x2="12" y2="12"></line>
+        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+      </svg>
+      <p>Upload up to 100 images and arrange them in your preferred order. Choose from standard paper sizes (A4, A3, Letter, etc.) and crop images before converting. All processing happens locally in your browser.</p>
+    </div>
+
+    <div class="upload-section" id="uploadSection">
+      <div class="tool-container">
+        <div class="drop-zone" id="dropZone">
+          <div class="drop-zone-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+          </div>
+          <h3>Drop images here or click to browse</h3>
+          <p>Supports JPG, PNG, WEBP, GIF • Up to 100 images</p>
+          <input type="file" class="file-input" id="fileInput" accept="image/*" multiple>
+        </div>
+      </div>
+    </div>
+
+    <div class="editor-container" id="editorContainer">
+      <div class="settings-panel">
+        <div class="settings-title">Paper Size</div>
+        <div class="paper-sizes">
+          <div class="paper-size-option">
+            <input type="radio" name="paperSize" id="a4" value="a4" checked>
+            <label for="a4">
+              <span class="paper-size-name">A4</span>
+              <span class="paper-size-dims">210 × 297 mm</span>
+            </label>
+          </div>
+          <div class="paper-size-option">
+            <input type="radio" name="paperSize" id="a3" value="a3">
+            <label for="a3">
+              <span class="paper-size-name">A3</span>
+              <span class="paper-size-dims">297 × 420 mm</span>
+            </label>
+          </div>
+          <div class="paper-size-option">
+            <input type="radio" name="paperSize" id="a5" value="a5">
+            <label for="a5">
+              <span class="paper-size-name">A5</span>
+              <span class="paper-size-dims">148 × 210 mm</span>
+            </label>
+          </div>
+          <div class="paper-size-option">
+            <input type="radio" name="paperSize" id="letter" value="letter">
+            <label for="letter">
+              <span class="paper-size-name">Letter</span>
+              <span class="paper-size-dims">216 × 279 mm</span>
+            </label>
+          </div>
+          <div class="paper-size-option">
+            <input type="radio" name="paperSize" id="legal" value="legal">
+            <label for="legal">
+              <span class="paper-size-name">Legal</span>
+              <span class="paper-size-dims">216 × 356 mm</span>
+            </label>
+          </div>
+          <div class="paper-size-option">
+            <input type="radio" name="paperSize" id="tabloid" value="tabloid">
+            <label for="tabloid">
+              <span class="paper-size-name">Tabloid</span>
+              <span class="paper-size-dims">279 × 432 mm</span>
+            </label>
+          </div>
+          <div class="paper-size-option">
+            <input type="radio" name="paperSize" id="original" value="original">
+            <label for="original">
+              <span class="paper-size-name">Original</span>
+              <span class="paper-size-dims">Image size</span>
+            </label>
+          </div>
+          <div class="paper-size-option">
+            <input type="radio" name="paperSize" id="fit" value="fit">
+            <label for="fit">
+              <span class="paper-size-name">Fit</span>
+              <span class="paper-size-dims">Auto fit</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-title">Orientation</div>
+        <div class="orientation-toggle">
+          <div class="orientation-option">
+            <input type="radio" name="orientation" id="portrait" value="portrait" checked>
+            <label for="portrait">
+              <svg class="orientation-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+              </svg>
+              <span class="orientation-label">Portrait</span>
+            </label>
+          </div>
+          <div class="orientation-option">
+            <input type="radio" name="orientation" id="landscape" value="landscape">
+            <label for="landscape">
+              <svg class="orientation-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+              </svg>
+              <span class="orientation-label">Landscape</span>
+            </label>
+          </div>
+          <div class="orientation-option">
+            <input type="radio" name="orientation" id="auto" value="auto">
+            <label for="auto">
+              <svg class="orientation-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+                <path d="M12 4v16"></path>
+              </svg>
+              <span class="orientation-label">Auto</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-title">Image Filter</div>
+        <div class="filter-options">
+          <div class="filter-option">
+            <input type="radio" name="filter" id="filter-none" value="none" checked>
+            <label for="filter-none">
+              <div class="filter-preview">
+                <div class="filter-circle original"></div>
+              </div>
+              <span class="filter-label">Original</span>
+            </label>
+          </div>
+          <div class="filter-option">
+            <input type="radio" name="filter" id="filter-soft" value="soft">
+            <label for="filter-soft">
+              <div class="filter-preview">
+                <div class="filter-circle soft"></div>
+              </div>
+              <span class="filter-label">Soft</span>
+            </label>
+          </div>
+          <div class="filter-option">
+            <input type="radio" name="filter" id="filter-minimalist" value="minimalist">
+            <label for="filter-minimalist">
+              <div class="filter-preview">
+                <div class="filter-circle minimalist"></div>
+              </div>
+              <span class="filter-label">Minimalist</span>
+            </label>
+          </div>
+          <div class="filter-option">
+            <input type="radio" name="filter" id="filter-clear" value="clear">
+            <label for="filter-clear">
+              <div class="filter-preview">
+                <div class="filter-circle clear"></div>
+              </div>
+              <span class="filter-label">Clear</span>
+            </label>
+          </div>
+          <div class="filter-option">
+            <input type="radio" name="filter" id="filter-vivid" value="vivid">
+            <label for="filter-vivid">
+              <div class="filter-preview">
+                <div class="filter-circle vivid"></div>
+              </div>
+              <span class="filter-label">Vivid</span>
+            </label>
+          </div>
+          <div class="filter-option">
+            <input type="radio" name="filter" id="filter-warm" value="warm">
+            <label for="filter-warm">
+              <div class="filter-preview">
+                <div class="filter-circle warm"></div>
+              </div>
+              <span class="filter-label">Warm</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="images-grid" id="imagesGrid"></div>
+    </div>
+
+    <div class="crop-modal" id="cropModal">
+      <div class="crop-container">
+        <div class="crop-header">
+          <h3 class="crop-title">Crop Image</h3>
+          <button class="crop-close" onclick="closeCropModal()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="crop-area">
+          <div class="crop-image-wrapper">
+            <img class="crop-image" id="cropImage" src="" alt="Crop preview">
+            <div class="crop-selection" id="cropSelection">
+              <div class="crop-handle nw"></div>
+              <div class="crop-handle ne"></div>
+              <div class="crop-handle sw"></div>
+              <div class="crop-handle se"></div>
+            </div>
+          </div>
+        </div>
+        <div class="crop-toolbar">
+          <div class="crop-presets">
+            <button class="crop-preset active" onclick="setCropRatio('free')">Free</button>
+            <button class="crop-preset" onclick="setCropRatio('1:1')">1:1</button>
+            <button class="crop-preset" onclick="setCropRatio('4:3')">4:3</button>
+            <button class="crop-preset" onclick="setCropRatio('16:9')">16:9</button>
+            <button class="crop-preset" onclick="setCropRatio('a4')">A4</button>
+          </div>
+          <div class="crop-actions">
+            <button class="btn-secondary" onclick="closeCropModal()">Cancel</button>
+            <button class="btn-primary" onclick="applyCrop()">Apply Crop</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="progress-container" id="progressContainer">
+      <div class="progress-header">
+        <span>Converting images to PDF...</span>
+        <span id="progressPercent">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-status" id="progressStatus">Initializing...</div>
+    </div>
+
+    <div class="result-container" id="resultContainer">
+      <div class="result-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+      </div>
+      <h3>PDF Created Successfully!</h3>
+      <p class="result-stats">
+        Converted <span class="stat-highlight" id="imageCount">0 images</span> to PDF
+      </p>
+      <a href="#" class="btn-download" id="downloadBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        Download PDF
+      </a>
+      <button class="btn-reset" id="resetBtn">Create another PDF</button>
+    </div>
+  </main>
+
+  <div class="action-bar" id="actionBar">
+    <button class="btn-main" id="convertBtn" onclick="convertToPDF()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="12" y1="18" x2="12" y2="12"></line>
+        <line x1="9" y1="15" x2="15" y2="15"></line>
+      </svg>
+      Convert to PDF
+    </button>
+  </div>
+
+  <footer>
+    <p>&copy; 2024 PDF Tools. All processing happens locally in your browser.</p>
+  </footer>
+
+  <script>
+    const { jsPDF } = window.jspdf;
+
+    // DOM Elements
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const uploadSection = document.getElementById('uploadSection');
+    const editorContainer = document.getElementById('editorContainer');
+    const imagesGrid = document.getElementById('imagesGrid');
+    const actionBar = document.getElementById('actionBar');
+    const cropModal = document.getElementById('cropModal');
+    const cropImage = document.getElementById('cropImage');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressFill = document.getElementById('progressFill');
+    const progressPercent = document.getElementById('progressPercent');
+    const progressStatus = document.getElementById('progressStatus');
+    const resultContainer = document.getElementById('resultContainer');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    // State
+    let images = [];
+    let currentCropIndex = null;
+    let cropRatio = 'free';
+    let isDragging = false;
+    let isResizing = false;
+    let resizeHandle = null;
+    let dragStart = { x: 0, y: 0 };
+    let cropStart = { left: 0, top: 0, width: 0, height: 0 };
+
+    // Paper sizes in mm
+    const paperSizes = {
+      a4: { width: 210, height: 297 },
+      a3: { width: 297, height: 420 },
+      a5: { width: 148, height: 210 },
+      letter: { width: 215.9, height: 279.4 },
+      legal: { width: 215.9, height: 355.6 },
+      tabloid: { width: 279.4, height: 431.8 }
+    };
+
+    // File handling
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      handleFiles(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      handleFiles(e.target.files);
+    });
+
+    function handleFiles(files) {
+      const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+      
+      if (imageFiles.length === 0) {
+        alert('Please upload image files only');
+        return;
+      }
+
+      if (images.length + imageFiles.length > 100) {
+        alert('Maximum 100 images allowed');
+        return;
+      }
+
+      let loaded = 0;
+      imageFiles.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            images.push({
+              id: Date.now() + index,
+              file: file,
+              src: e.target.result,
+              name: file.name,
+              size: file.size,
+              width: img.width,
+              height: img.height,
+              crop: null,
+              croppedSrc: null,
+              order: images.length
+            });
+            
+            loaded++;
+            if (loaded === imageFiles.length) {
+              initEditor();
+            }
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
+    function initEditor() {
+      uploadSection.style.display = 'none';
+      editorContainer.classList.add('active');
+      actionBar.classList.add('active');
+      renderImages();
+    }
+
+    function renderImages() {
+      imagesGrid.innerHTML = '';
+      
+      images.forEach((img, index) => {
+        const card = document.createElement('div');
+        card.className = 'image-card';
+        card.innerHTML = `
+          <div class="image-preview-container">
+            <img class="image-preview ${img.crop ? 'cropped' : ''}" src="${img.croppedSrc || img.src}" alt="${img.name}">
+            <div class="image-overlay">
+              <button class="image-btn" onclick="openCropModal(${index})" title="Crop">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6.13 1L6 16a2 2 0 0 0 2 2h15"></path>
+                  <path d="M1 6.13L16 6a2 2 0 0 1 2 2v15"></path>
+                </svg>
+              </button>
+              <button class="image-btn" onclick="removeImage(${index})" title="Remove">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="image-info">
+            <div class="image-name">${img.name}</div>
+            <div class="image-meta">${formatFileSize(img.size)} ${img.crop ? '• Cropped' : ''}</div>
+            <div class="image-order">
+              <button class="order-btn" onclick="moveImage(${index}, -1)" ${index === 0 ? 'disabled' : ''}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
+              <span class="order-number">${index + 1}</span>
+              <button class="order-btn" onclick="moveImage(${index}, 1)" ${index === images.length - 1 ? 'disabled' : ''}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
+            </div>
+          </div>
+        `;
+        imagesGrid.appendChild(card);
+      });
+
+      if (images.length < 100) {
+        const addMore = document.createElement('div');
+        addMore.className = 'image-card add-more';
+        addMore.onclick = () => fileInput.click();
+        addMore.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="12" y1="8" x2="12" y2="16"></line>
+            <line x1="8" y1="12" x2="16" y2="12"></line>
+          </svg>
+          <span>Add More</span>
+        `;
+        imagesGrid.appendChild(addMore);
+      }
+    }
+
+    function moveImage(index, direction) {
+      const newIndex = index + direction;
+      if (newIndex < 0 || newIndex >= images.length) return;
+      
+      const temp = images[index];
+      images[index] = images[newIndex];
+      images[newIndex] = temp;
+      
+      renderImages();
+    }
+
+    function removeImage(index) {
+      if (confirm('Remove this image?')) {
+        images.splice(index, 1);
+        if (images.length === 0) {
+          resetTool();
+        } else {
+          renderImages();
+        }
+      }
+    }
+
+    // Crop functionality
+    function openCropModal(index) {
+      currentCropIndex = index;
+      cropImage.src = images[index].src;
+      cropModal.classList.add('active');
+      cropRatio = 'free';
+      
+      document.querySelectorAll('.crop-preset').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.crop-preset')[0].classList.add('active');
+      
+      setTimeout(() => {
+        initCropSelection();
+      }, 100);
+    }
+
+    function closeCropModal() {
+      cropModal.classList.remove('active');
+      currentCropIndex = null;
+      removeCropListeners();
+    }
+
+    function initCropSelection() {
+      const selection = document.getElementById('cropSelection');
+      const img = document.getElementById('cropImage');
+      
+      // Default selection to 80% of image
+      const width = img.offsetWidth * 0.8;
+      const height = img.offsetHeight * 0.8;
+      const left = (img.offsetWidth - width) / 2;
+      const top = (img.offsetHeight - height) / 2;
+      
+      selection.style.width = width + 'px';
+      selection.style.height = height + 'px';
+      selection.style.left = left + 'px';
+      selection.style.top = top + 'px';
+      selection.classList.add('active');
+      
+      setupCropListeners();
+    }
+
+    function setupCropListeners() {
+      const selection = document.getElementById('cropSelection');
+      const handles = selection.querySelectorAll('.crop-handle');
+      
+      selection.addEventListener('mousedown', startDrag);
+      handles.forEach(handle => {
+        handle.addEventListener('mousedown', startResize);
+      });
+      
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', stopDragResize);
+    }
+
+    function removeCropListeners() {
+      const selection = document.getElementById('cropSelection');
+      const handles = selection.querySelectorAll('.crop-handle');
+      
+      selection.removeEventListener('mousedown', startDrag);
+      handles.forEach(handle => {
+        handle.removeEventListener('mousedown', startResize);
+      });
+      
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', stopDragResize);
+    }
+
+    function startDrag(e) {
+      if (e.target.classList.contains('crop-handle')) return;
+      
+      isDragging = true;
+      const selection = document.getElementById('cropSelection');
+      dragStart = {
+        x: e.clientX,
+        y: e.clientY
+      };
+      cropStart = {
+        left: parseInt(selection.style.left),
+        top: parseInt(selection.style.top)
+      };
+      e.preventDefault();
+    }
+
+    function startResize(e) {
+      isResizing = true;
+      resizeHandle = e.target.classList[1]; // nw, ne, sw, se
+      const selection = document.getElementById('cropSelection');
+      
+      dragStart = {
+        x: e.clientX,
+        y: e.clientY
+      };
+      cropStart = {
+        left: parseInt(selection.style.left),
+        top: parseInt(selection.style.top),
+        width: parseInt(selection.style.width),
+        height: parseInt(selection.style.height)
+      };
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    function onMouseMove(e) {
+      if (!isDragging && !isResizing) return;
+      
+      const selection = document.getElementById('cropSelection');
+      const img = document.getElementById('cropImage');
+      const dx = e.clientX - dragStart.x;
+      const dy = e.clientY - dragStart.y;
+      
+      if (isDragging) {
+        const newLeft = Math.max(0, Math.min(img.offsetWidth - parseInt(selection.style.width), cropStart.left + dx));
+        const newTop = Math.max(0, Math.min(img.offsetHeight - parseInt(selection.style.height), cropStart.top + dy));
+        
+        selection.style.left = newLeft + 'px';
+        selection.style.top = newTop + 'px';
+      }
+      
+      if (isResizing) {
+        let newWidth = cropStart.width;
+        let newHeight = cropStart.height;
+        let newLeft = cropStart.left;
+        let newTop = cropStart.top;
+        
+        if (resizeHandle.includes('e')) {
+          newWidth = Math.max(50, Math.min(img.offsetWidth - cropStart.left, cropStart.width + dx));
+        }
+        if (resizeHandle.includes('w')) {
+          newWidth = Math.max(50, cropStart.width - dx);
+          newLeft = Math.max(0, Math.min(cropStart.left + cropStart.width - 50, cropStart.left + dx));
+        }
+        if (resizeHandle.includes('s')) {
+          newHeight = Math.max(50, Math.min(img.offsetHeight - cropStart.top, cropStart.height + dy));
+        }
+        if (resizeHandle.includes('n')) {
+          newHeight = Math.max(50, cropStart.height - dy);
+          newTop = Math.max(0, Math.min(cropStart.top + cropStart.height - 50, cropStart.top + dy));
+        }
+        
+        // Apply aspect ratio if set
+        if (cropRatio !== 'free') {
+          const ratio = getRatioValue(cropRatio);
+          if (ratio) {
+            if (resizeHandle.includes('e') || resizeHandle.includes('w')) {
+              newHeight = newWidth / ratio;
+            } else {
+              newWidth = newHeight * ratio;
+            }
+            
+            // Adjust position if needed
+            if (resizeHandle.includes('w')) {
+              newLeft = cropStart.left + cropStart.width - newWidth;
+            }
+            if (resizeHandle.includes('n')) {
+              newTop = cropStart.top + cropStart.height - newHeight;
+            }
+          }
+        }
+        
+        // Ensure within bounds
+        if (newLeft + newWidth > img.offsetWidth) {
+          newWidth = img.offsetWidth - newLeft;
+        }
+        if (newTop + newHeight > img.offsetHeight) {
+          newHeight = img.offsetHeight - newTop;
+        }
+        
+        selection.style.width = newWidth + 'px';
+        selection.style.height = newHeight + 'px';
+        selection.style.left = newLeft + 'px';
+        selection.style.top = newTop + 'px';
+      }
+    }
+
+    function stopDragResize() {
+      isDragging = false;
+      isResizing = false;
+      resizeHandle = null;
+    }
+
+    function getRatioValue(ratio) {
+      switch(ratio) {
+        case '1:1': return 1;
+        case '4:3': return 4/3;
+        case '16:9': return 16/9;
+        case 'a4': return 210/297;
+        default: return null;
+      }
+    }
+
+    function setCropRatio(ratio) {
+      cropRatio = ratio;
+      document.querySelectorAll('.crop-preset').forEach(p => p.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      const selection = document.getElementById('cropSelection');
+      const img = document.getElementById('cropImage');
+      
+      let width, height;
+      const currentWidth = parseInt(selection.style.width);
+      const currentHeight = parseInt(selection.style.height);
+      
+      if (ratio === 'free') {
+        return;
+      }
+      
+      const ratioValue = getRatioValue(ratio);
+      if (ratioValue) {
+        // Keep width, adjust height
+        width = Math.min(currentWidth, img.offsetWidth * 0.8);
+        height = width / ratioValue;
+        
+        // If height is too large, adjust based on height instead
+        if (height > img.offsetHeight) {
+          height = img.offsetHeight * 0.8;
+          width = height * ratioValue;
+        }
+      } else {
+        width = img.offsetWidth * 0.8;
+        height = img.offsetHeight * 0.8;
+      }
+      
+      selection.style.width = width + 'px';
+      selection.style.height = height + 'px';
+      selection.style.left = ((img.offsetWidth - width) / 2) + 'px';
+      selection.style.top = ((img.offsetHeight - height) / 2) + 'px';
+    }
+
+    function applyCrop() {
+      if (currentCropIndex === null) return;
+      
+      const selection = document.getElementById('cropSelection');
+      const img = document.getElementById('cropImage');
+      
+      const scaleX = img.naturalWidth / img.offsetWidth;
+      const scaleY = img.naturalHeight / img.offsetHeight;
+      
+      const cropInfo = {
+        x: parseInt(selection.style.left) * scaleX,
+        y: parseInt(selection.style.top) * scaleY,
+        width: parseInt(selection.style.width) * scaleX,
+        height: parseInt(selection.style.height) * scaleY
+      };
+      
+      // Create cropped image
+      const canvas = document.createElement('canvas');
+      canvas.width = cropInfo.width;
+      canvas.height = cropInfo.height;
+      const ctx = canvas.getContext('2d');
+      
+      const sourceImg = new Image();
+      sourceImg.onload = () => {
+        ctx.drawImage(
+          sourceImg,
+          cropInfo.x, cropInfo.y, cropInfo.width, cropInfo.height,
+          0, 0, cropInfo.width, cropInfo.height
+        );
+        
+        images[currentCropIndex].crop = cropInfo;
+        images[currentCropIndex].croppedSrc = canvas.toDataURL('image/jpeg', 0.95);
+        
+        closeCropModal();
+        renderImages();
+      };
+      sourceImg.src = images[currentCropIndex].src;
+    }
+
+    async function convertToPDF() {
+      editorContainer.classList.remove('active');
+      actionBar.classList.remove('active');
+      progressContainer.classList.add('active');
+      
+      const paperSize = document.querySelector('input[name="paperSize"]:checked').value;
+      const orientation = document.querySelector('input[name="orientation"]:checked').value;
+      const filter = document.querySelector('input[name="filter"]:checked').value;
+      
+      try {
+        updateProgress(0, 'Initializing PDF...');
+        
+        let pdf;
+        let pageWidth, pageHeight;
+        
+        // Initialize PDF with first image or selected paper size
+        if (paperSize === 'original' || paperSize === 'fit') {
+          const firstImg = images[0];
+          let imgData = firstImg.crop ? firstImg.croppedSrc : firstImg.src;
+          
+          // Apply filter to first image
+          if (filter !== 'none') {
+            imgData = await processImageWithFilter(imgData, filter);
+          }
+          
+          const img = await loadImage(imgData);
+          
+          pageWidth = img.width * 0.264583; // px to mm
+          pageHeight = img.height * 0.264583;
+          
+          pdf = new jsPDF({
+            orientation: pageWidth > pageHeight ? 'landscape' : 'portrait',
+            unit: 'mm',
+            format: [pageWidth, pageHeight]
+          });
+        } else {
+          const size = paperSizes[paperSize];
+          let orient = orientation;
+          
+          if (orientation === 'auto') {
+            const firstImg = images[0];
+            orient = firstImg.width > firstImg.height ? 'landscape' : 'portrait';
+          }
+          
+          pageWidth = orient === 'portrait' ? size.width : size.height;
+          pageHeight = orient === 'portrait' ? size.height : size.width;
+          
+          pdf = new jsPDF({
+            orientation: orient === 'portrait' ? 'p' : 'l',
+            unit: 'mm',
+            format: paperSize
+          });
+        }
+        
+        // Add each image
+        for (let i = 0; i < images.length; i++) {
+          updateProgress((i / images.length) * 90, `Processing image ${i + 1} of ${images.length}...`);
+          
+          let imgData = images[i].crop ? images[i].croppedSrc : images[i].src;
+          
+          // Apply filter
+          if (filter !== 'none') {
+            imgData = await processImageWithFilter(imgData, filter);
+          }
+          
+          const img = await loadImage(imgData);
+          
+          if (i > 0) {
+            if (paperSize === 'original') {
+              const newWidth = img.width * 0.264583;
+              const newHeight = img.height * 0.264583;
+              pdf.addPage([newWidth, newHeight], newWidth > newHeight ? 'landscape' : 'portrait');
+            } else {
+              pdf.addPage();
+            }
+          }
+          
+          // Calculate dimensions
+          let imgWidth, imgHeight, x, y;
+          
+          if (paperSize === 'original') {
+            imgWidth = img.width * 0.264583;
+            imgHeight = img.height * 0.264583;
+            x = 0;
+            y = 0;
+          } else if (paperSize === 'fit') {
+            const pageRatio = pageWidth / pageHeight;
+            const imgRatio = img.width / img.height;
+            
+            if (imgRatio > pageRatio) {
+              imgWidth = pageWidth;
+              imgHeight = pageWidth / imgRatio;
+            } else {
+              imgHeight = pageHeight;
+              imgWidth = pageHeight * imgRatio;
+            }
+            
+            x = (pageWidth - imgWidth) / 2;
+            y = (pageHeight - imgHeight) / 2;
+          } else {
+            // Fit to page with margins
+            const margin = 10;
+            const availWidth = pageWidth - (margin * 2);
+            const availHeight = pageHeight - (margin * 2);
+            const imgRatio = img.width / img.height;
+            const availRatio = availWidth / availHeight;
+            
+            if (imgRatio > availRatio) {
+              imgWidth = availWidth;
+              imgHeight = availWidth / imgRatio;
+            } else {
+              imgHeight = availHeight;
+              imgWidth = availHeight * imgRatio;
+            }
+            
+            x = (pageWidth - imgWidth) / 2;
+            y = (pageHeight - imgHeight) / 2;
+          }
+          
+          pdf.addImage(imgData, 'JPEG', x, y, imgWidth, imgHeight);
+          
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
+        
+        updateProgress(95, 'Finalizing PDF...');
+        
+        // Save PDF
+        const pdfBlob = pdf.output('blob');
+        const url = URL.createObjectURL(pdfBlob);
+        
+        updateProgress(100, 'Complete!');
+        
+        setTimeout(() => {
+          showResult(url);
+        }, 500);
+        
+      } catch (error) {
+        console.error('PDF conversion error:', error);
+        alert('Error creating PDF: ' + error.message);
+        resetTool();
+      }
+    }
+
+    function loadImage(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+      });
+    }
+
+    function applyFilter(canvas, ctx, filter) {
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+
+      switch(filter) {
+        case 'soft':
+          // Soft filter: reduce contrast, slight blur effect
+          for (let i = 0; i < data.length; i += 4) {
+            data[i] = data[i] * 0.9 + 30;     // R
+            data[i + 1] = data[i + 1] * 0.9 + 30; // G
+            data[i + 2] = data[i + 2] * 0.9 + 30; // B
+          }
+          break;
+
+        case 'minimalist':
+          // Minimalist: desaturate and increase brightness
+          for (let i = 0; i < data.length; i += 4) {
+            const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+            const factor = 0.3; // Slight color retention
+            data[i] = avg * (1 - factor) + data[i] * factor + 20;
+            data[i + 1] = avg * (1 - factor) + data[i + 1] * factor + 20;
+            data[i + 2] = avg * (1 - factor) + data[i + 2] * factor + 20;
+          }
+          break;
+
+        case 'clear':
+          // Clear: increase brightness and slight saturation boost
+          for (let i = 0; i < data.length; i += 4) {
+            data[i] = Math.min(255, data[i] * 1.15 + 15);
+            data[i + 1] = Math.min(255, data[i + 1] * 1.15 + 15);
+            data[i + 2] = Math.min(255, data[i + 2] * 1.15 + 15);
+          }
+          break;
+
+        case 'vivid':
+          // Vivid: boost saturation and contrast
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            const avg = (r + g + b) / 3;
+            
+            data[i] = Math.min(255, avg + (r - avg) * 1.5);
+            data[i + 1] = Math.min(255, avg + (g - avg) * 1.5);
+            data[i + 2] = Math.min(255, avg + (b - avg) * 1.5);
+          }
+          break;
+
+        case 'warm':
+          // Warm: add warm tones (more red/yellow)
+          for (let i = 0; i < data.length; i += 4) {
+            data[i] = Math.min(255, data[i] * 1.1 + 20);     // R
+            data[i + 1] = Math.min(255, data[i + 1] * 1.05 + 10); // G
+            data[i + 2] = Math.min(255, data[i + 2] * 0.95); // B
+          }
+          break;
+
+        case 'none':
+        default:
+          // No filter
+          return;
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+    }
+
+    function processImageWithFilter(imgSrc, filter) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          
+          ctx.drawImage(img, 0, 0);
+          
+          if (filter !== 'none') {
+            applyFilter(canvas, ctx, filter);
+          }
+          
+          resolve(canvas.toDataURL('image/jpeg', 0.95));
+        };
+        img.onerror = reject;
+        img.src = imgSrc;
+      });
+    }
+
+    function updateProgress(percent, status) {
+      progressFill.style.width = percent + '%';
+      progressPercent.textContent = Math.floor(percent) + '%';
+      progressStatus.textContent = status;
+    }
+
+    function showResult(pdfUrl) {
+      progressContainer.classList.remove('active');
+      resultContainer.classList.add('active');
+      document.getElementById('imageCount').textContent = images.length + ' image' + (images.length !== 1 ? 's' : '');
+      
+      downloadBtn.href = pdfUrl;
+      downloadBtn.download = 'converted-images.pdf';
+    }
+
+    function resetTool() {
+      images = [];
+      currentCropIndex = null;
+      uploadSection.style.display = 'block';
+      editorContainer.classList.remove('active');
+      actionBar.classList.remove('active');
+      progressContainer.classList.remove('active');
+      resultContainer.classList.remove('active');
+      fileInput.value = '';
+      
+      if (downloadBtn.href && downloadBtn.href.startsWith('blob:')) {
+        URL.revokeObjectURL(downloadBtn.href);
+      }
+    }
+
+    resetBtn.addEventListener('click', resetTool);
+
+    // Cleanup
+    window.addEventListener('beforeunload', () => {
+      if (downloadBtn.href && downloadBtn.href.startsWith('blob:')) {
+        URL.revokeObjectURL(downloadBtn.href);
+      }
+    });
+  </script>
+</body>
+</html>
