@@ -7,27 +7,47 @@
   <meta name="description" content="Add custom watermarks to PDF documents. Control angle, opacity, size, and layering. Free, private, browser-based tool.">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap');
     
     :root {
+      --primary:      #000000;
+      --primary-h:    #222222;
+      --primary-light: #F5F5F5;
+      --accent:       #000000;
+      --accent-light: rgba(0, 0, 0, 0.05);
+      --bg:           #FFFFFF;
+      --bg-soft:      #F9F9F9;
+      --text:         #000000;
+      --text-heading: #000000;
+      --text-sub:     #222222;
+      --text-muted:   #444444;
+      --border-light: rgba(0, 0, 0, 0.1);
+      --font-body:    'Inter', sans-serif;
+      --font-heading: 'Outfit', sans-serif;
+      --radius-sm: 4px; --radius-md: 8px; --radius-lg: 12px; --radius-xl: 20px;
+      --shadow-sm:   0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-soft: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+      --shadow-xl:   0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      --transition-base:   all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-smooth: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
       --pure-white: #ffffff;
-      --off-white: #fafafa;
-      --light-gray: #f5f5f5;
-      --medium-gray: #e5e5e5;
-      --dark-gray: #737373;
-      --light-black: #404040;
-      --black: #171717;
+      --off-white: #FFFFE3;
+      --light-gray: #CBCBCB;
+      --medium-gray: rgba(55, 65, 81, 0.1);
+      --dark-gray: #64748B;
+      --light-black: #374151;
+      --black: #111827;
       --pure-black: #000000;
-      --accent: #3b82f6;
-      --accent-light: #eff6ff;
-      --success: #22c55e;
-      --warning: #f59e0b;
+      --accent-legacy: #374151;
+      --success: #6D8196;
+      --warning: #374151;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Inter', system-ui, sans-serif;
       background: var(--pure-white);
       color: var(--black);
       line-height: 1.6;
@@ -36,980 +56,345 @@
       display: flex;
       flex-direction: column;
     }
+    h1, h2, h3, .logo { font-family: var(--font-heading); color: var(--text-heading); }
 
     header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(255, 255, 255, 0.8);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      backdrop-filter: blur(20px) saturate(180%);
       border-bottom: 1px solid var(--medium-gray);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
-
+    header.scrolled { background: rgba(255,255,255,0.95); padding: 0.25rem 0; box-shadow: var(--shadow-sm); }
     .header-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 1.25rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .logo {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--pure-black);
-      letter-spacing: -0.03em;
-      text-decoration: none;
-    }
-
-    .logo span {
-      font-weight: 400;
-      color: var(--dark-gray);
-    }
-
-    .back-link {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--light-black);
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 0.9375rem;
-      transition: color 0.2s;
-    }
-
-    .back-link:hover {
-      color: var(--pure-black);
-    }
-
-    main {
-      flex: 1;
-      padding: 8rem 2rem 4rem;
-      max-width: 1200px;
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    .tool-header {
-      text-align: center;
-      margin-bottom: 3rem;
-    }
-
-    .tool-icon {
-      width: 80px;
-      height: 80px;
-      background: var(--off-white);
-      border-radius: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1.5rem;
-      border: 1px solid var(--medium-gray);
-    }
-
-    .tool-icon svg {
-      width: 40px;
-      height: 40px;
-      stroke-width: 1.5;
-    }
-
-    .tool-header h1 {
-      font-size: 2rem;
-      font-weight: 800;
-      color: var(--pure-black);
-      margin-bottom: 0.75rem;
-      letter-spacing: -0.02em;
-    }
-
-    .tool-header p {
-      color: var(--dark-gray);
-      font-size: 1.125rem;
-    }
-
-    .upload-section {
-      max-width: 800px;
-      margin: 0 auto 2rem;
-    }
-
-    .tool-container {
-      background: var(--off-white);
-      border-radius: 24px;
-      padding: 2.5rem;
-      border: 1px solid var(--medium-gray);
-    }
-
-    .drop-zone {
-      background: var(--pure-white);
-      border: 2px dashed var(--medium-gray);
-      border-radius: 16px;
-      padding: 3rem 2rem;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .drop-zone:hover, .drop-zone.dragover {
-      border-color: var(--pure-black);
-      background: var(--light-gray);
-    }
-
-    .drop-zone-icon {
-      width: 64px;
-      height: 64px;
-      background: var(--off-white);
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1rem;
-      border: 1px solid var(--medium-gray);
-    }
-
-    .drop-zone-icon svg {
-      width: 32px;
-      height: 32px;
-      color: var(--light-black);
-    }
-
-    .drop-zone h3 {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: var(--pure-black);
-      margin-bottom: 0.5rem;
-    }
-
-    .drop-zone p {
-      color: var(--dark-gray);
-      font-size: 0.9375rem;
-    }
-
-    .file-input {
-      display: none;
-    }
-
-    .editor-container {
-      display: none;
-      animation: slideIn 0.4s ease;
-    }
-
-    .editor-container.active {
-      display: block;
-    }
-
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(-10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .editor-layout {
-      display: grid;
-      grid-template-columns: 320px 1fr;
-      gap: 2rem;
-    }
-
-    .settings-panel {
-      background: var(--off-white);
-      border: 1px solid var(--medium-gray);
-      border-radius: 16px;
-      padding: 1.5rem;
-      height: fit-content;
-    }
-
-    .settings-section {
-      margin-bottom: 1.5rem;
-    }
-
-    .settings-section:last-child {
-      margin-bottom: 0;
-    }
-
-    .settings-title {
-      font-size: 0.875rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--light-black);
-      margin-bottom: 1rem;
-    }
-
-    .input-group {
-      margin-bottom: 1rem;
-    }
-
-    .input-label {
-      display: block;
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: var(--pure-black);
-      margin-bottom: 0.5rem;
-    }
-
-    .text-input {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      border: 1px solid var(--medium-gray);
-      border-radius: 10px;
-      font-size: 0.9375rem;
-      font-family: inherit;
-      transition: all 0.2s;
-    }
-
-    .text-input:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-light);
-    }
-
-    .font-selector {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.5rem;
-    }
-
-    .font-option {
-      position: relative;
-    }
-
-    .font-option input {
-      position: absolute;
-      opacity: 0;
-    }
-
-    .font-option label {
-      display: block;
-      padding: 0.625rem;
-      background: var(--pure-white);
-      border: 2px solid var(--medium-gray);
-      border-radius: 8px;
-      text-align: center;
-      cursor: pointer;
-      font-size: 0.875rem;
-      transition: all 0.2s;
-    }
-
-    .font-option input:checked + label {
-      border-color: var(--accent);
-      background: var(--accent-light);
-      color: var(--accent);
-    }
-
-    .color-picker-wrapper {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-
-    .color-option {
-      position: relative;
-    }
-
-    .color-option input {
-      position: absolute;
-      opacity: 0;
-    }
-
-    .color-option label {
-      display: block;
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
-      cursor: pointer;
-      border: 3px solid transparent;
-      transition: all 0.2s;
-      position: relative;
-    }
-
-    .color-option input:checked + label {
-      border-color: var(--pure-black);
-      transform: scale(1.1);
-    }
-
-    .color-option input:checked + label::after {
-      content: '✓';
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--pure-white);
-      font-size: 14px;
-      font-weight: bold;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    }
-
-    .angle-options {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.5rem;
-    }
-
-    .angle-option {
-      position: relative;
-    }
-
-    .angle-option input {
-      position: absolute;
-      opacity: 0;
-    }
-
-    .angle-option label {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.25rem;
-      padding: 0.75rem 0.5rem;
-      background: var(--pure-white);
-      border: 2px solid var(--medium-gray);
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .angle-option input:checked + label {
-      border-color: var(--accent);
-      background: var(--accent-light);
-    }
-
-    .angle-icon {
-      width: 32px;
-      height: 32px;
-      color: var(--light-black);
-      transition: all 0.2s;
-    }
-
-    .angle-option input:checked + label .angle-icon {
-      color: var(--accent);
-    }
-
-    .angle-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--pure-black);
-    }
-
-    .slider-container {
-      margin-top: 0.5rem;
-    }
-
-    .slider-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 0.5rem;
-      font-size: 0.8125rem;
-    }
-
-    .slider-value {
-      font-weight: 600;
-      color: var(--accent);
-    }
-
-    .slider {
-      width: 100%;
-      height: 6px;
-      border-radius: 3px;
-      background: var(--medium-gray);
-      outline: none;
-      -webkit-appearance: none;
-    }
-
-    .slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: var(--accent);
-      cursor: pointer;
-      border: 2px solid var(--pure-white);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .slider::-moz-range-thumb {
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: var(--accent);
-      cursor: pointer;
-      border: 2px solid var(--pure-white);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .layer-options {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .layer-option {
-      flex: 1;
-      position: relative;
-    }
-
-    .layer-option input {
-      position: absolute;
-      opacity: 0;
-    }
-
-    .layer-option label {
-      display: block;
-      padding: 0.75rem 0.5rem;
-      background: var(--pure-white);
-      border: 2px solid var(--medium-gray);
-      border-radius: 8px;
-      text-align: center;
-      cursor: pointer;
-      font-size: 0.812rem;
-      transition: all 0.2s;
-    }
-
-    .layer-option input:checked + label {
-      border-color: var(--accent);
-      background: var(--accent-light);
-      color: var(--accent);
-    }
-
-    .preview-panel {
-      background: var(--off-white);
-      border: 1px solid var(--medium-gray);
-      border-radius: 16px;
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .preview-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1rem;
-    }
-
-    .preview-title {
-      font-size: 0.875rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--light-black);
-    }
-
-    .preview-badge {
-      padding: 0.25rem 0.75rem;
-      background: var(--accent-light);
-      color: var(--accent);
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-
-    .preview-canvas-container {
-      flex: 1;
-      background: var(--light-gray);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 500px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .preview-page {
-      width: 400px;
-      height: 566px;
-      background: var(--pure-white);
-      border-radius: 8px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .preview-content {
-      position: absolute;
-      inset: 40px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .preview-text-line {
-      height: 8px;
-      background: var(--medium-gray);
-      border-radius: 4px;
-    }
-
+      display: flex; align-items: center; justify-content: space-between;
+      height: 80px; max-width: 1400px; margin: 0 auto; padding: 0 2rem;
+      transition: height 0.4s ease;
+    }
+    header.scrolled .header-container { height: 70px; }
+    .logo { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; font-size: 1.5rem; font-weight: 800; color: #000000; letter-spacing: -0.03em; z-index: 1001; }
+    .logo span { font-weight: 400; color: var(--text-muted); }
+
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--bg-soft); border-radius: 10px; border: 2px solid var(--bg); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    nav { display: flex; align-items: center; gap: 2.5rem; }
+    .nav-list { display: flex; align-items: center; gap: 2.5rem; list-style: none; }
+    .nav-item { position: relative; }
+    .nav-link { text-decoration: none; font-size: 0.9375rem; font-weight: 500; color: var(--light-black); transition: color 0.3s ease; display: flex; align-items: center; gap: 0.25rem; padding: 0.5rem 0; }
+    .nav-link:hover, .nav-item.active .nav-link { color: var(--primary); }
+    .nav-link svg { transition: transform 0.3s ease; }
+    .nav-item:hover .nav-link svg { transform: rotate(180deg); }
+
+    .dropdown-menu {
+      position: absolute; top: 100%; left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: var(--pure-white); border: 1px solid var(--medium-gray);
+      border-radius: 18px; padding: 0.75rem; min-width: 680px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+      opacity: 0; visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.25rem;
+    }
+    .nav-item:hover .dropdown-menu { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+    .dropdown-item { display: flex; align-items: center; gap: 0.875rem; padding: 0.75rem 1rem; text-decoration: none; color: var(--dark-gray); border-radius: 12px; transition: all 0.2s ease; font-size: 0.875rem; font-weight: 500; }
+    .dropdown-item:hover { background: var(--primary-light); color: var(--primary); }
+    .dropdown-item svg { width: 18px; height: 18px; stroke-width: 2; }
+    .dropdown-item-info { display: flex; flex-direction: column; }
+    .dropdown-item-title { font-weight: 600; color: var(--pure-black); font-size: 0.9375rem; }
+    .dropdown-item-desc { font-size: 0.75rem; color: var(--dark-gray); }
+    .dropdown-item:hover .dropdown-item-title { color: var(--primary); }
+
+    .menu-toggle { display: none; background: var(--off-white); border: 1px solid var(--medium-gray); padding: 0.625rem; border-radius: 12px; cursor: pointer; color: var(--pure-black); transition: all 0.2s; z-index: 1001; }
+    .menu-toggle:hover { background: var(--medium-gray); }
+
+    .mobile-menu { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--pure-white); z-index: 2000; padding: 1.5rem; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+    .mobile-menu.active { transform: translateX(0); }
+    .mobile-menu-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .mobile-nav { display: flex; flex-direction: column; gap: 0.5rem; }
+    .mobile-nav-link { font-size: 1.15rem; font-weight: 600; color: var(--text); text-decoration: none; display: flex; align-items: center; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid var(--border-light); cursor: pointer; }
+    .mobile-tools-grid { display: none; grid-template-columns: 1fr 1fr; gap: 0.75rem; padding: 1rem 0 0.5rem; }
+    .mobile-tool-item { display: flex; flex-direction: column; gap: 0.25rem; padding: 0.875rem 1rem; background: var(--bg-soft); border-radius: var(--radius-md); text-decoration: none; border: 1px solid var(--border-light); }
+    .mobile-tool-item span { font-size: 0.875rem; font-weight: 600; color: var(--text); }
+    .mobile-tool-item.view-all { background: var(--primary-light); border-color: var(--primary); }
+    .mobile-tool-item.view-all span { color: var(--primary); }
+
+    @media (max-width: 992px) { nav { display: none; } .menu-toggle { display: block; } }
+
+    main { flex: 1; padding: 8rem 2rem 4rem; max-width: 1200px; margin: 0 auto; width: 100%; }
+    @media (max-width: 768px) { main { padding: 6rem 1.5rem 3rem; } }
+
+    /* ── TOOL HEADER — centered, no icon ── */
+    .tool-header { text-align: center; margin-bottom: 3rem; }
+    .tool-header h1 { font-size: 2rem; font-weight: 800; color: var(--pure-black); margin-bottom: 0.75rem; letter-spacing: -0.02em; text-align: center; }
+    @media (max-width: 640px) { .tool-header h1 { font-size: 1.75rem; } }
+    .tool-header p { color: var(--dark-gray); font-size: 1.125rem; text-align: center; }
+    @media (max-width: 640px) { .tool-header p { font-size: 1rem; } }
+
+    /* ── TRUST BAR ── */
+    .trust-bar { display: inline-flex; align-items: center; gap: 0.75rem; background: #f9f9f9; border: 1px solid rgba(0,0,0,0.1); border-radius: 100px; padding: 0.5rem 1.25rem; margin: 0.75rem auto 1.25rem; flex-wrap: wrap; justify-content: center; }
+    .trust-badge { display: inline-flex; align-items: center; gap: 0.375rem; font-size: 0.78rem; font-weight: 600; color: #222; letter-spacing: 0.01em; white-space: nowrap; }
+    .trust-badge svg { width: 13px; height: 13px; color: #000; flex-shrink: 0; }
+    .trust-divider { width: 1px; height: 14px; background: rgba(0,0,0,0.15); display: inline-block; flex-shrink: 0; }
+
+    .upload-section { max-width: 800px; margin: 0 auto 2rem; }
+    .tool-container { background: var(--off-white); border-radius: var(--radius-lg); padding: 2.5rem; border: 1px solid var(--medium-gray); box-shadow: var(--shadow-sm); }
+    @media (max-width: 640px) { .tool-container { padding: 1.5rem; border-radius: 16px; } }
+
+    .drop-zone { background: var(--pure-white); border: 2px dashed var(--medium-gray); border-radius: var(--radius-md); padding: 3rem 2rem; text-align: center; cursor: pointer; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .drop-zone:hover, .drop-zone.dragover { border-color: var(--primary); background: var(--primary-light); transform: scale(1.01); }
+    .drop-zone-icon { width: 64px; height: 64px; background: var(--off-white); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; border: 1px solid var(--medium-gray); }
+    .drop-zone-icon svg { width: 32px; height: 32px; color: var(--light-black); }
+    .drop-zone h3 { font-size: 1.125rem; font-weight: 600; color: var(--pure-black); margin-bottom: 0.5rem; }
+    .drop-zone p { color: var(--dark-gray); font-size: 0.9375rem; }
+    .file-input { display: none; }
+
+    .editor-container { display: none; animation: slideIn 0.4s ease; }
+    .editor-container.active { display: block; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .editor-layout { display: grid; grid-template-columns: 320px 1fr; gap: 2rem; }
+    @media (max-width: 1024px) { .editor-layout { grid-template-columns: 1fr; } .settings-panel { order: 2; } .preview-panel { order: 1; } }
+
+    .settings-panel { background: var(--off-white); border: 1px solid var(--medium-gray); border-radius: 16px; padding: 1.5rem; height: fit-content; }
+    .settings-section { margin-bottom: 1.5rem; }
+    .settings-section:last-child { margin-bottom: 0; }
+    .settings-title { font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--light-black); margin-bottom: 1rem; }
+    .input-group { margin-bottom: 1rem; }
+    .input-label { display: block; font-size: 0.875rem; font-weight: 600; color: var(--pure-black); margin-bottom: 0.5rem; }
+    .text-input { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--medium-gray); border-radius: 10px; font-size: 0.9375rem; font-family: inherit; transition: all 0.2s; }
+    .text-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+
+    .font-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+    .font-option { position: relative; }
+    .font-option input { position: absolute; opacity: 0; }
+    .font-option label { display: block; padding: 0.625rem; background: var(--pure-white); border: 2px solid var(--medium-gray); border-radius: 8px; text-align: center; cursor: pointer; font-size: 0.875rem; transition: all 0.2s; }
+    .font-option input:checked + label { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+
+    .color-picker-wrapper { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .color-swatch-gray { background: #9ca3af; }
+    .color-swatch-red { background: #ef4444; }
+    .color-swatch-blue { background: #3b82f6; }
+    .color-swatch-green { background: #22c55e; }
+    .color-swatch-black { background: #171717; }
+    .color-swatch-orange { background: #f97316; }
+    .color-option { position: relative; }
+    .color-option input { position: absolute; opacity: 0; }
+    .color-option label { display: block; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; border: 3px solid transparent; transition: all 0.2s; position: relative; }
+    .color-option input:checked + label { border-color: var(--pure-black); transform: scale(1.1); }
+    .color-option input:checked + label::after { content: '✓'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--pure-white); font-size: 14px; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+
+    .angle-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+    .angle-option { position: relative; }
+    .angle-option input { position: absolute; opacity: 0; }
+    .angle-option label { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; padding: 0.75rem 0.5rem; background: var(--pure-white); border: 2px solid var(--medium-gray); border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+    .angle-option input:checked + label { border-color: var(--accent); background: var(--accent-light); }
+    .angle-icon { width: 32px; height: 32px; color: var(--light-black); transition: all 0.2s; }
+    .angle-option input:checked + label .angle-icon { color: var(--accent); }
+    .angle-label { font-size: 0.75rem; font-weight: 600; color: var(--pure-black); }
+    .angle-30 { transform: rotate(30deg); }
+    .angle-45 { transform: rotate(45deg); }
+    .angle-90 { transform: rotate(90deg); }
+    .angle-135 { transform: rotate(135deg); }
+    .angle-180 { transform: rotate(180deg); }
+
+    .slider-container { margin-top: 0.5rem; }
+    .slider-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.8125rem; }
+    .slider-value { font-weight: 600; color: var(--accent); }
+    .slider { width: 100%; height: 6px; border-radius: 3px; background: var(--medium-gray); outline: none; -webkit-appearance: none; appearance: none; }
+    .slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid var(--pure-white); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .slider::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid var(--pure-white); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+    .layer-options { display: flex; gap: 0.5rem; }
+    .layer-option { flex: 1; position: relative; }
+    .layer-option input { position: absolute; opacity: 0; }
+    .layer-option label { display: block; padding: 0.75rem 0.5rem; background: var(--pure-white); border: 2px solid var(--medium-gray); border-radius: 8px; text-align: center; cursor: pointer; font-size: 0.812rem; transition: all 0.2s; }
+    .layer-option input:checked + label { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+
+    .preview-panel { background: var(--off-white); border: 1px solid var(--medium-gray); border-radius: 16px; padding: 1.5rem; display: flex; flex-direction: column; }
+    .preview-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .preview-title { font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--light-black); }
+    .preview-badge { padding: 0.25rem 0.75rem; background: var(--accent-light); color: var(--accent); border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+    .preview-canvas-container { flex: 1; background: var(--light-gray); border-radius: 12px; display: flex; align-items: center; justify-content: center; min-height: 500px; position: relative; overflow: hidden; }
+    .preview-page { width: 400px; height: 566px; background: var(--pure-white); border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); position: relative; overflow: hidden; }
+    .preview-content { position: absolute; inset: 40px; display: flex; flex-direction: column; gap: 12px; z-index: 5; }
+    .preview-text-line { height: 8px; background: var(--medium-gray); border-radius: 4px; }
     .preview-text-line.short { width: 60%; }
     .preview-text-line.medium { width: 80%; }
-    .preview-text-line.heading {
-      height: 16px;
-      width: 40%;
-      margin-bottom: 8px;
-    }
+    .preview-text-line.heading { height: 16px; width: 40%; margin-bottom: 8px; }
 
-    .watermark-layer {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-    }
+    .watermark-layer { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+    .watermark-layer.behind { z-index: 1; }
+    .watermark-layer.front { z-index: 10; }
+    .watermark-text { font-size: 48px; font-weight: 700; white-space: nowrap; -webkit-user-select: none; user-select: none; transform-origin: center; }
 
-    .watermark-layer.behind {
-      z-index: 1;
-    }
+    .page-indicator { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--medium-gray); }
+    .page-btn { width: 40px; height: 40px; background: var(--pure-white); border: 1px solid var(--medium-gray); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--light-black); transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .page-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); background: var(--primary-light); transform: scale(1.1); }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .page-info { font-size: 0.875rem; color: var(--light-black); font-weight: 500; }
 
-    .watermark-layer.front {
-      z-index: 10;
-    }
+    .action-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--pure-white); border-top: 1px solid var(--medium-gray); padding: 1.25rem 2rem; display: flex; justify-content: center; gap: 1rem; z-index: 100; transform: translateY(100%); transition: transform 0.3s; }
+    .action-bar.active { transform: translateY(0); }
 
-    .watermark-text {
-      font-size: 48px;
-      font-weight: 700;
-      white-space: nowrap;
-      user-select: none;
-      transform-origin: center;
-    }
+    .btn-secondary { padding: 0.875rem 1.5rem; background: var(--pure-white); border: 1px solid var(--medium-gray); border-radius: 10px; font-size: 0.9375rem; font-weight: 600; color: var(--light-black); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.5rem; }
+    .btn-secondary:hover { border-color: var(--pure-black); color: var(--pure-black); }
+    .btn-primary { padding: 0.875rem 2rem; background: var(--pure-black); color: var(--pure-white); border: none; border-radius: 10px; font-size: 0.9375rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: all 0.3s; }
+    .btn-primary:hover:not(:disabled) { background: var(--light-black); transform: translateY(-2px); }
+    .btn-primary:disabled { background: var(--medium-gray); color: var(--dark-gray); cursor: not-allowed; transform: none; }
 
-    .page-indicator {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 1rem;
-      margin-top: 1rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--medium-gray);
-    }
+    .file-item { background: var(--pure-white); border: 1px solid var(--medium-gray); border-radius: 12px; padding: 1rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; animation: slideIn 0.3s ease; }
+    .file-info { display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 0; }
+    .file-icon { width: 40px; height: 40px; background: var(--off-white); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .file-icon svg { width: 20px; height: 20px; color: var(--light-black); }
+    .file-details { min-width: 0; }
+    .file-name { font-weight: 600; color: var(--pure-black); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 0.25rem; }
+    .file-size { font-size: 0.875rem; color: var(--dark-gray); }
+    .btn-icon { width: 36px; height: 36px; border: 1px solid var(--medium-gray); background: var(--pure-white); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: var(--light-black); }
+    .btn-icon:hover { border-color: var(--pure-black); color: var(--pure-black); }
+    .btn-icon.remove:hover { background: #fef2f2; border-color: #ef4444; color: #ef4444; }
 
-    .page-btn {
-      width: 36px;
-      height: 36px;
-      background: var(--pure-white);
-      border: 1px solid var(--medium-gray);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      color: var(--light-black);
-      transition: all 0.2s;
-    }
+    .progress-container { display: none; max-width: 600px; margin: 2rem auto; background: var(--pure-white); border: 1px solid var(--medium-gray); border-radius: 16px; padding: 2rem; text-align: center; }
+    .progress-container.active { display: block; }
+    .progress-header { display: flex; justify-content: space-between; margin-bottom: 0.75rem; font-size: 0.875rem; color: var(--light-black); }
+    .progress-bar { height: 8px; background: var(--medium-gray); border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--pure-black); width: 0%; transition: width 0.3s; border-radius: 4px; }
 
-    .page-btn:hover:not(:disabled) {
-      border-color: var(--pure-black);
-      color: var(--pure-black);
-    }
+    .result-container { display: none; max-width: 600px; margin: 2rem auto; background: var(--pure-white); border: 1px solid var(--medium-gray); border-radius: 16px; padding: 2.5rem; text-align: center; animation: slideIn 0.4s ease; }
+    .result-container.active { display: block; }
+    .result-icon { width: 64px; height: 64px; background: #f0fdf4; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
+    .result-icon svg { width: 32px; height: 32px; color: var(--success); }
+    .result-container h3 { font-size: 1.25rem; font-weight: 700; color: var(--pure-black); margin-bottom: 0.5rem; }
+    .result-stats { color: var(--dark-gray); margin-bottom: 1.5rem; font-size: 0.9375rem; }
+    .btn-download { display: inline-flex; align-items: center; gap: 0.75rem; background: var(--success); color: var(--pure-white); padding: 1rem 2rem; border-radius: var(--radius-md); text-decoration: none; font-weight: 600; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 10px 20px -5px rgba(34,197,94,0.3); }
+    .btn-download:hover { background: #16a34a; transform: translateY(-2px) scale(1.02); box-shadow: 0 15px 30px -10px rgba(34,197,94,0.4); }
+    .btn-reset { display: block; margin: 1rem auto 0; background: none; border: none; color: var(--dark-gray); font-size: 0.9375rem; cursor: pointer; text-decoration: underline; }
+    .btn-reset:hover { color: var(--pure-black); }
 
-    .page-btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
+    .info-box { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; background: var(--pure-white); border-radius: 10px; margin-bottom: 1.5rem; max-width: 800px; margin-left: auto; margin-right: auto; border: 1px solid var(--medium-gray); }
+    .info-box svg { width: 20px; height: 20px; color: var(--dark-gray); flex-shrink: 0; margin-top: 0.125rem; }
+    .info-box p { font-size: 0.875rem; color: var(--dark-gray); line-height: 1.6; }
 
-    .page-info {
-      font-size: 0.875rem;
-      color: var(--light-black);
-      font-weight: 500;
-    }
-
-    .action-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--pure-white);
-      border-top: 1px solid var(--medium-gray);
-      padding: 1.25rem 2rem;
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      z-index: 100;
-      transform: translateY(100%);
-      transition: transform 0.3s;
-    }
-
-    .action-bar.active {
-      transform: translateY(0);
-    }
-
-    .btn-secondary {
-      padding: 0.875rem 1.5rem;
-      background: var(--pure-white);
-      border: 1px solid var(--medium-gray);
-      border-radius: 10px;
-      font-size: 0.9375rem;
-      font-weight: 600;
-      color: var(--light-black);
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .btn-secondary:hover {
-      border-color: var(--pure-black);
-      color: var(--pure-black);
-    }
-
-    .btn-primary {
-      padding: 0.875rem 2rem;
-      background: var(--pure-black);
-      color: var(--pure-white);
-      border: none;
-      border-radius: 10px;
-      font-size: 0.9375rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      transition: all 0.3s;
-    }
-
-    .btn-primary:hover:not(:disabled) {
-      background: var(--light-black);
-      transform: translateY(-2px);
-    }
-
-    .btn-primary:disabled {
-      background: var(--medium-gray);
-      color: var(--dark-gray);
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .file-item {
-      background: var(--pure-white);
-      border: 1px solid var(--medium-gray);
-      border-radius: 12px;
-      padding: 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 0.75rem;
-      animation: slideIn 0.3s ease;
-    }
-
-    .file-info {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex: 1;
-      min-width: 0;
-    }
-
-    .file-icon {
-      width: 40px;
-      height: 40px;
-      background: var(--off-white);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .file-icon svg {
-      width: 20px;
-      height: 20px;
-      color: var(--light-black);
-    }
-
-    .file-details {
-      min-width: 0;
-    }
-
-    .file-name {
-      font-weight: 600;
-      color: var(--pure-black);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-bottom: 0.25rem;
-    }
-
-    .file-size {
-      font-size: 0.875rem;
-      color: var(--dark-gray);
-    }
-
-    .btn-icon {
-      width: 36px;
-      height: 36px;
-      border: 1px solid var(--medium-gray);
-      background: var(--pure-white);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s;
-      color: var(--light-black);
-    }
-
-    .btn-icon:hover {
-      border-color: var(--pure-black);
-      color: var(--pure-black);
-    }
-
-    .btn-icon.remove:hover {
-      background: #fef2f2;
-      border-color: #ef4444;
-      color: #ef4444;
-    }
-
-    .progress-container {
-      display: none;
-      max-width: 600px;
-      margin: 2rem auto;
-      background: var(--pure-white);
-      border: 1px solid var(--medium-gray);
-      border-radius: 16px;
-      padding: 2rem;
-      text-align: center;
-    }
-
-    .progress-container.active {
-      display: block;
-    }
-
-    .progress-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 0.75rem;
-      font-size: 0.875rem;
-      color: var(--light-black);
-    }
-
-    .progress-bar {
-      height: 8px;
-      background: var(--medium-gray);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: var(--pure-black);
-      width: 0%;
-      transition: width 0.3s;
-      border-radius: 4px;
-    }
-
-    .result-container {
-      display: none;
-      max-width: 600px;
-      margin: 2rem auto;
-      background: var(--pure-white);
-      border: 1px solid var(--medium-gray);
-      border-radius: 16px;
-      padding: 2.5rem;
-      text-align: center;
-      animation: slideIn 0.4s ease;
-    }
-
-    .result-container.active {
-      display: block;
-    }
-
-    .result-icon {
-      width: 64px;
-      height: 64px;
-      background: #f0fdf4;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1rem;
-    }
-
-    .result-icon svg {
-      width: 32px;
-      height: 32px;
-      color: var(--success);
-    }
-
-    .result-container h3 {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--pure-black);
-      margin-bottom: 0.5rem;
-    }
-
-    .result-stats {
-      color: var(--dark-gray);
-      margin-bottom: 1.5rem;
-      font-size: 0.9375rem;
-    }
-
-    .btn-download {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: var(--success);
-      color: var(--pure-white);
-      padding: 0.875rem 1.5rem;
-      border-radius: 10px;
-      text-decoration: none;
-      font-weight: 600;
-      transition: all 0.3s;
-    }
-
-    .btn-download:hover {
-      background: #16a34a;
-      transform: translateY(-2px);
-    }
-
-    .btn-reset {
-      display: block;
-      margin: 1rem auto 0;
-      background: none;
-      border: none;
-      color: var(--dark-gray);
-      font-size: 0.9375rem;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-
-    .btn-reset:hover {
-      color: var(--pure-black);
-    }
-
-    .info-box {
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-      padding: 1rem;
-      background: var(--pure-white);
-      border-radius: 10px;
-      margin-bottom: 1.5rem;
-      max-width: 800px;
-      margin-left: auto;
-      margin-right: auto;
-      border: 1px solid var(--medium-gray);
-    }
-
-    .info-box svg {
-      width: 20px;
-      height: 20px;
-      color: var(--dark-gray);
-      flex-shrink: 0;
-      margin-top: 0.125rem;
-    }
-
-    .info-box p {
-      font-size: 0.875rem;
-      color: var(--dark-gray);
-      line-height: 1.6;
-    }
-
-    footer {
-      background: var(--off-white);
-      border-top: 1px solid var(--medium-gray);
-      padding: 2rem;
-      text-align: center;
-    }
-
-    footer p {
-      color: var(--dark-gray);
-      font-size: 0.875rem;
-    }
+    footer { background: var(--off-white); border-top: 1px solid var(--medium-gray); padding: 2rem; text-align: center; }
+    footer p { color: var(--dark-gray); font-size: 0.875rem; }
 
     @media (max-width: 968px) {
-      .editor-layout {
-        grid-template-columns: 1fr;
-      }
-
-      .settings-panel {
-        order: 2;
-      }
-
-      .preview-panel {
-        order: 1;
-        min-height: 400px;
-      }
-
-      .preview-page {
-        width: 300px;
-        height: 425px;
-      }
-
-      .watermark-text {
-        font-size: 36px;
-      }
+      .editor-layout { grid-template-columns: 1fr; }
+      .settings-panel { order: 2; }
+      .preview-panel { order: 1; min-height: 400px; }
+      .preview-page { width: 300px; height: 425px; }
+      .watermark-text { font-size: 36px; }
     }
-
     @media (max-width: 640px) {
-      main {
-        padding: 7rem 1rem 6rem;
-      }
-
-      .tool-container {
-        padding: 1.5rem;
-      }
-
-      .action-bar {
-        padding: 1rem;
-        flex-direction: column;
-      }
-
-      .btn-secondary, .btn-primary {
-        width: 100%;
-        justify-content: center;
-      }
-
-      .angle-options {
-        grid-template-columns: repeat(3, 1fr);
-      }
-
-      .angle-option label {
-        padding: 0.5rem 0.25rem;
-      }
-
-      .angle-icon {
-        width: 24px;
-        height: 24px;
-      }
-
-      .angle-label {
-        font-size: 0.625rem;
-      }
+      main { padding: 7rem 1rem 6rem; }
+      .tool-container { padding: 1.5rem; }
+      .action-bar { padding: 1rem; flex-direction: column; }
+      .btn-secondary, .btn-primary { width: 100%; justify-content: center; }
+      .angle-options { grid-template-columns: repeat(3, 1fr); }
+      .angle-option label { padding: 0.5rem 0.25rem; }
+      .angle-icon { width: 24px; height: 24px; }
+      .angle-label { font-size: 0.625rem; }
     }
+
+    /* Site overrides */
+    main { margin-inline: auto !important; max-width: 1000px !important; }
+    .btn-primary { box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important; }
+    .btn-primary:hover { box-shadow: 0 8px 20px rgba(0,0,0,0.2) !important; }
+    .dropdown-title, .dropdown-desc, .nav-link, .mobile-nav-link, .mobile-tool-item span { color: #000000 !important; }
+    .dropdown-view-all { grid-column: 1 / -1 !important; border-top: 1px solid var(--border-light); margin-top: 0.5rem; padding-top: 0.75rem; }
+    .nav-cta { background: var(--primary); color: #fff !important; padding: 0.6rem 1.4rem; border-radius: var(--radius-md); font-weight: 600 !important; text-decoration: none; transition: var(--transition-base); box-shadow: var(--shadow-md); margin-left: 1rem; }
+    .nav-cta:hover { background: var(--primary-h) !important; transform: translateY(-1px); }
   </style>
 </head>
 <body>
 
-  <header>
+  <header id="mainHeader">
     <div class="header-container">
       <a href="index.html" class="logo">PDF<span>Tools</span></a>
-      <a href="index.html" class="back-link">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="19" y1="12" x2="5" y2="12"></line>
-          <polyline points="12 19 5 12 12 5"></polyline>
+      <nav>
+        <ul class="nav-list">
+          <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+          <li class="nav-item">
+            <span class="nav-link">Tools<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"></polyline></svg></span>
+            <div class="dropdown-menu">
+              <a href="merge.html" class="dropdown-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M7 8h10M7 12h10M7 16h10" stroke-width="2" stroke-linecap="round"/></svg><div class="dropdown-item-info"><span class="dropdown-item-title">Merge PDF</span><span class="dropdown-item-desc">Combine multiple files</span></div></a>
+              <a href="compress.html" class="dropdown-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 14V4a2 2 0 0 1 2-2h10l4 4v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4"/><path d="M4 14h16"/><path d="m15 9-3 3-3-3"/></svg><div class="dropdown-item-info"><span class="dropdown-item-title">Compress PDF</span><span class="dropdown-item-desc">Reduce file size</span></div></a>
+              <a href="protect.html" class="dropdown-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><div class="dropdown-item-info"><span class="dropdown-item-title">Protect PDF</span><span class="dropdown-item-desc">Encrypted security</span></div></a>
+              <a href="imagetopdf.html" class="dropdown-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><div class="dropdown-item-info"><span class="dropdown-item-title">Image to PDF</span><span class="dropdown-item-desc">Convert JPG/PNG</span></div></a>
+              <a href="redact.html" class="dropdown-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9l6 6M15 9l-6 6" stroke-width="2"/></svg><div class="dropdown-item-info"><span class="dropdown-item-title">Redact PDF</span><span class="dropdown-item-desc">Hide sensitive info</span></div></a>
+              <a href="remove.html" class="dropdown-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke-width="2"/></svg><div class="dropdown-item-info"><span class="dropdown-item-title">Remove Pages</span><span class="dropdown-item-desc">Delete PDF pages</span></div></a>
+              <a href="rotate.html" class="dropdown-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg><div class="dropdown-item-info"><span class="dropdown-item-title">Rotate PDF</span><span class="dropdown-item-desc">Change orientation</span></div></a>
+              <a href="watermark.html" class="dropdown-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg><div class="dropdown-item-info"><span class="dropdown-item-title">Watermark</span><span class="dropdown-item-desc">Text protection</span></div></a>
+              <a href="all-tools.html" class="dropdown-item dropdown-view-all"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg><div class="dropdown-item-info"><span class="dropdown-item-title">View All Tools</span><span class="dropdown-item-desc">8+ PDF utilities</span></div></a>
+            </div>
+          </li>
+          <li class="nav-item"><a href="how-to-use.html" class="nav-link">How to Use</a></li>
+          <li class="nav-item"><a href="why-use.html" class="nav-link">Why Us?</a></li>
+        </ul>
+      </nav>
+      <a href="all-tools.html" class="nav-cta">Get Started</a>
+      <button class="menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle Menu">
+        <svg id="menuIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
         </svg>
-        Back to Tools
-      </a>
+      </button>
     </div>
   </header>
 
-  <main>
-    <div class="tool-header">
-      <div class="tool-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-        </svg>
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-header">
+      <a href="index.html" class="logo">PDF<span>Tools</span></a>
+      <button class="btn-icon" onclick="toggleMobileMenu()" aria-label="Close Menu"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+    </div>
+    <div class="mobile-nav">
+      <a href="index.html" class="mobile-nav-link">Home</a>
+      <div class="mobile-nav-link" onclick="toggleMobileTools()">Tools<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></div>
+      <div class="mobile-tools-grid">
+        <a href="merge.html" class="mobile-tool-item"><span>Merge PDF</span></a>
+        <a href="compress.html" class="mobile-tool-item"><span>Compress PDF</span></a>
+        <a href="protect.html" class="mobile-tool-item"><span>Protect PDF</span></a>
+        <a href="imagetopdf.html" class="mobile-tool-item"><span>Image to PDF</span></a>
+        <a href="redact.html" class="mobile-tool-item"><span>Redact PDF</span></a>
+        <a href="remove.html" class="mobile-tool-item"><span>Remove Pages</span></a>
+        <a href="rotate.html" class="mobile-tool-item"><span>Rotate PDF</span></a>
+        <a href="watermark.html" class="mobile-tool-item"><span>Watermark</span></a>
+        <a href="all-tools.html" class="mobile-tool-item view-all"><span>View All Tools</span></a>
       </div>
+      <a href="how-to-use.html" class="mobile-nav-link">How to Use</a>
+      <a href="why-use.html" class="mobile-nav-link">Why Us?</a>
+    </div>
+  </div>
+
+  <main>
+    <!-- ── TOOL HEADER: centered, no icon ── -->
+    <div class="tool-header">
       <h1>Add Watermark</h1>
-      <p>Customize and apply watermarks to PDF</p>
+      <div class="trust-bar">
+        <span class="trust-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          ISO/IEC 27001 Certified
+        </span>
+        <span class="trust-divider"></span>
+        <span class="trust-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Fully GDPR Compliant
+        </span>
+        <span class="trust-divider"></span>
+        <span class="trust-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Your Data Stays Private
+        </span>
+      </div>
+      <p>Customize and apply watermarks to your PDF</p>
     </div>
 
     <div class="info-box">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="16" x2="12" y2="12"></line>
-        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-      </svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
       <p>Add text watermarks with full control over angle, opacity, size, and layering. Place watermarks behind text for subtle protection or in front for prominent marking. All processing happens locally in your browser.</p>
     </div>
 
@@ -1017,10 +402,7 @@
       <div class="tool-container">
         <div class="drop-zone" id="dropZone">
           <div class="drop-zone-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-            </svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
           </div>
           <h3>Drop PDF here or click to browse</h3>
           <p>Supports PDF files up to 1GB</p>
@@ -1043,122 +425,41 @@
           <div class="settings-section">
             <div class="settings-title">Font Style</div>
             <div class="font-selector">
-              <div class="font-option">
-                <input type="radio" name="font" id="fontHelvetica" value="Helvetica" checked>
-                <label for="fontHelvetica">Helvetica</label>
-              </div>
-              <div class="font-option">
-                <input type="radio" name="font" id="fontTimes" value="Times-Roman">
-                <label for="fontTimes">Times</label>
-              </div>
-              <div class="font-option">
-                <input type="radio" name="font" id="fontCourier" value="Courier">
-                <label for="fontCourier">Courier</label>
-              </div>
-              <div class="font-option">
-                <input type="radio" name="font" id="fontHelveticaBold" value="Helvetica-Bold">
-                <label for="fontHelveticaBold">Bold</label>
-              </div>
+              <div class="font-option"><input type="radio" name="font" id="fontHelvetica" value="Helvetica" checked><label for="fontHelvetica">Helvetica</label></div>
+              <div class="font-option"><input type="radio" name="font" id="fontTimes" value="Times-Roman"><label for="fontTimes">Times</label></div>
+              <div class="font-option"><input type="radio" name="font" id="fontCourier" value="Courier"><label for="fontCourier">Courier</label></div>
+              <div class="font-option"><input type="radio" name="font" id="fontHelveticaBold" value="Helvetica-Bold"><label for="fontHelveticaBold">Bold</label></div>
             </div>
           </div>
 
           <div class="settings-section">
             <div class="settings-title">Color</div>
             <div class="color-picker-wrapper">
-              <div class="color-option">
-                <input type="radio" name="color" id="colorGray" value="0.6,0.6,0.6" checked>
-                <label for="colorGray" style="background: #9ca3af;"></label>
-              </div>
-              <div class="color-option">
-                <input type="radio" name="color" id="colorRed" value="0.94,0.27,0.27">
-                <label for="colorRed" style="background: #ef4444;"></label>
-              </div>
-              <div class="color-option">
-                <input type="radio" name="color" id="colorBlue" value="0.23,0.51,0.96">
-                <label for="colorBlue" style="background: #3b82f6;"></label>
-              </div>
-              <div class="color-option">
-                <input type="radio" name="color" id="colorGreen" value="0.13,0.77,0.37">
-                <label for="colorGreen" style="background: #22c55e;"></label>
-              </div>
-              <div class="color-option">
-                <input type="radio" name="color" id="colorBlack" value="0.09,0.09,0.09">
-                <label for="colorBlack" style="background: #171717;"></label>
-              </div>
-              <div class="color-option">
-                <input type="radio" name="color" id="colorOrange" value="0.98,0.45,0.09">
-                <label for="colorOrange" style="background: #f97316;"></label>
-              </div>
+              <div class="color-option"><input type="radio" name="color" id="colorGray" value="0.6,0.6,0.6" checked><label for="colorGray" class="color-swatch-gray"></label></div>
+              <div class="color-option"><input type="radio" name="color" id="colorRed" value="0.94,0.27,0.27"><label for="colorRed" class="color-swatch-red"></label></div>
+              <div class="color-option"><input type="radio" name="color" id="colorBlue" value="0.23,0.51,0.96"><label for="colorBlue" class="color-swatch-blue"></label></div>
+              <div class="color-option"><input type="radio" name="color" id="colorGreen" value="0.13,0.77,0.37"><label for="colorGreen" class="color-swatch-green"></label></div>
+              <div class="color-option"><input type="radio" name="color" id="colorBlack" value="0.09,0.09,0.09"><label for="colorBlack" class="color-swatch-black"></label></div>
+              <div class="color-option"><input type="radio" name="color" id="colorOrange" value="0.98,0.45,0.09"><label for="colorOrange" class="color-swatch-orange"></label></div>
             </div>
           </div>
 
           <div class="settings-section">
             <div class="settings-title">Angle Orientation</div>
             <div class="angle-options">
-              <div class="angle-option">
-                <input type="radio" name="angle" id="angle0" value="0">
-                <label for="angle0">
-                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="4" y1="12" x2="20" y2="12"></line>
-                  </svg>
-                  <span class="angle-label">0°</span>
-                </label>
-              </div>
-              <div class="angle-option">
-                <input type="radio" name="angle" id="angle30" value="30">
-                <label for="angle30">
-                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform: rotate(30deg);">
-                    <line x1="4" y1="12" x2="20" y2="12"></line>
-                  </svg>
-                  <span class="angle-label">30°</span>
-                </label>
-              </div>
-              <div class="angle-option">
-                <input type="radio" name="angle" id="angle45" value="45" checked>
-                <label for="angle45">
-                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform: rotate(45deg);">
-                    <line x1="4" y1="12" x2="20" y2="12"></line>
-                  </svg>
-                  <span class="angle-label">45°</span>
-                </label>
-              </div>
-              <div class="angle-option">
-                <input type="radio" name="angle" id="angle90" value="90">
-                <label for="angle90">
-                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform: rotate(90deg);">
-                    <line x1="4" y1="12" x2="20" y2="12"></line>
-                  </svg>
-                  <span class="angle-label">90°</span>
-                </label>
-              </div>
-              <div class="angle-option">
-                <input type="radio" name="angle" id="angle135" value="135">
-                <label for="angle135">
-                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform: rotate(135deg);">
-                    <line x1="4" y1="12" x2="20" y2="12"></line>
-                  </svg>
-                  <span class="angle-label">135°</span>
-                </label>
-              </div>
-              <div class="angle-option">
-                <input type="radio" name="angle" id="angle180" value="180">
-                <label for="angle180">
-                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transform: rotate(180deg);">
-                    <line x1="4" y1="12" x2="20" y2="12"></line>
-                  </svg>
-                  <span class="angle-label">180°</span>
-                </label>
-              </div>
+              <div class="angle-option"><input type="radio" name="angle" id="angle0" value="0"><label for="angle0"><svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="12" x2="20" y2="12"></line></svg><span class="angle-label">0°</span></label></div>
+              <div class="angle-option"><input type="radio" name="angle" id="angle30" value="30"><label for="angle30"><svg class="angle-icon angle-30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="12" x2="20" y2="12"></line></svg><span class="angle-label">30°</span></label></div>
+              <div class="angle-option"><input type="radio" name="angle" id="angle45" value="45" checked><label for="angle45"><svg class="angle-icon angle-45" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="12" x2="20" y2="12"></line></svg><span class="angle-label">45°</span></label></div>
+              <div class="angle-option"><input type="radio" name="angle" id="angle90" value="90"><label for="angle90"><svg class="angle-icon angle-90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="12" x2="20" y2="12"></line></svg><span class="angle-label">90°</span></label></div>
+              <div class="angle-option"><input type="radio" name="angle" id="angle135" value="135"><label for="angle135"><svg class="angle-icon angle-135" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="12" x2="20" y2="12"></line></svg><span class="angle-label">135°</span></label></div>
+              <div class="angle-option"><input type="radio" name="angle" id="angle180" value="180"><label for="angle180"><svg class="angle-icon angle-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="12" x2="20" y2="12"></line></svg><span class="angle-label">180°</span></label></div>
             </div>
           </div>
 
           <div class="settings-section">
             <div class="settings-title">Opacity</div>
             <div class="slider-container">
-              <div class="slider-header">
-                <span>Transparency</span>
-                <span class="slider-value" id="opacityValue">30%</span>
-              </div>
+              <div class="slider-header"><span>Transparency</span><span class="slider-value" id="opacityValue">30%</span></div>
               <input type="range" class="slider" id="opacitySlider" min="5" max="100" value="30">
             </div>
           </div>
@@ -1166,10 +467,7 @@
           <div class="settings-section">
             <div class="settings-title">Size</div>
             <div class="slider-container">
-              <div class="slider-header">
-                <span>Scale</span>
-                <span class="slider-value" id="sizeValue">48pt</span>
-              </div>
+              <div class="slider-header"><span>Scale</span><span class="slider-value" id="sizeValue">48pt</span></div>
               <input type="range" class="slider" id="sizeSlider" min="24" max="120" value="48">
             </div>
           </div>
@@ -1177,110 +475,23 @@
           <div class="settings-section">
             <div class="settings-title">Alignment</div>
             <div class="angle-options">
-              <div class="angle-option">
-                <input type="radio" name="alignment" id="alignTopLeft" value="top-left">
-                <label for="alignTopLeft">
-                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="4" y="4" width="6" height="6" fill="currentColor"></rect>
-                    <rect x="4" y="4" width="16" height="16" rx="2"></rect>
-                  </svg>
-                  <span class="angle-label">Top Left</span>
-                </label>
-              </div>
-              <div class="angle-option">
-                <input type="radio" name="alignment" id="alignTopCenter" value="top-center">
-                <label for="alignTopCenter">
-                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="9" y="4" width="6" height="6" fill="currentColor"></rect>
-                    <rect x="4" y="4" width="16" height="16" rx="2"></rect>
-                  </svg>
-                  <span class="angle-label">Top Center</span>
-                </label>
-              </div>
-              <div class="angle-option">
-                <input type="radio" name="alignment" id="alignTopRight" value="top-right">
-                <label for="alignTopRight">
-                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="14" y="4" width="6" height="6" fill="currentColor"></rect>
-                    <rect x="4" y="4" width="16" height="16" rx="2"></rect>
-                  </svg>
-                  <span class="angle-label">Top Right</span>
-                </label>
-              </div>
-              <div class="angle-option">
-                <input type="radio" name="alignment" id="alignMiddleLeft" value="middle-left">
-                <label for="alignMiddleLeft">
-                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="4" y="9" width="6" height="6" fill="currentColor"></rect>
-                    <rect x="4" y="4" width="16" height="16" rx="2"></rect>
-                  </svg>
-                  <span class="angle-label">Mid Left</span>
-                </label>
-              </div>
-              <div class="angle-option">
-                <input type="radio" name="alignment" id="alignCenter" value="center" checked>
-                <label for="alignCenter">
-                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="9" y="9" width="6" height="6" fill="currentColor"></rect>
-                    <rect x="4" y="4" width="16" height="16" rx="2"></rect>
-                  </svg>
-                  <span class="angle-label">Center</span>
-                </label>
-              </div>
-              <div class="angle-option">
-                <input type="radio" name="alignment" id="alignMiddleRight" value="middle-right">
-                <label for="alignMiddleRight">
-                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="14" y="9" width="6" height="6" fill="currentColor"></rect>
-                    <rect x="4" y="4" width="16" height="16" rx="2"></rect>
-                  </svg>
-                  <span class="angle-label">Mid Right</span>
-                </label>
-              </div>
-              <div class="angle-option">
-                <input type="radio" name="alignment" id="alignBottomLeft" value="bottom-left">
-                <label for="alignBottomLeft">
-                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="4" y="14" width="6" height="6" fill="currentColor"></rect>
-                    <rect x="4" y="4" width="16" height="16" rx="2"></rect>
-                  </svg>
-                  <span class="angle-label">Bot Left</span>
-                </label>
-              </div>
-              <div class="angle-option">
-                <input type="radio" name="alignment" id="alignBottomCenter" value="bottom-center">
-                <label for="alignBottomCenter">
-                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="9" y="14" width="6" height="6" fill="currentColor"></rect>
-                    <rect x="4" y="4" width="16" height="16" rx="2"></rect>
-                  </svg>
-                  <span class="angle-label">Bot Center</span>
-                </label>
-              </div>
-              <div class="angle-option">
-                <input type="radio" name="alignment" id="alignBottomRight" value="bottom-right">
-                <label for="alignBottomRight">
-                  <svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="14" y="14" width="6" height="6" fill="currentColor"></rect>
-                    <rect x="4" y="4" width="16" height="16" rx="2"></rect>
-                  </svg>
-                  <span class="angle-label">Bot Right</span>
-                </label>
-              </div>
+              <div class="angle-option"><input type="radio" name="alignment" id="alignTopLeft" value="top-left"><label for="alignTopLeft"><svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="6" height="6" fill="currentColor"></rect><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg><span class="angle-label">Top Left</span></label></div>
+              <div class="angle-option"><input type="radio" name="alignment" id="alignTopCenter" value="top-center"><label for="alignTopCenter"><svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="4" width="6" height="6" fill="currentColor"></rect><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg><span class="angle-label">Top Center</span></label></div>
+              <div class="angle-option"><input type="radio" name="alignment" id="alignTopRight" value="top-right"><label for="alignTopRight"><svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="14" y="4" width="6" height="6" fill="currentColor"></rect><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg><span class="angle-label">Top Right</span></label></div>
+              <div class="angle-option"><input type="radio" name="alignment" id="alignMiddleLeft" value="middle-left"><label for="alignMiddleLeft"><svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="9" width="6" height="6" fill="currentColor"></rect><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg><span class="angle-label">Mid Left</span></label></div>
+              <div class="angle-option"><input type="radio" name="alignment" id="alignCenter" value="center" checked><label for="alignCenter"><svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="6" height="6" fill="currentColor"></rect><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg><span class="angle-label">Center</span></label></div>
+              <div class="angle-option"><input type="radio" name="alignment" id="alignMiddleRight" value="middle-right"><label for="alignMiddleRight"><svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="14" y="9" width="6" height="6" fill="currentColor"></rect><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg><span class="angle-label">Mid Right</span></label></div>
+              <div class="angle-option"><input type="radio" name="alignment" id="alignBottomLeft" value="bottom-left"><label for="alignBottomLeft"><svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="14" width="6" height="6" fill="currentColor"></rect><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg><span class="angle-label">Bot Left</span></label></div>
+              <div class="angle-option"><input type="radio" name="alignment" id="alignBottomCenter" value="bottom-center"><label for="alignBottomCenter"><svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="14" width="6" height="6" fill="currentColor"></rect><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg><span class="angle-label">Bot Center</span></label></div>
+              <div class="angle-option"><input type="radio" name="alignment" id="alignBottomRight" value="bottom-right"><label for="alignBottomRight"><svg class="angle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="14" y="14" width="6" height="6" fill="currentColor"></rect><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg><span class="angle-label">Bot Right</span></label></div>
             </div>
           </div>
 
           <div class="settings-section">
             <div class="settings-title">Layer Position</div>
             <div class="layer-options">
-              <div class="layer-option">
-                <input type="radio" name="layer" id="layerBehind" value="behind" checked>
-                <label for="layerBehind">Behind Text</label>
-              </div>
-              <div class="layer-option">
-                <input type="radio" name="layer" id="layerFront" value="front">
-                <label for="layerFront">In Front</label>
-              </div>
+              <div class="layer-option"><input type="radio" name="layer" id="layerBehind" value="behind" checked><label for="layerBehind">Behind Text</label></div>
+              <div class="layer-option"><input type="radio" name="layer" id="layerFront" value="front"><label for="layerFront">In Front</label></div>
             </div>
           </div>
         </div>
@@ -1292,8 +503,7 @@
           </div>
           <div class="preview-canvas-container">
             <div class="preview-page" id="previewPage">
-              <!-- Content Layer -->
-              <div class="preview-content" style="z-index: 5; position: relative;">
+              <div class="preview-content" id="previewContent">
                 <div class="preview-text-line heading"></div>
                 <div class="preview-text-line"></div>
                 <div class="preview-text-line medium"></div>
@@ -1305,57 +515,31 @@
                 <div class="preview-text-line medium"></div>
                 <div class="preview-text-line"></div>
               </div>
-              
-              <!-- Watermark Layer -->
               <div class="watermark-layer behind" id="watermarkLayer">
                 <div class="watermark-text" id="watermarkPreview">CONFIDENTIAL</div>
               </div>
             </div>
           </div>
           <div class="page-indicator">
-            <button class="page-btn" disabled>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="15 18 9 12 15 6"></polyline>
-              </svg>
-            </button>
+            <button class="page-btn" disabled><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
             <span class="page-info" id="pageInfo">Preview</span>
-            <button class="page-btn" disabled>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="9 18 15 12 9 6"></polyline>
-              </svg>
-            </button>
+            <button class="page-btn" disabled><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
           </div>
         </div>
       </div>
     </div>
 
     <div class="progress-container" id="progressContainer">
-      <div class="progress-header">
-        <span>Applying watermark...</span>
-        <span id="progressPercent">0%</span>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressFill"></div>
-      </div>
+      <div class="progress-header"><span>Applying watermark...</span><span id="progressPercent">0%</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
     </div>
 
     <div class="result-container" id="resultContainer">
-      <div class="result-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-          <polyline points="22 4 12 14.01 9 11.01"></polyline>
-        </svg>
-      </div>
+      <div class="result-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></div>
       <h3>Watermark Applied!</h3>
-      <p class="result-stats">
-        Successfully added watermark to <span class="stat-highlight" id="pageCount">0 pages</span>
-      </p>
+      <p class="result-stats">Successfully added watermark to <span class="stat-highlight" id="pageCount">0 pages</span></p>
       <a href="#" class="btn-download" id="downloadBtn">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-          <polyline points="7 10 12 15 17 10"></polyline>
-          <line x1="12" y1="15" x2="12" y2="3"></line>
-        </svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         Download Watermarked PDF
       </a>
       <button class="btn-reset" id="resetBtn">Watermark another file</button>
@@ -1364,16 +548,11 @@
 
   <div class="action-bar" id="actionBar">
     <button class="btn-secondary" onclick="resetTool()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-      </svg>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
       Cancel
     </button>
     <button class="btn-primary" id="applyBtn" onclick="applyWatermark()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-      </svg>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
       Apply Watermark
     </button>
   </div>
@@ -1385,7 +564,6 @@
   <script>
     const { PDFDocument, rgb, degrees, StandardFonts } = PDFLib;
 
-    // DOM Elements
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('fileInput');
     const uploadSection = document.getElementById('uploadSection');
@@ -1402,61 +580,32 @@
     const resetBtn = document.getElementById('resetBtn');
     const pageInfo = document.getElementById('pageInfo');
 
-    // State
     let currentFile = null;
     let pdfDoc = null;
     let watermarkedPdfBytes = null;
 
-    // File handling
     dropZone.addEventListener('click', () => fileInput.click());
-
-    dropZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropZone.classList.add('dragover');
-    });
-
-    dropZone.addEventListener('dragleave', () => {
-      dropZone.classList.remove('dragover');
-    });
-
-    dropZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropZone.classList.remove('dragover');
-      if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
-    });
-
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length > 0) handleFile(e.target.files[0]);
-    });
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
+    dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]); });
+    fileInput.addEventListener('change', (e) => { if (e.target.files.length > 0) handleFile(e.target.files[0]); });
 
     function formatFileSize(bytes) {
       if (bytes === 0) return '0 Bytes';
-      const k = 1024;
-      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const k = 1024, sizes = ['Bytes', 'KB', 'MB', 'GB'];
       const i = Math.floor(Math.log(bytes) / Math.log(k));
       return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 
     async function handleFile(file) {
-      if (file.type !== 'application/pdf' && !file.name.endsWith('.pdf')) {
-        alert('Please upload a PDF file');
-        return;
-      }
-      
-      if (file.size > 1024 * 1024 * 1024) { // 1GB in bytes
-        alert('File size must be less than 1GB');
-        return;
-      }
-
+      if (file.type !== 'application/pdf' && !file.name.endsWith('.pdf')) { alert('Please upload a PDF file'); return; }
+      if (file.size > 1024 * 1024 * 1024) { alert('File size must be less than 1GB'); return; }
       currentFile = file;
-      
       try {
         const arrayBuffer = await file.arrayBuffer();
         pdfDoc = await PDFDocument.load(arrayBuffer);
-        
         showFileInfo(file);
         initEditor();
-        
         const numPages = pdfDoc.getPageCount();
         pageInfo.textContent = `${numPages} page${numPages !== 1 ? 's' : ''}`;
       } catch (error) {
@@ -1466,28 +615,7 @@
     }
 
     function showFileInfo(file) {
-      fileInfo.innerHTML = `
-        <div class="file-item" style="margin-top: 1.5rem;">
-          <div class="file-info">
-            <div class="file-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-              </svg>
-            </div>
-            <div class="file-details">
-              <div class="file-name">${file.name}</div>
-              <div class="file-size">${formatFileSize(file.size)}</div>
-            </div>
-          </div>
-          <button class="btn-icon remove" onclick="resetTool()" title="Remove file">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
-      `;
+      fileInfo.innerHTML = `<div class="file-item" style="margin-top:1.5rem;"><div class="file-info"><div class="file-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></div><div class="file-details"><div class="file-name">${file.name}</div><div class="file-size">${formatFileSize(file.size)}</div></div></div><button class="btn-icon remove" onclick="resetTool()" title="Remove file"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>`;
     }
 
     function initEditor() {
@@ -1497,38 +625,14 @@
       updatePreview();
     }
 
-    // Live preview updates
     document.getElementById('watermarkText').addEventListener('input', updatePreview);
-    
-    document.querySelectorAll('input[name="font"]').forEach(radio => {
-      radio.addEventListener('change', updatePreview);
-    });
-    
-    document.querySelectorAll('input[name="color"]').forEach(radio => {
-      radio.addEventListener('change', updatePreview);
-    });
-    
-    document.querySelectorAll('input[name="angle"]').forEach(radio => {
-      radio.addEventListener('change', updatePreview);
-    });
-    
-    document.querySelectorAll('input[name="alignment"]').forEach(radio => {
-      radio.addEventListener('change', updatePreview);
-    });
-    
-    document.querySelectorAll('input[name="layer"]').forEach(radio => {
-      radio.addEventListener('change', updatePreview);
-    });
-
-    document.getElementById('opacitySlider').addEventListener('input', (e) => {
-      document.getElementById('opacityValue').textContent = e.target.value + '%';
-      updatePreview();
-    });
-
-    document.getElementById('sizeSlider').addEventListener('input', (e) => {
-      document.getElementById('sizeValue').textContent = e.target.value + 'pt';
-      updatePreview();
-    });
+    document.querySelectorAll('input[name="font"]').forEach(r => r.addEventListener('change', updatePreview));
+    document.querySelectorAll('input[name="color"]').forEach(r => r.addEventListener('change', updatePreview));
+    document.querySelectorAll('input[name="angle"]').forEach(r => r.addEventListener('change', updatePreview));
+    document.querySelectorAll('input[name="alignment"]').forEach(r => r.addEventListener('change', updatePreview));
+    document.querySelectorAll('input[name="layer"]').forEach(r => r.addEventListener('change', updatePreview));
+    document.getElementById('opacitySlider').addEventListener('input', (e) => { document.getElementById('opacityValue').textContent = e.target.value + '%'; updatePreview(); });
+    document.getElementById('sizeSlider').addEventListener('input', (e) => { document.getElementById('sizeValue').textContent = e.target.value + 'pt'; updatePreview(); });
 
     function updatePreview() {
       const text = document.getElementById('watermarkText').value || 'WATERMARK';
@@ -1539,98 +643,37 @@
       const opacity = document.getElementById('opacitySlider').value;
       const size = document.getElementById('sizeSlider').value;
       const layer = document.querySelector('input[name="layer"]:checked').value;
-
-      // Map font names to web-safe equivalents for preview
-      const fontMap = {
-        'Helvetica': 'Arial, sans-serif',
-        'Helvetica-Bold': 'Arial, sans-serif',
-        'Times-Roman': 'Georgia, serif',
-        'Courier': 'Courier New, monospace'
-      };
-
-      // Convert RGB values to hex for preview
+      const fontMap = { 'Helvetica': 'Arial, sans-serif', 'Helvetica-Bold': 'Arial, sans-serif', 'Times-Roman': 'Georgia, serif', 'Courier': 'Courier New, monospace' };
       const [r, g, b] = colorValue.split(',').map(parseFloat);
-      const hexColor = '#' + [r, g, b].map(v => {
-        const hex = Math.round(v * 255).toString(16);
-        return hex.length === 1 ? '0' + hex : hex;
-      }).join('');
-
+      const hexColor = '#' + [r, g, b].map(v => { const h = Math.round(v * 255).toString(16); return h.length === 1 ? '0' + h : h; }).join('');
       watermarkPreview.textContent = text;
       watermarkPreview.style.fontFamily = fontMap[fontValue] || fontMap['Helvetica'];
       watermarkPreview.style.fontWeight = fontValue.includes('Bold') ? '700' : '400';
       watermarkPreview.style.color = hexColor;
       watermarkPreview.style.transform = `rotate(${angle}deg) scale(${size / 48})`;
       watermarkPreview.style.opacity = opacity / 100;
-      
-      // Update watermark layer positioning
       watermarkLayer.className = 'watermark-layer ' + layer;
-      
-      // Reset default centering
       watermarkLayer.style.justifyContent = 'center';
       watermarkLayer.style.alignItems = 'center';
       watermarkLayer.style.padding = '0';
-      
-      // Apply alignment
       switch(alignment) {
-        case 'top-left':
-          watermarkLayer.style.justifyContent = 'flex-start';
-          watermarkLayer.style.alignItems = 'flex-start';
-          watermarkLayer.style.padding = '40px';
-          break;
-        case 'top-center':
-          watermarkLayer.style.justifyContent = 'center';
-          watermarkLayer.style.alignItems = 'flex-start';
-          watermarkLayer.style.padding = '40px 0 0 0';
-          break;
-        case 'top-right':
-          watermarkLayer.style.justifyContent = 'flex-end';
-          watermarkLayer.style.alignItems = 'flex-start';
-          watermarkLayer.style.padding = '40px';
-          break;
-        case 'middle-left':
-          watermarkLayer.style.justifyContent = 'flex-start';
-          watermarkLayer.style.alignItems = 'center';
-          watermarkLayer.style.padding = '0 40px';
-          break;
-        case 'center':
-          watermarkLayer.style.justifyContent = 'center';
-          watermarkLayer.style.alignItems = 'center';
-          break;
-        case 'middle-right':
-          watermarkLayer.style.justifyContent = 'flex-end';
-          watermarkLayer.style.alignItems = 'center';
-          watermarkLayer.style.padding = '0 40px';
-          break;
-        case 'bottom-left':
-          watermarkLayer.style.justifyContent = 'flex-start';
-          watermarkLayer.style.alignItems = 'flex-end';
-          watermarkLayer.style.padding = '40px';
-          break;
-        case 'bottom-center':
-          watermarkLayer.style.justifyContent = 'center';
-          watermarkLayer.style.alignItems = 'flex-end';
-          watermarkLayer.style.padding = '0 0 40px 0';
-          break;
-        case 'bottom-right':
-          watermarkLayer.style.justifyContent = 'flex-end';
-          watermarkLayer.style.alignItems = 'flex-end';
-          watermarkLayer.style.padding = '40px';
-          break;
+        case 'top-left': watermarkLayer.style.justifyContent='flex-start'; watermarkLayer.style.alignItems='flex-start'; watermarkLayer.style.padding='40px'; break;
+        case 'top-center': watermarkLayer.style.justifyContent='center'; watermarkLayer.style.alignItems='flex-start'; watermarkLayer.style.padding='40px 0 0 0'; break;
+        case 'top-right': watermarkLayer.style.justifyContent='flex-end'; watermarkLayer.style.alignItems='flex-start'; watermarkLayer.style.padding='40px'; break;
+        case 'middle-left': watermarkLayer.style.justifyContent='flex-start'; watermarkLayer.style.alignItems='center'; watermarkLayer.style.padding='0 40px'; break;
+        case 'middle-right': watermarkLayer.style.justifyContent='flex-end'; watermarkLayer.style.alignItems='center'; watermarkLayer.style.padding='0 40px'; break;
+        case 'bottom-left': watermarkLayer.style.justifyContent='flex-start'; watermarkLayer.style.alignItems='flex-end'; watermarkLayer.style.padding='40px'; break;
+        case 'bottom-center': watermarkLayer.style.justifyContent='center'; watermarkLayer.style.alignItems='flex-end'; watermarkLayer.style.padding='0 0 40px 0'; break;
+        case 'bottom-right': watermarkLayer.style.justifyContent='flex-end'; watermarkLayer.style.alignItems='flex-end'; watermarkLayer.style.padding='40px'; break;
       }
     }
 
     async function applyWatermark() {
-      if (!pdfDoc) {
-        alert('No PDF loaded');
-        return;
-      }
-
+      if (!pdfDoc) { alert('No PDF loaded'); return; }
       editorContainer.classList.remove('active');
       actionBar.classList.remove('active');
       progressContainer.classList.add('active');
-
       try {
-        // Get settings
         const text = document.getElementById('watermarkText').value || 'WATERMARK';
         const fontName = document.querySelector('input[name="font"]:checked').value;
         const colorValue = document.querySelector('input[name="color"]:checked').value;
@@ -1638,120 +681,43 @@
         const alignment = document.querySelector('input[name="alignment"]:checked').value;
         const opacity = parseFloat(document.getElementById('opacitySlider').value) / 100;
         const fontSize = parseInt(document.getElementById('sizeSlider').value);
-        const layer = document.querySelector('input[name="layer"]:checked').value;
-
-        // Parse color
         const [r, g, b] = colorValue.split(',').map(parseFloat);
-        
-        // Load font
         let font;
-        try {
-          font = await pdfDoc.embedFont(fontName);
-        } catch (e) {
-          console.warn('Font not available, using Helvetica');
-          font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-        }
-
+        try { font = await pdfDoc.embedFont(fontName); } catch(e) { font = await pdfDoc.embedFont(StandardFonts.Helvetica); }
         const pages = pdfDoc.getPages();
         const totalPages = pages.length;
-
-        // Process each page
         for (let i = 0; i < totalPages; i++) {
           const page = pages[i];
           const { width, height } = page.getSize();
-          
           const textWidth = font.widthOfTextAtSize(text, fontSize);
           const textHeight = fontSize;
-          
-          // Calculate the center point where we want the watermark
           let centerX, centerY;
           const margin = 50;
-          
           switch(alignment) {
-            case 'top-left':
-              centerX = margin;
-              centerY = height - margin;
-              break;
-            case 'top-center':
-              centerX = width / 2;
-              centerY = height - margin;
-              break;
-            case 'top-right':
-              centerX = width - margin;
-              centerY = height - margin;
-              break;
-            case 'middle-left':
-              centerX = margin;
-              centerY = height / 2;
-              break;
-            case 'center':
-              centerX = width / 2;
-              centerY = height / 2;
-              break;
-            case 'middle-right':
-              centerX = width - margin;
-              centerY = height / 2;
-              break;
-            case 'bottom-left':
-              centerX = margin;
-              centerY = margin;
-              break;
-            case 'bottom-center':
-              centerX = width / 2;
-              centerY = margin;
-              break;
-            case 'bottom-right':
-              centerX = width - margin;
-              centerY = margin;
-              break;
-            default:
-              centerX = width / 2;
-              centerY = height / 2;
+            case 'top-left': centerX=margin; centerY=height-margin; break;
+            case 'top-center': centerX=width/2; centerY=height-margin; break;
+            case 'top-right': centerX=width-margin; centerY=height-margin; break;
+            case 'middle-left': centerX=margin; centerY=height/2; break;
+            case 'middle-right': centerX=width-margin; centerY=height/2; break;
+            case 'bottom-left': centerX=margin; centerY=margin; break;
+            case 'bottom-center': centerX=width/2; centerY=margin; break;
+            case 'bottom-right': centerX=width-margin; centerY=margin; break;
+            default: centerX=width/2; centerY=height/2;
           }
-
-          // Calculate text starting position (bottom-left of text)
-          // Offset to center the text at centerX, centerY
           const startX = centerX - (textWidth / 2);
           const startY = centerY - (textHeight / 2);
-          
-          // Convert angle to radians
           const angleRad = (angle * Math.PI) / 180;
-          
-          // Calculate the rotated position
-          // Rotate around the center point
-          const dx = startX - centerX;
-          const dy = startY - centerY;
-          
+          const dx = startX - centerX, dy = startY - centerY;
           const rotatedX = centerX + (dx * Math.cos(angleRad) - dy * Math.sin(angleRad));
           const rotatedY = centerY + (dx * Math.sin(angleRad) + dy * Math.cos(angleRad));
-
-          // Draw watermark
-          page.drawText(text, {
-            x: rotatedX,
-            y: rotatedY,
-            size: fontSize,
-            font: font,
-            color: rgb(r, g, b),
-            opacity: opacity,
-            rotate: degrees(angle),
-          });
-
-          // Update progress
+          page.drawText(text, { x: rotatedX, y: rotatedY, size: fontSize, font, color: rgb(r, g, b), opacity, rotate: degrees(angle) });
           const progress = Math.round(((i + 1) / totalPages) * 100);
           progressFill.style.width = progress + '%';
           progressPercent.textContent = progress + '%';
-
-          // Allow UI to update
           await new Promise(resolve => setTimeout(resolve, 10));
         }
-
-        // Save the PDF
         watermarkedPdfBytes = await pdfDoc.save();
-        
-        setTimeout(() => {
-          showResult(totalPages);
-        }, 300);
-
+        setTimeout(() => showResult(totalPages), 300);
       } catch (error) {
         console.error('Error applying watermark:', error);
         alert('Error applying watermark: ' + error.message);
@@ -1763,20 +729,14 @@
       progressContainer.classList.remove('active');
       resultContainer.classList.add('active');
       document.getElementById('pageCount').textContent = `${numPages} page${numPages !== 1 ? 's' : ''}`;
-      
-      // Create download link
       const blob = new Blob([watermarkedPdfBytes], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
       downloadBtn.href = url;
-      
-      const originalName = currentFile.name.replace('.pdf', '');
-      downloadBtn.download = `${originalName}_watermarked.pdf`;
+      downloadBtn.download = `${currentFile.name.replace('.pdf', '')}_watermarked.pdf`;
     }
 
     function resetTool() {
-      currentFile = null;
-      pdfDoc = null;
-      watermarkedPdfBytes = null;
+      currentFile = null; pdfDoc = null; watermarkedPdfBytes = null;
       fileInfo.innerHTML = '';
       uploadSection.style.display = 'block';
       editorContainer.classList.remove('active');
@@ -1784,13 +744,7 @@
       progressContainer.classList.remove('active');
       resultContainer.classList.remove('active');
       fileInput.value = '';
-      
-      // Clean up blob URL
-      if (downloadBtn.href && downloadBtn.href.startsWith('blob:')) {
-        URL.revokeObjectURL(downloadBtn.href);
-      }
-      
-      // Reset defaults
+      if (downloadBtn.href && downloadBtn.href.startsWith('blob:')) URL.revokeObjectURL(downloadBtn.href);
       document.getElementById('watermarkText').value = 'CONFIDENTIAL';
       document.getElementById('opacitySlider').value = 30;
       document.getElementById('opacityValue').textContent = '30%';
@@ -1807,12 +761,31 @@
 
     resetBtn.addEventListener('click', resetTool);
 
-    // Cleanup on page unload
     window.addEventListener('beforeunload', () => {
-      if (downloadBtn.href && downloadBtn.href.startsWith('blob:')) {
-        URL.revokeObjectURL(downloadBtn.href);
-      }
+      if (downloadBtn.href && downloadBtn.href.startsWith('blob:')) URL.revokeObjectURL(downloadBtn.href);
     });
+
+    window.addEventListener('scroll', () => {
+      document.getElementById('mainHeader').classList.toggle('scrolled', window.scrollY > 20);
+    });
+
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobileMenu');
+      const icon = document.getElementById('menuIcon');
+      menu.classList.toggle('active');
+      if (menu.classList.contains('active')) {
+        document.body.style.overflow = 'hidden';
+        if(icon) icon.innerHTML = '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>';
+      } else {
+        document.body.style.overflow = '';
+        if(icon) icon.innerHTML = '<line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>';
+      }
+    }
+
+    function toggleMobileTools() {
+      const grid = document.querySelector('.mobile-tools-grid');
+      if (grid) grid.style.display = grid.style.display === 'grid' ? 'none' : 'grid';
+    }
   </script>
 </body>
 </html>

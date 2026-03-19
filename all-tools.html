@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>All PDF Tools | PDFTools — Free Browser-Based PDF Utilities</title>
+  <meta name="description" content="Browse all free PDF tools: Merge, Compress, Protect, Redact, Rotate, Watermark and more. 100% in-browser, no uploads, complete privacy.">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ── TOKENS ── */
+    :root {
+      /* Legacy Achromatic Fallbacks */
+      --black: #000000;
+      --light-black: #222222;
+      --pure-black: #000000;
+      --dark-gray: #444444;
+      --medium-gray: #D1D5DB;
+      --light-gray: #F3F4F6;
+      --off-white: #F9F9F9;
+      --pure-white: #FFFFFF;
+      --border-main: #E5E7EB;
+      /* Maximum Contrast Theme Tokens - Perfect Legibility */
+      --primary:      #000000; /* Plain Black */
+      --primary-h:    #222222; /* Off Black */
+      --primary-light: #F5F5F5; /* Off White */
+      
+      --accent:       #000000; /* Plain Black */
+      --accent-light: rgba(0, 0, 0, 0.05);
+      
+      --bg:           #FFFFFF; /* Plain White */
+      --bg-soft:      #F9F9F9; /* Off White */
+      
+      --text:         #000000; /* Plain Black */
+      --text-heading: #000000; /* Plain Black */
+      --text-sub:     #222222; /* Off Black */
+      --text-muted:   #444444;
+      
+      --border-light: rgba(0, 0, 0, 0.1);
+      --font-body:    'Inter', sans-serif;
+      --font-heading: 'Outfit', sans-serif;
+      
+      --radius-sm: 4px; --radius-md: 8px; --radius-lg: 12px; --radius-xl: 20px;
+      
+      --shadow-sm:   0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-soft: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+      --shadow-xl:   0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      
+      --transition-base:   all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-smooth: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: rgba(255,255,255,0.7);
+      -webkit-backdrop-filter: blur(12px) saturate(180%);
+      backdrop-filter: blur(12px) saturate(180%);
+      border-bottom: 1px solid var(--border-light);
+      transition: var(--transition-smooth);
+    }
+    
+    .header-container {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 80px; max-width: 1200px; margin: 0 auto; padding: 0 2rem;
+    }
+ 
+    .logo {
+      display: flex; align-items: center; gap: 0.5rem;
+      text-decoration: none; font-family: var(--font-heading);
+      font-size: 1.5rem; font-weight: 800; color: #000000;
+      letter-spacing: -0.04em;
+    }
+    .logo span { font-weight: 400; color: var(--text-muted); }
+
+    /* Modern Thin Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { 
+      background: var(--bg-soft); 
+      border-radius: 10px; 
+      border: 2px solid var(--bg);
+    }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    nav { display: flex; align-items: center; gap: 2rem; }
+    .nav-list { display: flex; align-items: center; gap: 2rem; list-style: none; }
+    .nav-item { position: relative; }
+    .nav-link {
+      text-decoration: none; font-size: 0.9375rem; font-weight: 500;
+      color: var(--text-sub); transition: color 0.3s ease;
+      display: flex; align-items: center; gap: 0.25rem; padding: 0.5rem 0;
+    }
+    .nav-link:hover, .nav-item.active .nav-link { color: var(--primary); }
+    .nav-link svg { transition: transform 0.3s ease; }
+    .nav-item:hover .nav-link svg { transform: rotate(180deg); }
+
+    /* Dropdown */
+    .dropdown-menu {
+      position: absolute; top: calc(100% + 8px); left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: var(--bg); border: 1px solid var(--border-light);
+      border-radius: var(--radius-md); box-shadow: var(--shadow-soft);
+      padding: 1.25rem; width: 680px;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;
+      opacity: 0; visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.16,1,0.3,1); z-index: 1000;
+    }
+    .nav-item:hover .dropdown-menu {
+      opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+    }
+    .dropdown-item {
+      display: flex; align-items: center; gap: 0.875rem;
+      padding: 0.625rem 0.75rem; text-decoration: none;
+      border-radius: var(--radius-sm); transition: background 0.2s ease;
+    }
+    .dropdown-item:hover { background: var(--bg-soft); }
+    .dropdown-icon {
+      width: 38px; height: 38px; background: var(--bg-soft);
+      border-radius: 9px; display: flex; align-items: center;
+      justify-content: center; color: var(--primary);
+      transition: all 0.2s ease; flex-shrink: 0;
+    }
+    .dropdown-item:hover .dropdown-icon { background: var(--primary-light); transform: scale(1.07); }
+    .dropdown-info { display: flex; flex-direction: column; }
+    .dropdown-title { font-size: 0.875rem; font-weight: 600; color: var(--text); }
+    .dropdown-desc  { font-size: 0.72rem; color: var(--text-muted); }
+    .dropdown-view-all { 
+      grid-column: 1 / -1 !important; 
+      border-top: 1px solid var(--border-light); 
+      margin-top: 0.5rem; 
+      padding-top: 0.75rem; 
+    }
+
+    .nav-cta {
+      background: var(--primary); color: #fff !important;
+      padding: 0.625rem 1.375rem; border-radius: var(--radius-md);
+      font-weight: 600 !important; text-decoration: none;
+      transition: all 0.3s ease !important; font-size: 0.9rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .nav-cta:hover { background: var(--primary-h) !important; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1); }
+
+    /* Mobile btn */
+    .mobile-menu-btn {
+      display: none; background: none; border: 1.5px solid var(--border-light);
+      border-radius: var(--radius-sm); padding: 0.4rem 0.55rem;
+      cursor: pointer; color: var(--text); z-index: 1001;
+    }
+    @media (max-width: 991px) {
+      nav { display: none; }
+      .mobile-menu-btn { display: flex; align-items: center; }
+    }
+
+    /* ── MOBILE MENU ── */
+    .mobile-menu {
+      position: fixed; inset: 0; background: var(--bg); z-index: 999;
+      padding: 90px 1.5rem 2rem; display: flex; flex-direction: column; gap: 0;
+      opacity: 0; visibility: hidden; transform: translateY(-8px);
+      transition: all 0.4s cubic-bezier(0.16,1,0.3,1); overflow-y: auto;
+    }
+    .mobile-menu.active { opacity: 1; visibility: visible; transform: translateY(0); }
+    .mobile-nav-list { list-style: none; display: flex; flex-direction: column; gap: 0; }
+    .mobile-nav-link {
+      font-size: 1.15rem; font-weight: 600; color: var(--text);
+      text-decoration: none; display: flex; align-items: center;
+      justify-content: space-between; padding: 1rem 0;
+      border-bottom: 1px solid var(--border-light); cursor: pointer;
+    }
+    .mobile-nav-link:hover { color: var(--primary); }
+    .mobile-tools-grid {
+      display: none; grid-template-columns: 1fr 1fr;
+      gap: 0.75rem; padding: 1rem 0 0.5rem;
+    }
+    .mobile-tool-item {
+      display: flex; flex-direction: column; gap: 0.25rem;
+      padding: 0.875rem 1rem; background: var(--bg-soft);
+      border-radius: var(--radius-md); text-decoration: none;
+      border: 1px solid var(--border-light); transition: border-color 0.2s;
+    }
+    .mobile-tool-item:hover { border-color: var(--primary); }
+    .mobile-tool-item span { font-size: 0.875rem; font-weight: 600; color: var(--text); }
+    .mobile-view-all {
+      display: block; text-align: center; margin-top: 0.75rem;
+      padding: 0.75rem; background: var(--primary); color: #fff !important;
+      border-radius: var(--radius-md); text-decoration: none;
+      font-weight: 600; font-size: 0.875rem;
+    }
+    .mobile-divider { height: 1px; background: var(--border-light); margin: 0.25rem 0; }
+
+    /* ── HERO STRIP ── */
+    .page-hero {
+      background: var(--bg);
+      border-bottom: 1px solid var(--border-light);
+      padding: 7rem 2rem 3rem;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .page-hero-inner { position: relative; max-width: 680px; margin: 0 auto; }
+    .page-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--bg-soft); border: 1.5px solid var(--border-light);
+      border-radius: 999px; padding: 0.3rem 1rem;
+      font-size: 0.75rem; font-weight: 700; color: var(--text-sub);
+      letter-spacing: 0.06em; text-transform: uppercase;
+      margin-bottom: 1.5rem; animation: fadeUp 0.5s ease both;
+    }
+    .page-badge::before {
+      content: ''; width: 7px; height: 7px;
+      background: #4caf50; border-radius: 50%;
+    }
+    .page-hero h1 {
+      font-family: var(--font-heading); font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800; letter-spacing: -0.04em; color: var(--text);
+      margin-bottom: 1rem; line-height: 1.1;
+      animation: fadeUp 0.6s 0.05s ease both;
+    }
+    .page-hero p {
+      font-size: 1.1rem; color: var(--text-muted); margin-bottom: 2rem;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    /* Stats pills */
+    .stats-pills {
+      display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;
+      margin-bottom: 2rem; animation: fadeUp 0.6s 0.15s ease both;
+    }
+    .stat-pill {
+      display: flex; align-items: center; gap: 0.5rem;
+      background: var(--bg-soft); border: 1px solid var(--border-light);
+      border-radius: 999px; padding: 0.4rem 1.1rem;
+      font-size: 0.8rem; font-weight: 600; color: var(--text-sub);
+    }
+    .stat-pill svg { color: var(--primary); flex-shrink: 0; }
+
+    /* Search */
+    .search-wrap {
+      position: relative; max-width: 440px; margin: 0 auto;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+    .search-wrap svg {
+      position: absolute; left: 1rem; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted); pointer-events: none;
+    }
+    #toolSearch {
+      width: 100%; padding: 1rem 1.25rem 1rem 3.25rem;
+      border: 1px solid var(--border-light); border-radius: var(--radius-md);
+      font-family: var(--font-body); font-size: 1rem; color: var(--text);
+      background: #fff; outline: none;
+      transition: var(--transition-base);
+      box-shadow: var(--shadow-sm);
+    }
+    #toolSearch:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* ── MAIN ── */
+    main {
+      max-width: 1200px; margin: 0 auto;
+      padding: 3rem 2rem 5rem;
+    }
+
+    /* Filter Tabs */
+    .filter-row {
+      display: flex; align-items: center; gap: 0.75rem;
+      flex-wrap: wrap; margin-bottom: 3rem;
+    }
+    .filter-btn {
+      padding: 0.6rem 1.5rem; border-radius: 999px;
+      border: 1px solid var(--border-light);
+      background: #fff; font-family: var(--font-body);
+      font-size: 0.875rem; font-weight: 600; color: var(--text-sub);
+      cursor: pointer; transition: var(--transition-base);
+    }
+    .filter-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+    .filter-btn.active {
+      background: var(--primary); border-color: var(--primary);
+      color: #fff; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+    .filter-count {
+      margin-left: auto; font-size: 0.85rem; color: var(--text-muted);
+      font-weight: 600; background: var(--bg-soft); padding: 0.25rem 0.75rem;
+      border-radius: 999px; border: 1px solid var(--border-light);
+    }
+
+    /* Tools Grid */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    /* Tool Card */
+    .tool-card {
+      background: #fff; border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg); padding: 2rem;
+      text-decoration: none; color: inherit;
+      display: flex; flex-direction: column; gap: 1.25rem;
+      transition: var(--transition-smooth);
+      box-shadow: var(--shadow-sm);
+      opacity: 0; transform: translateY(20px);
+      animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .tool-card:hover { 
+      border-color: var(--primary); 
+      transform: translateY(-8px); 
+      box-shadow: var(--shadow-xl); 
+      background: #fff;
+    }
+    .tool-card.hidden { display: none; }
+
+    /* stagger animation delays */
+    .tool-card:nth-child(1)  { animation-delay: 0.05s; }
+    .tool-card:nth-child(2)  { animation-delay: 0.10s; }
+    .tool-card:nth-child(3)  { animation-delay: 0.15s; }
+    .tool-card:nth-child(4)  { animation-delay: 0.20s; }
+    .tool-card:nth-child(5)  { animation-delay: 0.25s; }
+    .tool-card:nth-child(6)  { animation-delay: 0.30s; }
+    .tool-card:nth-child(7)  { animation-delay: 0.35s; }
+    .tool-card:nth-child(8)  { animation-delay: 0.40s; }
+
+    .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+    .tool-icon {
+      width: 54px; height: 54px; background: var(--bg-soft);
+      border: 1px solid var(--border-light); border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--primary); flex-shrink: 0;
+      transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
+    }
+    .tool-card:hover .tool-icon {
+      background: var(--primary); border-color: var(--primary); color: #fff;
+      transform: scale(1.08);
+    }
+    .tool-icon svg { width: 24px; height: 24px; stroke-width: 2; transition: color 0.2s; }
+
+    .cat-badge {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; padding: 0.25rem 0.75rem;
+      border-radius: 999px; border: 1.5px solid;
+      flex-shrink: 0; align-self: flex-start;
+    }
+    .cat-edit    { color: #fff; border-color: var(--primary); background: var(--primary); }
+    .cat-convert { color: #fff; border-color: var(--accent); background: var(--accent); }
+    .cat-secure  { color: var(--accent); border-color: var(--bg-soft); background: var(--bg-soft); }
+
+    .tool-info h3 {
+      font-family: var(--font-heading); font-size: 1.125rem;
+      font-weight: 700; color: var(--text); margin-bottom: 0.4rem;
+      letter-spacing: -0.02em;
+    }
+    .tool-info p { font-size: 0.875rem; color: var(--text-muted); line-height: 1.65; }
+
+    .tool-link-btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      margin-top: auto; align-self: flex-start;
+      background: var(--primary); color: #fff;
+      padding: 0.55rem 1.25rem; border-radius: var(--radius-sm);
+      font-size: 0.82rem; font-weight: 600; text-decoration: none;
+      transition: background 0.2s, transform 0.2s, gap 0.2s;
+    }
+    .tool-link-btn:hover { background: var(--primary-h); transform: translateY(-1px); gap: 0.75rem; }
+
+    /* No results */
+    .no-results {
+      display: none; grid-column: 1/-1; text-align: center;
+      padding: 4rem 2rem; color: var(--text-muted);
+    }
+    .no-results svg { margin-bottom: 1rem; opacity: 0.4; }
+    .no-results p { font-size: 1.05rem; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--bg-soft); border-top: 1.5px solid var(--border-light); padding: 4rem 0 2.5rem;
+    }
+    .footer-container { max-width: 1080px; margin: 0 auto; padding: 0 2rem; }
+    .footer-grid {
+      display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr;
+      gap: 3rem; margin-bottom: 3rem;
+    }
+    @media (max-width: 900px) { .footer-grid { grid-template-columns: repeat(2,1fr); gap: 2rem; } }
+    @media (max-width: 580px) { .footer-grid { grid-template-columns: 1fr; gap: 1.5rem; } }
+    .footer-brand p { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.75rem; line-height: 1.7; max-width: 260px; }
+    .footer-column h4 { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-sub); margin-bottom: 1rem; }
+    .footer-column ul { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+    .footer-column a {
+      font-size: 0.875rem; color: var(--text-muted); text-decoration: none;
+      transition: color 0.2s, transform 0.2s; display: inline-block;
+    }
+    .footer-column a:hover { color: var(--text); transform: translateX(3px); }
+    .footer-bottom {
+      border-top: 1px solid var(--border-light); padding-top: 1.75rem;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 1rem;
+    }
+    .footer-bottom p { font-size: 0.8rem; color: var(--text-muted); }
+    .footer-social { display: flex; gap: 0.75rem; }
+    .footer-social a {
+      width: 36px; height: 36px; border: 1.5px solid var(--border-light);
+      border-radius: var(--radius-sm); display: flex; align-items: center;
+      justify-content: center; color: var(--text-muted);
+      transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.2s;
+      background: var(--bg);
+    }
+    .footer-social a:hover { background: var(--primary); color: #fff; border-color: var(--primary); transform: translateY(-2px); }
+
+    /* How it Works Section */
+    .how-it-works-section {
+      max-width: 1200px;
+      margin: -2.5rem auto 3rem;
+      padding: 0 2rem;
+      position: relative;
+      z-index: 10;
+      animation: fadeUp 0.6s 0.25s ease both;
+    }
+
+    .process-card {
+      background: var(--bg);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-xl);
+      padding: 2.5rem;
+      box-shadow: var(--shadow-soft);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
+    }
+
+    .process-step {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      position: relative;
+    }
+
+    .process-step:not(:last-child)::after {
+      content: '→';
+      position: absolute;
+      top: 1.25rem;
+      right: -1.25rem;
+      color: var(--border-light);
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .step-num-circle {
+      width: 40px;
+      height: 40px;
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+      font-family: var(--font-heading);
+    }
+
+    .step-content h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+      letter-spacing: -0.01em;
+    }
+
+    .step-content p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    @media (max-width: 1024px) {
+      .process-card { grid-template-columns: repeat(2, 1fr); gap: 2.5rem; }
+      .process-step:nth-child(2)::after { display: none; }
+    }
+
+    @media (max-width: 640px) {
+      .how-it-works-section { margin-top: -1.5rem; }
+      .process-card { grid-template-columns: 1fr; padding: 2rem; gap: 2rem; }
+      .process-step::after { display: none !important; }
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .page-hero { padding-top: 6rem; }
+      .page-hero h1 { font-size: 2rem; }
+      main { padding: 2rem 1.25rem 4rem; }
+      .tools-grid { grid-template-columns: 1fr; gap: 1rem; }
+    }
+    @media (max-width: 480px) {
+      .stats-pills { gap: 0.5rem; }
+      .filter-row { gap: 0.5rem; }
+    }
+  
+    /* ─────────────────────────────────────────
+       CENTRALIZED SITE OVERRIDES
+    ───────────────────────────────────────── */
+    body, p, h1, h2, h3, h4, h5, h6, li, 
+    .tool-info, .feature-content, .step, .faq-item, 
+    .cta-text, .upload-area,
+    .policy-container, .tool-header {
+      text-align: center !important;
+    }
+    .tool-card {
+      align-items: center !important;
+      flex-direction: column !important;
+      text-align: center !important;
+      justify-content: center !important;
+    }
+    .feature-list {
+      align-items: center !important;
+    }
+    .cta-container {
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+    }
+    .feature-grid, .tools-grid {
+      justify-items: center !important;
+    }
+    .btn-white, .btn-primary {
+      margin-inline: auto !important;
+    }
+
+    /* ─────────────────────────────────────────
+       FOOTER REVERSION (LEFT ALIGN)
+    ───────────────────────────────────────── */
+    footer, footer p, footer h1, footer h2, footer h3, footer h4, footer h5, footer h6, footer li, .footer-column, .footer-brand {
+      text-align: left !important;
+    }
+    footer .footer-column ul, footer .footer-social {
+      align-items: flex-start !important;
+      justify-content: flex-start !important;
+    }
+    footer .footer-brand .logo {
+      justify-content: flex-start !important;
+    }
+  
+    /* ─────────────────────────────────────────
+       STEP CARD REVERSION (LEFT ALIGN)
+    ───────────────────────────────────────── */
+    .step, .step p, .step h1, .step h2, .step h3, .step h4, .step h5, .step h6 {
+      text-align: left !important;
+    }
+  
+    /* ─────────────────────────────────────────
+       FEATURE LIST REVERSION (LEFT ALIGN)
+    ───────────────────────────────────────── */
+    .feature-content, .feature-content p, .feature-content h1, .feature-content h2, .feature-content h3 {
+      text-align: left !important;
+    }
+    .feature-list {
+      align-items: flex-start !important;
+    }
+  
+    /* ─────────────────────────────────────────
+       TOOL CARD REVERSION (LEFT ALIGN)
+    ───────────────────────────────────────── */
+    .tool-card {
+      align-items: flex-start !important;
+      text-align: left !important;
+      justify-content: flex-start !important;
+    }
+    .tool-info, .tool-info p, .tool-info h3 {
+      text-align: left !important;
+    }
+  
+    /* ─────────────────────────────────────────
+       TOOL CONTENT REVERSION (LEFT ALIGN)
+    ───────────────────────────────────────── */
+    .tool-header, .tool-info, .tool-header h1, .tool-header p, .tool-info h1, .tool-info p {
+      text-align: left !important;
+    }
+    .tool-container {
+      align-items: flex-start !important;
+    }
+  
+    /* ─────────────────────────────────────────
+       FINAL NEUTRALIZATION & ALIGNMENT
+    ───────────────────────────────────────── */
+    main {
+      margin-inline: auto !important;
+      max-width: 1000px !important;
+    }
+    .tool-header, .tool-info, .tool-header h1, .tool-header p, .tool-info h1, .tool-info p, .tool-icon {
+      text-align: left !important;
+      margin-inline: auto !important;
+      margin-right: auto !important;
+    }
+    .btn-primary {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    }
+    .btn-primary:hover {
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2) !important;
+    }
+    /* Ensure dropdown text is strictly black */
+    .dropdown-title, .dropdown-desc, .nav-link, .mobile-nav-link, .mobile-tool-item span {
+      color: #000000 !important;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header id="mainHeader">
+    <div class="header-container">
+      <a href="index.html" class="logo">PDF<span>Tools</span></a>
+
+      <nav>
+        <ul class="nav-list">
+          <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+          <li class="nav-item"><a href="features.html" class="nav-link">Features</a></li>
+          <li class="nav-item active">
+            <a href="all-tools.html" class="nav-link">
+              Tools
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </a>
+            <div class="dropdown-menu">
+              <a href="merge.html" class="dropdown-item">
+                <div class="dropdown-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 7v8a2 2 0 0 0 2 2h6M8 7V5a2 2 0 0 1 2-2h4.586a1 1 0 0 1 .707.293l4.414 4.414a1 1 0 0 1 .293.707V15a2 2 0 0 1-2 2h-2"/><path d="M12 12v6"/><path d="M9 15l3 3 3-3"/></svg></div>
+                <div class="dropdown-info"><span class="dropdown-title">Merge PDF</span><span class="dropdown-desc">Combine multiple files</span></div>
+              </a>
+              <a href="compress.html" class="dropdown-item">
+                <div class="dropdown-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+                <div class="dropdown-info"><span class="dropdown-title">Compress PDF</span><span class="dropdown-desc">Reduce file size</span></div>
+              </a>
+              <a href="protect.html" class="dropdown-item">
+                <div class="dropdown-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+                <div class="dropdown-info"><span class="dropdown-title">Protect PDF</span><span class="dropdown-desc">Encrypt & password</span></div>
+              </a>
+              <a href="imagetopdf.html" class="dropdown-item">
+                <div class="dropdown-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+                <div class="dropdown-info"><span class="dropdown-title">Image to PDF</span><span class="dropdown-desc">Convert JPG/PNG</span></div>
+              </a>
+              <a href="redact.html" class="dropdown-item">
+                <div class="dropdown-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h12"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg></div>
+                <div class="dropdown-info"><span class="dropdown-title">Redact PDF</span><span class="dropdown-desc">Hide sensitive info</span></div>
+              </a>
+              <a href="remove.html" class="dropdown-item">
+                <div class="dropdown-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></div>
+                <div class="dropdown-info"><span class="dropdown-title">Remove Pages</span><span class="dropdown-desc">Delete PDF pages</span></div>
+              </a>
+              <a href="rotate.html" class="dropdown-item">
+                <div class="dropdown-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg></div>
+                <div class="dropdown-info"><span class="dropdown-title">Rotate PDF</span><span class="dropdown-desc">Change orientation</span></div>
+              </a>
+              <a href="watermark.html" class="dropdown-item">
+                <div class="dropdown-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></div>
+                <div class="dropdown-info"><span class="dropdown-title">Watermark</span><span class="dropdown-desc">Text protection</span></div>
+              </a>
+              <a href="all-tools.html" class="dropdown-item dropdown-view-all">
+                <div class="dropdown-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg></div>
+                <div class="dropdown-info"><span class="dropdown-title">View All Tools</span><span class="dropdown-desc">8+ PDF utilities</span></div>
+              </a>
+            </div>
+          </li>
+          <li class="nav-item"><a href="how-to-use.html" class="nav-link">How to Use</a></li>
+          <li class="nav-item"><a href="why-use.html" class="nav-link">Why Us?</a></li>
+        </ul>
+      </nav>
+
+      <a href="#toolsGrid" class="nav-cta">Get Started</a>
+
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle Menu">
+        <svg id="menuIcon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <ul class="mobile-nav-list">
+      <li><a href="index.html" class="mobile-nav-link">Home</a></li>
+      <li><a href="features.html" class="mobile-nav-link">Features</a></li>
+      <li>
+        <div class="mobile-nav-link" onclick="toggleMobileTools(this)">
+          Tools
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="mobile-tools-grid" id="mobileToolsGrid">
+          <a href="merge.html" class="mobile-tool-item"><span>Merge PDF</span></a>
+          <a href="compress.html" class="mobile-tool-item"><span>Compress PDF</span></a>
+          <a href="protect.html" class="mobile-tool-item"><span>Protect PDF</span></a>
+          <a href="imagetopdf.html" class="mobile-tool-item"><span>Image to PDF</span></a>
+          <a href="redact.html" class="mobile-tool-item"><span>Redact PDF</span></a>
+          <a href="remove.html" class="mobile-tool-item"><span>Remove Pages</span></a>
+          <a href="rotate.html" class="mobile-tool-item"><span>Rotate PDF</span></a>
+          <a href="watermark.html" class="mobile-tool-item"><span>Watermark</span></a>
+        </div>
+        <a href="all-tools.html" class="mobile-view-all">View All Tools →</a>
+      </li>
+      <li><a href="how-to-use.html" class="mobile-nav-link">How to Use</a></li>
+      <li><a href="why-use.html" class="mobile-nav-link">Why Us?</a></li>
+    </ul>
+  </div>
+
+  <!-- Hero -->
+  <section class="page-hero">
+    <div class="page-hero-inner">
+      <div class="page-badge">9 Free Tools Available</div>
+      <h1>All PDF Tools</h1>
+      <p>Powerful PDF utilities that run entirely in your browser.<br>Complete privacy — your files never leave your device.</p>
+
+      <div class="stats-pills">
+        <div class="stat-pill">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          100% Free
+        </div>
+        <div class="stat-pill">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          No Server Upload
+        </div>
+        <div class="stat-pill">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          Instant Results
+        </div>
+      </div>
+
+      <div class="search-wrap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="toolSearch" placeholder="Search tools… e.g. compress, rotate" autocomplete="off">
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Main Tools -->
+  <main>
+    <div class="filter-row">
+      <button class="filter-btn active" data-cat="all">All Tools</button>
+      <button class="filter-btn" data-cat="edit">Edit</button>
+      <button class="filter-btn" data-cat="convert">Convert</button>
+      <button class="filter-btn" data-cat="secure">Secure</button>
+      <span class="filter-count" id="filterCount">Showing 9 tools</span>
+    </div>
+
+    <div class="tools-grid" id="toolsGrid">
+
+      <!-- Merge PDF — Edit -->
+      <a href="merge.html" class="tool-card" data-cat="edit" data-name="merge pdf combine">
+        <div class="card-top">
+          <div class="tool-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 7v8a2 2 0 0 0 2 2h6M8 7V5a2 2 0 0 1 2-2h4.586a1 1 0 0 1 .707.293l4.414 4.414a1 1 0 0 1 .293.707V15a2 2 0 0 1-2 2h-2"/><path d="M12 12v6"/><path d="M9 15l3 3 3-3"/></svg>
+          </div>
+          <span class="cat-badge cat-edit">Edit</span>
+        </div>
+        <div class="tool-info">
+          <h3>Merge PDF</h3>
+          <p>Combine multiple PDF files into one document in your preferred order. Fast and seamless.</p>
+        </div>
+        <span class="tool-link-btn">Use Tool <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+      </a>
+
+      <!-- Compress PDF — Edit -->
+      <a href="compress.html" class="tool-card" data-cat="edit" data-name="compress pdf reduce size">
+        <div class="card-top">
+          <div class="tool-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <span class="cat-badge cat-edit">Edit</span>
+        </div>
+        <div class="tool-info">
+          <h3>Compress PDF</h3>
+          <p>Reduce the file size of your PDF while maintaining optimal quality for easy sharing.</p>
+        </div>
+        <span class="tool-link-btn">Use Tool <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+      </a>
+
+      <!-- Remove Pages — Edit -->
+      <a href="remove.html" class="tool-card" data-cat="edit" data-name="remove pages delete">
+        <div class="card-top">
+          <div class="tool-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          </div>
+          <span class="cat-badge cat-edit">Edit</span>
+        </div>
+        <div class="tool-info">
+          <h3>Remove Pages</h3>
+          <p>Delete specific pages from your PDF with simple selection. Clean and precise.</p>
+        </div>
+        <span class="tool-link-btn">Use Tool <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+      </a>
+
+      <!-- Rotate PDF — Edit -->
+      <a href="rotate.html" class="tool-card" data-cat="edit" data-name="rotate pdf orientation pages">
+        <div class="card-top">
+          <div class="tool-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+          </div>
+          <span class="cat-badge cat-edit">Edit</span>
+        </div>
+        <div class="tool-info">
+          <h3>Rotate PDF</h3>
+          <p>Rotate pages 90°, 180°, or 270°. Apply to all pages or specific ones individually.</p>
+        </div>
+        <span class="tool-link-btn">Use Tool <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+      </a>
+
+      <!-- Image to PDF — Convert -->
+      <a href="imagetopdf.html" class="tool-card" data-cat="convert" data-name="image to pdf jpg png convert">
+        <div class="card-top">
+          <div class="tool-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </div>
+          <span class="cat-badge cat-convert">Convert</span>
+        </div>
+        <div class="tool-info">
+          <h3>Image to PDF</h3>
+          <p>Convert JPG, PNG, and other images into high-quality PDF files. Supports bulk import.</p>
+        </div>
+        <span class="tool-link-btn">Use Tool <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+      </a>
+
+      <!-- Protect PDF — Secure -->
+      <a href="protect.html" class="tool-card" data-cat="secure" data-name="protect pdf password encrypt secure">
+        <div class="card-top">
+          <div class="tool-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <span class="cat-badge cat-secure">Secure</span>
+        </div>
+        <div class="tool-info">
+          <h3>Protect PDF</h3>
+          <p>Add a password and AES-256 encryption to your PDF. Keep sensitive information safe.</p>
+        </div>
+        <span class="tool-link-btn">Use Tool <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+      </a>
+
+      <!-- Redact PDF — Secure -->
+      <a href="redact.html" class="tool-card" data-cat="secure" data-name="redact pdf sensitive blackout hide">
+        <div class="card-top">
+          <div class="tool-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h12"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+          </div>
+          <span class="cat-badge cat-secure">Secure</span>
+        </div>
+        <div class="tool-info">
+          <h3>Redact PDF</h3>
+          <p>Permanently black out sensitive information from your PDF documents. Irreversible.</p>
+        </div>
+        <span class="tool-link-btn">Use Tool <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+      </a>
+
+      <!-- Watermark — Secure -->
+      <a href="watermark.html" class="tool-card" data-cat="secure" data-name="watermark text stamp brand">
+        <div class="card-top">
+          <div class="tool-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+          </div>
+          <span class="cat-badge cat-secure">Secure</span>
+        </div>
+        <div class="tool-info">
+          <h3>Watermark PDF</h3>
+          <p>Add custom text watermarks to brand and protect your PDF content. Fully customizable.</p>
+        </div>
+        <span class="tool-link-btn">Use Tool <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+      </a>
+ 
+      <!-- Unlock PDF — Secure -->
+      <a href="unlock.html" class="tool-card" data-cat="secure" data-name="unlock pdf password remove decrypt">
+        <div class="card-top">
+          <div class="tool-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 1 1 10 0v4"/><path d="M11 11h2v3h-2z"/></svg>
+          </div>
+          <span class="cat-badge cat-secure">Secure</span>
+        </div>
+        <div class="tool-info">
+          <h3>Unlock PDF</h3>
+          <p>Remove passwords and restrictions from secured PDF files. Free and fast decryption.</p>
+        </div>
+        <span class="tool-link-btn">Use Tool <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+      </a>
+
+      <!-- No results -->
+      <div class="no-results" id="noResults">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <p>No tools match your search. Try a different keyword.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="logo">PDF<span>Tools</span></a>
+          <p>Professional PDF utilities that run entirely in your browser. No uploads, no watermarks, complete privacy.</p>
+        </div>
+        <div class="footer-column">
+          <h4>Edit Tools</h4>
+          <ul>
+            <li><a href="merge.html">Merge PDFs</a></li>
+            <li><a href="compress.html">Compress PDF</a></li>
+            <li><a href="remove.html">Remove Pages</a></li>
+            <li><a href="rotate.html">Rotate PDF</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4>Security</h4>
+          <ul>
+            <li><a href="protect.html">Protect PDF</a></li>
+            <li><a href="redact.html">Redact PDF</a></li>
+            <li><a href="watermark.html">Watermark</a></li>
+            <li><a href="imagetopdf.html">Image to PDF</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="privacy-policy.html">Privacy Policy</a></li>
+            <li><a href="terms-of-service.html">Terms of Service</a></li>
+            <li><a href="cookie-policy.html">Cookie Policy</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 PDFTools. All rights reserved. Made with ❤ by AMANXR. Free & Fast — No server uploads.</p>
+        <div class="footer-social">
+          <a href="https://x.com/home" aria-label="Twitter">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
+          </a>
+          <a href="https://github.com/xraman-71" aria-label="GitHub">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Header scroll
+    window.addEventListener('scroll', () => {
+      document.getElementById('mainHeader').classList.toggle('scrolled', window.scrollY > 20);
+    });
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobileMenu');
+      const icon = document.getElementById('menuIcon');
+      const open = menu.classList.toggle('active');
+      document.body.style.overflow = open ? 'hidden' : '';
+      icon.innerHTML = open
+        ? '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>'
+        : '<line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>';
+    }
+
+    // Mobile tools accordion
+    function toggleMobileTools(el) {
+      const grid = document.getElementById('mobileToolsGrid');
+      const isOpen = grid.style.display === 'grid';
+      grid.style.display = isOpen ? 'none' : 'grid';
+      const svgEl = el.querySelector('svg');
+      svgEl.style.transform = isOpen ? '' : 'rotate(180deg)';
+    }
+
+    // Category filter
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const cards = document.querySelectorAll('.tool-card[data-cat]');
+    const countEl = document.getElementById('filterCount');
+    const noResults = document.getElementById('noResults');
+    let activeFilter = 'all';
+    let searchQuery = '';
+
+    function applyFilters() {
+      let visible = 0;
+      cards.forEach(card => {
+        const catMatch = activeFilter === 'all' || card.dataset.cat === activeFilter;
+        const searchMatch = !searchQuery || card.dataset.name.includes(searchQuery);
+        const show = catMatch && searchMatch;
+        card.classList.toggle('hidden', !show);
+        if (show) visible++;
+      });
+      countEl.textContent = `Showing ${visible} tool${visible !== 1 ? 's' : ''}`;
+      noResults.style.display = visible === 0 ? 'block' : 'none';
+    }
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeFilter = btn.dataset.cat;
+        applyFilters();
+      });
+    });
+
+    document.getElementById('toolSearch').addEventListener('input', e => {
+      searchQuery = e.target.value.toLowerCase().trim();
+      applyFilters();
+    });
+  </script>
+</body>
+</html>

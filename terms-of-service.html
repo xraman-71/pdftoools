@@ -6,17 +6,52 @@
   <title>Terms of Service | PDF Tools</title>
   <meta name="description" content="Terms of Service for PDF Tools - Rules and guidelines for using our service.">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap');
     
     :root {
-      --pure-white: #ffffff;
-      --off-white: #fafafa;
-      --light-gray: #f5f5f5;
-      --medium-gray: #e5e5e5;
-      --dark-gray: #737373;
-      --light-black: #404040;
-      --black: #171717;
+      /* Legacy Achromatic Fallbacks */
+      --black: #000000;
+      --light-black: #222222;
       --pure-black: #000000;
+      --dark-gray: #444444;
+      --medium-gray: #D1D5DB;
+      --light-gray: #F3F4F6;
+      --off-white: #F9F9F9;
+      --pure-white: #FFFFFF;
+      --border-main: #E5E7EB;
+      /* Maximum Contrast Theme Tokens - Perfect Legibility */
+      --primary:      #000000; /* Plain Black */
+      --primary-h:    #222222; /* Off Black */
+      --primary-light: #F5F5F5; /* Off White */
+      
+      --accent:       #000000; /* Plain Black */
+      --accent-light: rgba(0, 0, 0, 0.05);
+      
+      --bg:           #FFFFFF; /* Plain White */
+      --bg-soft:      #F9F9F9; /* Off White */
+      
+      --text:         #000000; /* Plain Black */
+      --text-heading: #000000; /* Plain Black */
+      --text-sub:     #222222; /* Off Black */
+      --text-muted:   #444444;
+      
+      --border-light: rgba(0, 0, 0, 0.1);
+      --font-body:    'Inter', sans-serif;
+      --font-heading: 'Outfit', sans-serif;
+      
+      --radius-sm: 4px; --radius-md: 8px; --radius-lg: 12px; --radius-xl: 20px;
+      
+      --shadow-sm:   0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-soft: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+      --shadow-xl:   0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      
+      --transition-base:   all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-smooth: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    h1, h2, h3, .logo { 
+      font-family: var(--font-heading); 
+      color: #000000; 
     }
 
     * {
@@ -26,40 +61,71 @@
     }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--pure-white);
-      color: var(--black);
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
     }
 
+    /* Modern Thin Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { 
+      background: var(--bg-soft); 
+      border-radius: 10px; 
+      border: 2px solid var(--bg);
+    }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
     /* Header */
+    /* ─────────────────────────────────────────
+       HEADER / NAV
+    ───────────────────────────────────────── */
     header {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       z-index: 1000;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
+      background: rgba(255, 255, 255, 0.8);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      backdrop-filter: blur(20px) saturate(180%);
       border-bottom: 1px solid var(--medium-gray);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    header.scrolled {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 0.25rem 0;
+      box-shadow: var(--shadow-sm);
     }
 
     .header-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 1.25rem 2rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      height: 80px;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      transition: height 0.4s ease;
+    }
+
+    header.scrolled .header-container {
+      height: 70px;
     }
 
     .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
       font-size: 1.5rem;
       font-weight: 800;
       color: var(--pure-black);
       letter-spacing: -0.03em;
-      text-decoration: none;
+      z-index: 1001;
     }
 
     .logo span {
@@ -67,19 +133,218 @@
       color: var(--dark-gray);
     }
 
-    .back-link {
-      color: var(--light-black);
+    /* Desktop Navigation */
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 2.5rem;
+    }
+
+    .nav-list {
+      display: flex;
+      align-items: center;
+      gap: 2.5rem;
+      list-style: none;
+    }
+
+    .nav-item {
+      position: relative;
+    }
+
+    .nav-link {
       text-decoration: none;
       font-size: 0.9375rem;
       font-weight: 500;
+      color: var(--light-black);
+      transition: color 0.3s ease;
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      transition: color 0.2s;
+      gap: 0.25rem;
+      padding: 0.5rem 0;
     }
 
-    .back-link:hover {
+    .nav-link:hover, .nav-item.active .nav-link {
+      color: var(--primary);
+    }
+
+    .nav-link svg {
+      transition: transform 0.3s ease;
+    }
+
+    .nav-item:hover .nav-link svg {
+      transform: rotate(180deg);
+    }
+
+    /* Dropdown System */
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: var(--pure-white);
+      border: 1px solid var(--medium-gray);
+      border-radius: 18px;
+      padding: 0.75rem;
+      min-width: 680px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 1000;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.25rem;
+    }
+
+    .nav-item:hover .dropdown-menu {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      padding: 0.75rem 1rem;
+      text-decoration: none;
+      color: var(--dark-gray);
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .dropdown-item:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .dropdown-item svg {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2;
+    }
+
+    .dropdown-item-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .dropdown-item-title {
+      font-weight: 600;
       color: var(--pure-black);
+      font-size: 0.9375rem;
+    }
+
+    .dropdown-item-desc {
+      font-size: 0.75rem;
+      color: var(--dark-gray);
+    }
+
+    .dropdown-item:hover .dropdown-item-title {
+      color: var(--primary);
+    }
+
+    /* Mobile Menu Toggle */
+    .menu-toggle {
+      display: none;
+      background: var(--off-white);
+      border: 1px solid var(--medium-gray);
+      padding: 0.625rem;
+      border-radius: 12px;
+      cursor: pointer;
+      color: var(--pure-black);
+      transition: all 0.2s;
+      z-index: 1001;
+    }
+
+    .menu-toggle:hover {
+      background: var(--medium-gray);
+    }
+
+    /* Mobile Menu Overlay */
+    .mobile-menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--pure-white);
+      z-index: 2000;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .mobile-menu.active {
+      transform: translateX(0);
+    }
+
+    .mobile-menu-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .mobile-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .mobile-nav-link {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border-light);
+      cursor: pointer;
+    }
+
+    .mobile-tools-grid {
+      display: none;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      padding: 1rem 0 0.5rem;
+    }
+
+    .mobile-tool-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      padding: 0.875rem 1rem;
+      background: var(--bg-soft);
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      border: 1px solid var(--border-light);
+    }
+
+    .mobile-tool-item span {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .mobile-tool-item.view-all {
+      background: var(--primary-light);
+      border-color: var(--primary);
+    }
+
+    .mobile-tool-item.view-all span {
+      color: var(--primary);
+    }
+
+    @media (max-width: 992px) {
+      nav { display: none; }
+      .menu-toggle { display: block; }
     }
 
     /* Main Content */
@@ -137,11 +402,12 @@
     }
 
     .highlight-box {
-      background: var(--off-white);
-      border: 1px solid var(--medium-gray);
-      border-radius: 12px;
+      background: var(--bg-soft);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
       padding: 1.5rem;
       margin: 1.5rem 0;
+      color: var(--accent);
     }
 
     .highlight-box p {
@@ -162,6 +428,10 @@
       font-size: 0.875rem;
     }
 
+    .footer-copy {
+      margin-top: 1rem;
+    }
+
     footer a {
       color: var(--light-black);
       text-decoration: none;
@@ -173,30 +443,194 @@
     }
 
     @media (max-width: 768px) {
-      main {
-        padding: 6rem 1.5rem 3rem;
-      }
-
-      .page-header h1 {
-        font-size: 2rem;
-      }
+      .header-container { padding: 0 1.5rem; }
+      .logo { font-size: 1.3rem; }
+      .menu-toggle { padding: 0.5rem; }
+      main { padding: 7rem 1.5rem 3rem; }
+      .page-header h1 { font-size: 2rem; }
     }
+  
+  
+    /* Neutralize all blue text in navigation */
+    .dropdown-title, .dropdown-desc, .nav-link, .mobile-nav-link, .mobile-tool-item span {
+      color: #000000 !important;
+    }
+  
+    .dropdown-view-all { 
+      grid-column: 1 / -1 !important; 
+      border-top: 1px solid var(--border-light); 
+      margin-top: 0.5rem; 
+      padding-top: 0.75rem; 
+    }
+
+    .nav-cta {
+      background: var(--primary);
+      color: #fff !important;
+      padding: 0.6rem 1.4rem;
+      border-radius: var(--radius-md);
+      font-weight: 600 !important;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow-md);
+      margin-left: 1rem;
+    }
+
+    .nav-cta:hover {
+      background: #000000 !important;
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-lg);
+    }
+
   </style>
 </head>
 <body>
-
-  <header>
+  <header id="mainHeader">
     <div class="header-container">
       <a href="index.html" class="logo">PDF<span>Tools</span></a>
-      <a href="index.html" class="back-link">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="19" y1="12" x2="5" y2="12"></line>
-          <polyline points="12 19 5 12 12 5"></polyline>
+      
+      <nav>
+        <ul class="nav-list">
+          <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+          <li class="nav-item">
+            <a href="all-tools.html" class="nav-link">
+              Tools 
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </a>
+            <div class="dropdown-menu">
+              <a href="merge.html" class="dropdown-item">
+                <div class="dropdown-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 7v8a2 2 0 0 0 2 2h6M8 7V5a2 2 0 0 1 2-2h4.586a1 1 0 0 1 .707.293l4.414 4.414a1 1 0 0 1 .293.707V15a2 2 0 0 1-2 2h-2"/><path d="M12 12v6"/><path d="M9 15l3 3 3-3"/></svg>
+                </div>
+                <div class="dropdown-info">
+                  <span class="dropdown-title">Merge PDF</span>
+                  <span class="dropdown-desc">Combine multiple files</span>
+                </div>
+              </a>
+              <a href="compress.html" class="dropdown-item">
+                <div class="dropdown-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14V4a2 2 0 0 1 2-2h10l4 4v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4"/><path d="M4 14h16"/><path d="m15 9-3 3-3-3"/></svg>
+                </div>
+                <div class="dropdown-info">
+                  <span class="dropdown-title">Compress PDF</span>
+                  <span class="dropdown-desc">Reduce file size</span>
+                </div>
+              </a>
+              <a href="protect.html" class="dropdown-item">
+                <div class="dropdown-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <div class="dropdown-info">
+                  <span class="dropdown-title">Protect PDF</span>
+                  <span class="dropdown-desc">Encrypted security</span>
+                </div>
+              </a>
+              <a href="imagetopdf.html" class="dropdown-item">
+                <div class="dropdown-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                </div>
+                <div class="dropdown-info">
+                  <span class="dropdown-title">Image to PDF</span>
+                  <span class="dropdown-desc">Convert JPG/PNG</span>
+                </div>
+              </a>
+              <a href="redact.html" class="dropdown-item">
+                <div class="dropdown-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h12"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                </div>
+                <div class="dropdown-info">
+                  <span class="dropdown-title">Redact PDF</span>
+                  <span class="dropdown-desc">Hide sensitive info</span>
+                </div>
+              </a>
+              <a href="remove.html" class="dropdown-item">
+                <div class="dropdown-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h12"/><circle cx="18" cy="17" r="3"/><line x1="16.5" y1="17" x2="19.5" y2="17"/></svg>
+                </div>
+                <div class="dropdown-info">
+                  <span class="dropdown-title">Remove Pages</span>
+                  <span class="dropdown-desc">Delete PDF pages</span>
+                </div>
+              </a>
+              <a href="rotate.html" class="dropdown-item">
+                <div class="dropdown-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                </div>
+                <div class="dropdown-info">
+                  <span class="dropdown-title">Rotate PDF</span>
+                  <span class="dropdown-desc">Change orientation</span>
+                </div>
+              </a>
+              <a href="watermark.html" class="dropdown-item">
+                <div class="dropdown-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                </div>
+                <div class="dropdown-info">
+                  <span class="dropdown-title">Watermark</span>
+                  <span class="dropdown-desc">Text protection</span>
+                </div>
+              </a>
+              <a href="all-tools.html" class="dropdown-item dropdown-view-all">
+                <div class="dropdown-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                </div>
+                <div class="dropdown-info">
+                  <span class="dropdown-title">View All Tools</span>
+                  <span class="dropdown-desc">8+ PDF utilities</span>
+                </div>
+              </a>
+            </div>
+          </li>
+          <li class="nav-item"><a href="how-to-use.html" class="nav-link">How to Use</a></li>
+          <li class="nav-item"><a href="why-use.html" class="nav-link">Why Us?</a></li>
+        </ul>
+      </nav>
+
+      <a href="all-tools.html" class="nav-cta">Get Started</a>
+
+      <button class="menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle Menu">
+        <svg id="menuIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
         </svg>
-        Back to Home
-      </a>
+      </button>
     </div>
   </header>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-header">
+      <a href="index.html" class="logo">PDF<span>Tools</span></a>
+      <button class="menu-toggle" onclick="toggleMobileMenu()" aria-label="Close Menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <ul class="mobile-nav-list">
+      <li><a href="index.html" class="mobile-nav-link">Home</a></li>
+      <li>
+        <div class="mobile-nav-link" onclick="toggleMobileTools()">
+          Tools 
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="mobile-tools-grid">
+          <a href="merge.html" class="mobile-tool-item"><span>Merge PDF</span></a>
+          <a href="compress.html" class="mobile-tool-item"><span>Compress PDF</span></a>
+          <a href="protect.html" class="mobile-tool-item"><span>Protect PDF</span></a>
+          <a href="imagetopdf.html" class="mobile-tool-item"><span>Image to PDF</span></a>
+          <a href="redact.html" class="mobile-tool-item"><span>Redact PDF</span></a>
+          <a href="remove.html" class="mobile-tool-item"><span>Remove Pages</span></a>
+          <a href="rotate.html" class="mobile-tool-item"><span>Rotate PDF</span></a>
+          <a href="watermark.html" class="mobile-tool-item"><span>Watermark</span></a>
+          <a href="all-tools.html" class="mobile-tool-item view-all"><span>View All Tools</span></a>
+        </div>
+      </li>
+      <li><a href="how-to-use.html" class="mobile-nav-link">How to Use</a></li>
+      <li><a href="why-use.html" class="mobile-nav-link">Why Us?</a></li>
+    </ul>
+  </div>
 
   <main>
     <div class="page-header">
@@ -285,7 +719,7 @@
 
     <div class="content-section">
       <h2>11. Contact Information</h2>
-      <p>For questions about these Terms, please contact us at legal@pdftools.com</p>
+      <p>For questions about these Terms, please contact us at xrbrowserextension@gmail.com</p>
     </div>
   </main>
 
@@ -296,8 +730,18 @@
       <a href="terms-of-service.html">Terms</a>
       <a href="cookie-policy.html">Cookies</a>
     </p>
-    <p style="margin-top: 1rem;">© 2026 PDFTools. All rights reserved.</p>
+    <p class="footer-copy">© 2026 PDFTools. All rights reserved.</p>
   </footer>
 
+  <script>
+    const headerElement = document.getElementById('mainHeader');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 20) {
+        headerElement.classList.add('scrolled');
+      } else {
+        headerElement.classList.remove('scrolled');
+      }
+    });
+  </script>
 </body>
 </html>

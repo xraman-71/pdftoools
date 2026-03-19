@@ -6,531 +6,323 @@
   <title>Merge PDFs | PDF Tools</title>
   <meta name="description" content="Combine multiple PDF files into one document. Free, private, browser-based tool.">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300 ;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap');
     
     :root {
-      --pure-white: #ffffff;
-      --off-white: #fafafa;
-      --light-gray: #f5f5f5;
-      --medium-gray: #e5e5e5;
-      --dark-gray: #737373;
-      --light-black: #404040;
-      --black: #171717;
+      --black: #000000;
+      --light-black: #222222;
       --pure-black: #000000;
+      --dark-gray: #444444;
+      --medium-gray: #D1D5DB;
+      --light-gray: #F3F4F6;
+      --off-white: #F9F9F9;
+      --pure-white: #FFFFFF;
+      --border-main: #E5E7EB;
+      --primary:      #000000;
+      --primary-h:    #222222;
+      --primary-light: #F5F5F5;
+      --accent:       #000000;
+      --accent-light: rgba(0, 0, 0, 0.05);
+      --bg:           #FFFFFF;
+      --bg-soft:      #F9F9F9;
+      --text:         #000000;
+      --text-heading: #000000;
+      --text-sub:     #222222;
+      --text-muted:   #444444;
+      --border-light: rgba(0, 0, 0, 0.1);
+      --font-body:    'Inter', sans-serif;
+      --font-heading: 'Outfit', sans-serif;
+      --radius-sm: 4px; --radius-md: 8px; --radius-lg: 12px; --radius-xl: 20px;
+      --shadow-sm:   0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-soft: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+      --shadow-xl:   0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      --transition-base:   all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-smooth: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--pure-white);
-      color: var(--black);
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
+    h1, h2, h3, .logo { font-family: var(--font-heading); color: var(--text-heading); }
 
-    /* Header */
     header {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
+      top: 0; left: 0; right: 0;
       z-index: 1000;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
+      background: rgba(255, 255, 255, 0.8);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      backdrop-filter: blur(20px) saturate(180%);
       border-bottom: 1px solid var(--medium-gray);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
-
+    header.scrolled { background: rgba(255, 255, 255, 0.95); padding: 0.25rem 0; box-shadow: var(--shadow-sm); }
     .header-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 1.25rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 80px; max-width: 1400px; margin: 0 auto; padding: 0 2rem;
+      transition: height 0.4s ease;
     }
-
+    header.scrolled .header-container { height: 70px; }
     .logo {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--pure-black);
-      letter-spacing: -0.03em;
-      text-decoration: none;
+      display: flex; align-items: center; gap: 0.75rem;
+      text-decoration: none; font-size: 1.5rem; font-weight: 800;
+      color: #000000; letter-spacing: -0.03em; z-index: 1001;
     }
+    .logo span { font-weight: 400; color: var(--text-muted); }
 
-    .logo span {
-      font-weight: 400;
-      color: var(--dark-gray);
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--bg-soft); border-radius: 10px; border: 2px solid var(--bg); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    nav { display: flex; align-items: center; gap: 2.5rem; }
+    .nav-list { display: flex; align-items: center; gap: 2.5rem; list-style: none; }
+    .nav-item { position: relative; }
+    .nav-link {
+      text-decoration: none; font-size: 0.9375rem; font-weight: 500;
+      color: var(--light-black); transition: color 0.3s ease;
+      display: flex; align-items: center; gap: 0.25rem; padding: 0.5rem 0;
     }
+    .nav-link:hover, .nav-item.active .nav-link { color: var(--primary); }
+    .nav-link svg { transition: transform 0.3s ease; }
+    .nav-item:hover .nav-link svg { transform: rotate(180deg); }
 
-    .back-link {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: var(--light-black);
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 0.9375rem;
-      transition: color 0.2s;
+    .dropdown-menu {
+      position: absolute; top: 100%; left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: var(--pure-white); border: 1px solid var(--medium-gray);
+      border-radius: var(--radius-md); box-shadow: var(--shadow-soft);
+      padding: 1.5rem; width: 680px;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+      opacity: 0; visibility: hidden;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); z-index: 1000;
     }
+    .nav-item:hover .dropdown-menu { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+    .dropdown-item { display: flex; align-items: center; gap: 1rem; padding: 0.75rem; text-decoration: none; border-radius: var(--radius-sm); transition: background 0.2s ease; }
+    .dropdown-item:hover { background: var(--off-white); }
+    .dropdown-icon { width: 40px; height: 40px; background: var(--off-white); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--primary); transition: all 0.2s ease; }
+    .dropdown-item:hover .dropdown-icon { background: var(--primary-light); transform: scale(1.05); }
+    .dropdown-info { display: flex; flex-direction: column; }
+    .dropdown-title { font-size: 0.875rem; font-weight: 600; color: var(--black); }
+    .dropdown-desc { font-size: 0.75rem; color: var(--dark-gray); }
 
-    .back-link:hover {
-      color: var(--pure-black);
+    .mobile-menu-btn { display: none; background: none; border: none; cursor: pointer; padding: 0.5rem; z-index: 1001; color: var(--black); }
+    @media (max-width: 991px) { nav { display: none; } .mobile-menu-btn { display: block; } }
+
+    .mobile-menu {
+      position: fixed; inset: 0; background: var(--pure-white); z-index: 999;
+      padding: 100px 1.5rem 2rem; display: flex; flex-direction: column; gap: 2rem;
+      opacity: 0; visibility: hidden; transform: translateY(-10px);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
-
-    /* Main Content */
-    main {
-      flex: 1;
-      padding: 8rem 2rem 4rem;
-      max-width: 800px;
-      margin: 0 auto;
-      width: 100%;
+    .mobile-menu.active { opacity: 1; visibility: visible; transform: translateY(0); }
+    .mobile-nav-list { list-style: none; display: flex; flex-direction: column; gap: 0; }
+    .mobile-nav-link {
+      font-size: 1.15rem; font-weight: 600; color: var(--text); text-decoration: none;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 0; border-bottom: 1px solid var(--border-light); cursor: pointer;
     }
+    .mobile-tools-grid { display: none; grid-template-columns: 1fr 1fr; gap: 0.75rem; padding: 1rem 0 0.5rem; }
+    .mobile-tool-item { display: flex; flex-direction: column; gap: 0.25rem; padding: 0.875rem 1rem; background: var(--bg-soft); border-radius: var(--radius-md); text-decoration: none; border: 1px solid var(--border-light); }
+    .mobile-tool-item span { font-size: 0.875rem; font-weight: 600; color: var(--text); }
 
-    .tool-header {
-      text-align: center;
-      margin-bottom: 3rem;
-    }
+    main { flex: 1; padding: 8rem 2rem 4rem; max-width: 800px; margin: 0 auto; width: 100%; }
+    @media (max-width: 768px) { main { padding: 6rem 1.5rem 3rem; } }
 
-    .tool-icon {
-      width: 80px;
-      height: 80px;
-      background: var(--off-white);
-      border-radius: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1.5rem;
-      border: 1px solid var(--medium-gray);
-    }
-
-    .tool-icon svg {
-      width: 40px;
-      height: 40px;
-      stroke-width: 1.5;
-    }
-
+    /* ── TOOL HEADER ── */
+    .tool-header { text-align: center; margin-bottom: 3rem; }
     .tool-header h1 {
-      font-size: 2rem;
-      font-weight: 800;
-      color: var(--pure-black);
-      margin-bottom: 0.75rem;
-      letter-spacing: -0.02em;
+      font-size: 2rem; font-weight: 800; color: var(--pure-black);
+      margin-bottom: 0.75rem; letter-spacing: -0.02em; text-align: center;
     }
+    @media (max-width: 640px) { .tool-header h1 { font-size: 1.75rem; } }
+    .tool-header p { color: var(--dark-gray); font-size: 1.125rem; text-align: center; }
+    @media (max-width: 640px) { .tool-header p { font-size: 1rem; } }
 
-    .tool-header p {
-      color: var(--dark-gray);
-      font-size: 1.125rem;
+    /* ── TRUST BAR ── */
+    .trust-bar {
+      display: inline-flex; align-items: center; gap: 0.75rem;
+      background: #f9f9f9; border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 100px; padding: 0.5rem 1.25rem;
+      margin: 0.75rem auto 1.25rem; flex-wrap: wrap; justify-content: center;
     }
-
-    /* Tool Container */
-    .tool-container {
-      background: var(--off-white);
-      border-radius: 24px;
-      padding: 2.5rem;
-      border: 1px solid var(--medium-gray);
+    .trust-badge {
+      display: inline-flex; align-items: center; gap: 0.375rem;
+      font-size: 0.78rem; font-weight: 600; color: #222;
+      letter-spacing: 0.01em; white-space: nowrap;
     }
+    .trust-badge svg { width: 13px; height: 13px; color: #000; flex-shrink: 0; }
+    .trust-divider { width: 1px; height: 14px; background: rgba(0,0,0,0.15); display: inline-block; flex-shrink: 0; }
 
-    /* Drop Zone */
-    .drop-zone {
-      background: var(--pure-white);
-      border: 2px dashed var(--medium-gray);
-      border-radius: 16px;
-      padding: 3rem 2rem;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.3s;
-      margin-bottom: 1.5rem;
-    }
+    .tool-container { background: var(--bg-soft); border-radius: var(--radius-lg); padding: 2.5rem; border: 1px solid var(--border-light); box-shadow: var(--shadow-md); }
+    @media (max-width: 640px) { .tool-container { padding: 1.5rem; border-radius: 16px; } }
 
-    .drop-zone:hover, .drop-zone.dragover {
-      border-color: var(--pure-black);
-      background: var(--light-gray);
-    }
+    .drop-zone { background: var(--bg); border: 2px dashed var(--border-light); border-radius: var(--radius-md); padding: 3rem 2rem; text-align: center; cursor: pointer; transition: all 0.3s; margin-bottom: 1.5rem; }
+    .drop-zone:hover, .drop-zone.dragover { border-color: var(--primary); background: #fff; }
+    .drop-zone-icon { width: 64px; height: 64px; background: var(--off-white); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; border: 1px solid var(--medium-gray); }
+    .drop-zone-icon svg { width: 32px; height: 32px; color: var(--light-black); }
+    .drop-zone h3 { font-size: 1.125rem; font-weight: 600; color: var(--pure-black); margin-bottom: 0.5rem; }
+    .drop-zone p { color: var(--dark-gray); font-size: 0.9375rem; }
+    .file-input { display: none; }
 
-    .drop-zone-icon {
-      width: 64px;
-      height: 64px;
-      background: var(--off-white);
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1rem;
-      border: 1px solid var(--medium-gray);
-    }
+    .file-list { margin-bottom: 1.5rem; }
+    .file-item { background: var(--pure-white); border: 1px solid var(--medium-gray); border-radius: 12px; padding: 1rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; transition: all 0.2s; }
+    .file-item:hover { border-color: var(--light-black); }
+    .file-info { display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 0; }
+    .file-icon { width: 40px; height: 40px; background: var(--off-white); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .file-icon svg { width: 20px; height: 20px; color: var(--light-black); }
+    .file-details { min-width: 0; }
+    .file-name { font-weight: 600; color: var(--pure-black); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 0.25rem; }
+    .file-size { font-size: 0.875rem; color: var(--dark-gray); }
+    .file-actions { display: flex; gap: 0.5rem; }
+    .btn-icon { width: 36px; height: 36px; border: 1px solid var(--medium-gray); background: var(--pure-white); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: var(--light-black); }
+    .btn-icon:hover { border-color: var(--pure-black); color: var(--pure-black); }
+    .btn-icon.remove:hover { background: #fef2f2; border-color: #ef4444; color: #ef4444; }
+    .btn-icon:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    .drop-zone-icon svg {
-      width: 32px;
-      height: 32px;
-      color: var(--light-black);
-    }
+    .tool-options { background: var(--pure-white); border: 1px solid var(--medium-gray); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .tool-options h3 { font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--light-black); margin-bottom: 1rem; }
 
-    .drop-zone h3 {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: var(--pure-black);
-      margin-bottom: 0.5rem;
-    }
+    .btn-primary { width: 100%; background: var(--primary); color: var(--pure-white); border: none; padding: 1.125rem 2rem; border-radius: var(--radius-md); font-size: 1rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.75rem; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 10px 20px -5px rgba(0,0,0,0.1); }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-h); transform: translateY(-2px) scale(1.02); box-shadow: 0 15px 30px -10px rgba(0,0,0,0.1); }
+    .btn-primary:disabled { background: var(--medium-gray); color: var(--dark-gray); cursor: not-allowed; transform: none; }
 
-    .drop-zone p {
-      color: var(--dark-gray);
-      font-size: 0.9375rem;
-    }
+    .progress-container { display: none; margin-bottom: 1.5rem; }
+    .progress-container.active { display: block; }
+    .progress-header { display: flex; justify-content: space-between; margin-bottom: 0.75rem; font-size: 0.875rem; color: var(--light-black); }
+    .progress-bar { height: 8px; background: var(--medium-gray); border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--pure-black); width: 0%; transition: width 0.3s; border-radius: 4px; }
 
-    .file-input {
-      display: none;
-    }
+    .result-container { display: none; background: var(--pure-white); border: 1px solid var(--medium-gray); border-radius: 16px; padding: 2rem; text-align: center; margin-bottom: 1.5rem; }
+    .result-container.active { display: block; }
+    .result-icon { width: 64px; height: 64px; background: #f0fdf4; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
+    .result-icon svg { width: 32px; height: 32px; color: #22c55e; }
+    .result-container h3 { font-size: 1.25rem; font-weight: 700; color: var(--pure-black); margin-bottom: 0.5rem; }
+    .result-container p { color: var(--dark-gray); margin-bottom: 1.5rem; }
+    .btn-download { display: inline-flex; align-items: center; gap: 0.5rem; background: #22c55e; color: var(--pure-white); padding: 0.875rem 1.5rem; border-radius: 10px; text-decoration: none; font-weight: 600; transition: all 0.3s; }
+    .btn-download:hover { background: #16a34a; transform: translateY(-2px); }
+    .btn-reset { display: block; margin: 1rem auto 0; background: none; border: none; color: var(--dark-gray); font-size: 0.9375rem; cursor: pointer; text-decoration: underline; }
+    .btn-reset:hover { color: var(--pure-black); }
 
-    /* File List */
-    .file-list {
-      margin-bottom: 1.5rem;
-    }
+    .info-box { display: flex; align-items: flex-start; gap: 1rem; padding: 1rem; background: var(--pure-white); border-radius: 10px; margin-bottom: 1.5rem; }
+    .info-box svg { width: 20px; height: 20px; color: var(--dark-gray); flex-shrink: 0; margin-top: 0.125rem; }
+    .info-box p { font-size: 0.875rem; color: var(--dark-gray); line-height: 1.6; }
 
-    .file-item {
-      background: var(--pure-white);
-      border: 1px solid var(--medium-gray);
-      border-radius: 12px;
-      padding: 1rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 0.75rem;
-      transition: all 0.2s;
-    }
+    footer { background: var(--off-white); border-top: 1px solid var(--medium-gray); padding: 2rem; text-align: center; }
+    footer p { color: var(--dark-gray); font-size: 0.875rem; }
 
-    .file-item:hover {
-      border-color: var(--light-black);
-    }
+    @media (max-width: 640px) { main { padding: 7rem 1rem 2rem; } .tool-container { padding: 1.5rem; } .drop-zone { padding: 2rem 1.5rem; } }
 
-    .file-info {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      flex: 1;
-      min-width: 0;
-    }
-
-    .file-icon {
-      width: 40px;
-      height: 40px;
-      background: var(--off-white);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .file-icon svg {
-      width: 20px;
-      height: 20px;
-      color: var(--light-black);
-    }
-
-    .file-details {
-      min-width: 0;
-    }
-
-    .file-name {
-      font-weight: 600;
-      color: var(--pure-black);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-bottom: 0.25rem;
-    }
-
-    .file-size {
-      font-size: 0.875rem;
-      color: var(--dark-gray);
-    }
-
-    .file-actions {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .btn-icon {
-      width: 36px;
-      height: 36px;
-      border: 1px solid var(--medium-gray);
-      background: var(--pure-white);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s;
-      color: var(--light-black);
-    }
-
-    .btn-icon:hover {
-      border-color: var(--pure-black);
-      color: var(--pure-black);
-    }
-
-    .btn-icon.remove:hover {
-      background: #fef2f2;
-      border-color: #ef4444;
-      color: #ef4444;
-    }
-
-    .btn-icon:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    /* Options */
-    .tool-options {
-      background: var(--pure-white);
-      border: 1px solid var(--medium-gray);
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .tool-options h3 {
-      font-size: 0.875rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--light-black);
-      margin-bottom: 1rem;
-    }
-
-    /* Buttons */
-    .btn-primary {
-      width: 100%;
-      background: var(--pure-black);
-      color: var(--pure-white);
-      border: none;
-      padding: 1rem 2rem;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      transition: all 0.3s;
-    }
-
-    .btn-primary:hover:not(:disabled) {
-      background: var(--light-black);
-      transform: translateY(-2px);
-    }
-
-    .btn-primary:disabled {
-      background: var(--medium-gray);
-      color: var(--dark-gray);
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    /* Progress */
-    .progress-container {
-      display: none;
-      margin-bottom: 1.5rem;
-    }
-
-    .progress-container.active {
-      display: block;
-    }
-
-    .progress-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 0.75rem;
-      font-size: 0.875rem;
-      color: var(--light-black);
-    }
-
-    .progress-bar {
-      height: 8px;
-      background: var(--medium-gray);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: var(--pure-black);
-      width: 0%;
-      transition: width 0.3s;
-      border-radius: 4px;
-    }
-
-    /* Result */
-    .result-container {
-      display: none;
-      background: var(--pure-white);
-      border: 1px solid var(--medium-gray);
-      border-radius: 16px;
-      padding: 2rem;
-      text-align: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .result-container.active {
-      display: block;
-    }
-
-    .result-icon {
-      width: 64px;
-      height: 64px;
-      background: #f0fdf4;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1rem;
-    }
-
-    .result-icon svg {
-      width: 32px;
-      height: 32px;
-      color: #22c55e;
-    }
-
-    .result-container h3 {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--pure-black);
-      margin-bottom: 0.5rem;
-    }
-
-    .result-container p {
-      color: var(--dark-gray);
-      margin-bottom: 1.5rem;
-    }
-
-    .btn-download {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: #22c55e;
-      color: var(--pure-white);
-      padding: 0.875rem 1.5rem;
-      border-radius: 10px;
-      text-decoration: none;
-      font-weight: 600;
-      transition: all 0.3s;
-    }
-
-    .btn-download:hover {
-      background: #16a34a;
-      transform: translateY(-2px);
-    }
-
-    .btn-reset {
-      display: block;
-      margin: 1rem auto 0;
-      background: none;
-      border: none;
-      color: var(--dark-gray);
-      font-size: 0.9375rem;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-
-    .btn-reset:hover {
-      color: var(--pure-black);
-    }
-
-    /* Info Box */
-    .info-box {
-      display: flex;
-      align-items: flex-start;
-      gap: 1rem;
-      padding: 1rem;
-      background: var(--pure-white);
-      border-radius: 10px;
-      margin-bottom: 1.5rem;
-    }
-
-    .info-box svg {
-      width: 20px;
-      height: 20px;
-      color: var(--dark-gray);
-      flex-shrink: 0;
-      margin-top: 0.125rem;
-    }
-
-    .info-box p {
-      font-size: 0.875rem;
-      color: var(--dark-gray);
-      line-height: 1.6;
-    }
-
-    /* Footer */
-    footer {
-      background: var(--off-white);
-      border-top: 1px solid var(--medium-gray);
-      padding: 2rem;
-      text-align: center;
-    }
-
-    footer p {
-      color: var(--dark-gray);
-      font-size: 0.875rem;
-    }
-
-    /* Responsive */
-    @media (max-width: 640px) {
-      main {
-        padding: 7rem 1rem 2rem;
-      }
-
-      .tool-container {
-        padding: 1.5rem;
-      }
-
-      .drop-zone {
-        padding: 2rem 1.5rem;
-      }
-    }
+    .dropdown-view-all { grid-column: 1 / -1 !important; border-top: 1px solid var(--border-light); margin-top: 0.5rem; padding-top: 0.75rem; }
+    .nav-cta { background: var(--primary); color: #fff !important; padding: 0.6rem 1.4rem; border-radius: var(--radius-md); font-weight: 600 !important; text-decoration: none; transition: var(--transition-base); box-shadow: var(--shadow-md); margin-left: 1rem; }
+    .nav-cta:hover { background: var(--primary-h) !important; transform: translateY(-1px); }
+    .dropdown-title, .dropdown-desc, .nav-link, .mobile-nav-link, .mobile-tool-item span { color: #000000 !important; }
+    main { margin-inline: auto !important; max-width: 1000px !important; }
+    .btn-primary { box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important; }
+    .btn-primary:hover { box-shadow: 0 8px 20px rgba(0,0,0,0.2) !important; }
   </style>
 </head>
 <body>
-
-  <!-- Header -->
-  <header>
+  <header id="mainHeader">
     <div class="header-container">
       <a href="index.html" class="logo">PDF<span>Tools</span></a>
-      <a href="index.html" class="back-link">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="19" y1="12" x2="5" y2="12"></line>
-          <polyline points="12 19 5 12 12 5"></polyline>
+      <nav>
+        <ul class="nav-list">
+          <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+          <li class="nav-item active">
+            <a href="all-tools.html" class="nav-link">
+              Tools 
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </a>
+            <div class="dropdown-menu">
+              <a href="merge.html" class="dropdown-item">
+                <div class="dropdown-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 7v8a2 2 0 0 0 2 2h6M8 7V5a2 2 0 0 1 2-2h4.586a1 1 0 0 1 .707.293l4.414 4.414a1 1 0 0 1 .293.707V15a2 2 0 0 1-2 2h-2"/><path d="M12 12v6"/><path d="M9 15l3 3 3-3"/></svg></div>
+                <div class="dropdown-info"><span class="dropdown-title">Merge PDF</span><span class="dropdown-desc">Combine multiple files</span></div>
+              </a>
+              <a href="compress.html" class="dropdown-item">
+                <div class="dropdown-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14V4a2 2 0 0 1 2-2h10l4 4v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4"/><path d="M4 14h16"/><path d="m15 9-3 3-3-3"/></svg></div>
+                <div class="dropdown-info"><span class="dropdown-title">Compress PDF</span><span class="dropdown-desc">Reduce file size</span></div>
+              </a>
+              <a href="protect.html" class="dropdown-item">
+                <div class="dropdown-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+                <div class="dropdown-info"><span class="dropdown-title">Protect PDF</span><span class="dropdown-desc">Encrypted security</span></div>
+              </a>
+              <a href="imagetopdf.html" class="dropdown-item">
+                <div class="dropdown-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+                <div class="dropdown-info"><span class="dropdown-title">Image to PDF</span><span class="dropdown-desc">Convert JPG/PNG</span></div>
+              </a>
+              <a href="all-tools.html" class="dropdown-item dropdown-view-all">
+                <div class="dropdown-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg></div>
+                <div class="dropdown-info"><span class="dropdown-title">View All Tools</span><span class="dropdown-desc">8+ PDF utilities</span></div>
+              </a>
+            </div>
+          </li>
+          <li class="nav-item"><a href="how-to-use.html" class="nav-link">How to Use</a></li>
+          <li class="nav-item"><a href="why-use.html" class="nav-link">Why Us?</a></li>
+        </ul>
+      </nav>
+      <a href="all-tools.html" class="nav-cta">Get Started</a>
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle Menu">
+        <svg id="menuIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
         </svg>
-        Back to Tools
-      </a>
+      </button>
     </div>
   </header>
 
-  <!-- Main -->
+  <div class="mobile-menu" id="mobileMenu">
+    <ul class="mobile-nav-list">
+      <li><a href="index.html" class="mobile-nav-link">Home</a></li>
+      <li>
+        <div class="mobile-nav-link" onclick="this.nextElementSibling.style.display = (this.nextElementSibling.style.display === 'grid' ? 'none' : 'grid')">
+          Tools <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="mobile-tools-grid">
+          <a href="merge.html" class="mobile-tool-item"><span>Merge PDF</span></a>
+          <a href="compress.html" class="mobile-tool-item"><span>Compress PDF</span></a>
+          <a href="protect.html" class="mobile-tool-item"><span>Protect PDF</span></a>
+          <a href="imagetopdf.html" class="mobile-tool-item"><span>Image to PDF</span></a>
+        </div>
+      </li>
+      <li><a href="how-to-use.html" class="mobile-nav-link">How to Use</a></li>
+      <li><a href="why-use.html" class="mobile-nav-link">Why Us?</a></li>
+    </ul>
+  </div>
+
   <main>
     <div class="tool-header">
-      <div class="tool-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M8 7v8a2 2 0 0 0 2 2h6M8 7V5a2 2 0 0 1 2-2h4.586a1 1 0 0 1 .707.293l4.414 4.414a1 1 0 0 1 .293.707V15a2 2 0 0 1-2 2h-2"/>
-          <path d="M12 12v6"/><path d="M9 15l3 3 3-3"/>
-        </svg>
-      </div>
       <h1>Merge PDFs</h1>
+      <div class="trust-bar">
+        <span class="trust-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          ISO/IEC 27001 Certified
+        </span>
+        <span class="trust-divider"></span>
+        <span class="trust-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Fully GDPR Compliant
+        </span>
+        <span class="trust-divider"></span>
+        <span class="trust-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Your Data Stays Private
+        </span>
+      </div>
       <p>Combine multiple PDF files into one document</p>
     </div>
 
     <div class="tool-container">
-      <!-- Info Box -->
       <div class="info-box">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="10"></circle>
@@ -540,7 +332,6 @@
         <p>If the file is password-protected, the merging process will not proceed. Files are processed locally in your browser. No upload to any server. Maximum file size: 500MB.</p>
       </div>
 
-      <!-- Drop Zone -->
       <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
         <div class="drop-zone-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -553,10 +344,8 @@
       </div>
       <input type="file" id="fileInput" class="file-input" multiple accept=".pdf" onchange="handleFiles(this.files)">
 
-      <!-- File List -->
       <div class="file-list" id="fileList"></div>
 
-      <!-- Progress -->
       <div class="progress-container" id="progressContainer">
         <div class="progress-header">
           <span>Merging PDFs...</span>
@@ -567,7 +356,6 @@
         </div>
       </div>
 
-      <!-- Result -->
       <div class="result-container" id="resultContainer">
         <div class="result-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -587,23 +375,21 @@
         <button class="btn-reset" onclick="resetTool()">Merge another PDF</button>
       </div>
 
-      <!-- Action Button -->
       <button class="btn-primary" id="mergeBtn" onclick="mergePDFs()" disabled>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M8 7v8a2 2 0 0 0 2 2h6M8 7V5a2 2 0 0 1 2-2h4.586a1 1 0 0 1 .707.293l4.414 4.414a1 1 0 0 1 .293.707V15a2 2 0 0 1-2 2h-2"/>
-                    <path d="M12 12v6"/><path d="M9 15l3 3 3-3"/>
+          <path d="M12 12v6"/><path d="M9 15l3 3 3-3"/>
         </svg>
         Merge PDFs
       </button>
     </div>
   </main>
 
-  <!-- Footer -->
   <footer>
     <p>Free & Fast — No server uploads, no installs, no watermarks.</p>
   </footer>
 
-  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js "></script>
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
   <script>
     let files = [];
     let mergedPdfBytes = null;
@@ -618,21 +404,9 @@
     const resultContainer = document.getElementById('resultContainer');
     const downloadBtn = document.getElementById('downloadBtn');
 
-    // Drag and drop
-    dropZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      dropZone.classList.add('dragover');
-    });
-
-    dropZone.addEventListener('dragleave', () => {
-      dropZone.classList.remove('dragover');
-    });
-
-    dropZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropZone.classList.remove('dragover');
-      handleFiles(e.dataTransfer.files);
-    });
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
+    dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
 
     function handleFiles(selectedFiles) {
       const newFiles = Array.from(selectedFiles).filter(f => f.type === 'application/pdf');
@@ -661,20 +435,13 @@
           </div>
           <div class="file-actions">
             <button class="btn-icon" onclick="moveFile(${index}, -1)" ${index === 0 ? 'disabled' : ''} title="Move up">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="18 15 12 9 6 15"></polyline>
-              </svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>
             </button>
             <button class="btn-icon" onclick="moveFile(${index}, 1)" ${index === files.length - 1 ? 'disabled' : ''} title="Move down">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
             <button class="btn-icon remove" onclick="removeFile(${index})" title="Remove">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
           </div>
         `;
@@ -703,28 +470,22 @@
       mergeBtn.disabled = true;
       progressContainer.classList.add('active');
       dropZone.style.display = 'none';
-
       try {
         const mergedPdf = await PDFLib.PDFDocument.create();
-
         for (let i = 0; i < files.length; i++) {
           const arrayBuffer = await files[i].arrayBuffer();
           const pdf = await PDFLib.PDFDocument.load(arrayBuffer);
           const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
           pages.forEach(page => mergedPdf.addPage(page));
-
           const progress = ((i + 1) / files.length) * 100;
           progressFill.style.width = progress + '%';
           progressPercent.textContent = Math.round(progress) + '%';
         }
-
         mergedPdfBytes = await mergedPdf.save();
-
         const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
         downloadBtn.href = url;
         downloadBtn.download = 'merged.pdf';
-
         progressContainer.classList.remove('active');
         resultContainer.classList.add('active');
       } catch (error) {
@@ -759,7 +520,25 @@
       div.textContent = text;
       return div.innerHTML;
     }
-  </script>
 
+    window.addEventListener('scroll', () => {
+      const header = document.getElementById('mainHeader');
+      if (window.scrollY > 20) header.classList.add('scrolled');
+      else header.classList.remove('scrolled');
+    });
+
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobileMenu');
+      const icon = document.getElementById('menuIcon');
+      menu.classList.toggle('active');
+      if (menu.classList.contains('active')) {
+        document.body.style.overflow = 'hidden';
+        icon.innerHTML = '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>';
+      } else {
+        document.body.style.overflow = '';
+        icon.innerHTML = '<line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>';
+      }
+    }
+  </script>
 </body>
 </html>

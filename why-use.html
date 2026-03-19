@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Why PDFTools? | Professional PDF Utilities</title>
+  <meta name="description" content="Discover why PDFTools is the most secure and fastest way to handle your documents. 100% browser-based processing, zero server uploads, and complete privacy.">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap');
+    
+    :root {
+      /* Legacy Achromatic Fallbacks */
+      --black: #000000;
+      --light-black: #222222;
+      --pure-black: #000000;
+      --dark-gray: #444444;
+      --medium-gray: #D1D5DB;
+      --light-gray: #F3F4F6;
+      --off-white: #F9F9F9;
+      --pure-white: #FFFFFF;
+      --border-main: #E5E7EB;
+      /* Maximum Contrast Theme Tokens - Perfect Legibility */
+      --primary:      #000000; /* Plain Black */
+      --primary-h:    #222222; /* Off Black */
+      --primary-light: #F5F5F5; /* Off White */
+      
+      --accent:       #000000; /* Plain Black */
+      --accent-light: rgba(0, 0, 0, 0.05);
+      
+      --bg:           #FFFFFF; /* Plain White */
+      --bg-soft:      #F9F9F9; /* Off White */
+      
+      --text:         #000000; /* Plain Black */
+      --text-heading: #000000; /* Plain Black */
+      --text-sub:     #222222; /* Off Black */
+      --text-muted:   #444444;
+      
+      --border-light: rgba(0, 0, 0, 0.1);
+      --font-body:    'Inter', sans-serif;
+      --font-heading: 'Outfit', sans-serif;
+      
+      --radius-sm: 4px; --radius-md: 8px; --radius-lg: 12px; --radius-xl: 20px;
+      
+      --shadow-sm:   0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md:   0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-soft: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+      --shadow-xl:   0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      
+      --transition-base:   all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-smooth: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, .logo { 
+      font-family: var(--font-heading); 
+      color: var(--text-heading); 
+    }
+
+    /* HEADER & DROPDOWN */
+
+    /* Header & Navigation */
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: rgba(255,255,255,0.7);
+      -webkit-backdrop-filter: blur(12px) saturate(180%);
+      backdrop-filter: blur(12px) saturate(180%);
+      border-bottom: 1px solid var(--border-light);
+      transition: var(--transition-smooth);
+    }
+    
+    .header-container {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 80px; max-width: 1200px; margin: 0 auto; padding: 0 2rem;
+    }
+
+    .logo {
+      display: flex; align-items: center; gap: 0.5rem;
+      text-decoration: none; font-size: 1.5rem; font-weight: 800; color: #000000;
+      letter-spacing: -0.04em;
+    }
+    .logo span { font-weight: 400; color: var(--text-muted); }
+
+    nav { display: flex; align-items: center; gap: 2.5rem; }
+    .nav-list { display: flex; align-items: center; gap: 2.5rem; list-style: none; }
+    .nav-item { position: relative; }
+    .nav-link {
+      text-decoration: none; font-size: 0.9375rem; font-weight: 500;
+      color: var(--text-sub); transition: color 0.3s ease;
+      display: flex; align-items: center; gap: 0.25rem;
+      padding: 0.5rem 0;
+    }
+    .nav-link:hover, .nav-item.active .nav-link { color: var(--primary); }
+
+    /* Dropdown System */
+    .dropdown-menu {
+      position: absolute; top: 100%; left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: var(--bg); border: 1px solid var(--border-light);
+      border-radius: var(--radius-md); box-shadow: var(--shadow-xl);
+      padding: 1.25rem; width: 680px; display: grid;
+      grid-template-columns: repeat(3, 1fr); gap: 0.5rem;
+      opacity: 0; visibility: hidden; transition: var(--transition-smooth);
+      z-index: 1000;
+    }
+
+    .nav-item:hover .dropdown-menu {
+      opacity: 1; visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .dropdown-item {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 0.75rem; text-decoration: none;
+      border-radius: var(--radius-sm); transition: background 0.2s ease;
+    }
+    .dropdown-item:hover { background: var(--bg-soft); }
+
+    .dropdown-icon {
+      width: 40px; height: 40px; background: var(--bg-soft);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      color: var(--primary); transition: all 0.2s ease;
+    }
+    .dropdown-item:hover .dropdown-icon { background: var(--primary-light); transform: scale(1.05); }
+
+    .dropdown-info { display: flex; flex-direction: column; }
+    .dropdown-title { font-size: 0.875rem; font-weight: 600; color: var(--text); }
+    .dropdown-desc { font-size: 0.75rem; color: var(--text-muted); }
+
+    .nav-cta {
+      background: var(--primary); color: #fff !important;
+      padding: 0.6rem 1.4rem; border-radius: var(--radius-md);
+      font-weight: 600 !important; text-decoration: none;
+      transition: var(--transition-base); box-shadow: var(--shadow-md);
+    }
+    .nav-cta:hover { background: var(--primary-h) !important; transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+    .mobile-menu-btn { display: none; }
+
+    @media (max-width: 991px) {
+      .header-container { padding: 0 1.5rem; }
+      nav { display: none; }
+      .mobile-menu-btn { display: block; }
+    }
+
+    /* Mobile Menu Overlay */
+    .mobile-menu {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 999;
+      padding: 80px 1.5rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .mobile-menu.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .mobile-nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .mobile-nav-link {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .mobile-tools-grid {
+      display: none;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      margin-top: 1rem;
+    }
+
+    .mobile-tool-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 1rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      text-decoration: none;
+    }
+
+    .mobile-tool-item span {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* ── HERO ── */
+    .page-hero {
+      padding: 10rem 2rem 6rem;
+      background: radial-gradient(circle at top right, var(--primary-light) 0%, transparent 50%);
+      text-align: center;
+    }
+    .hero-inner { max-width: 900px; margin: 0 auto; }
+    .page-badge {
+      display: inline-block; padding: 0.5rem 1rem; background: var(--primary-light);
+      color: var(--primary); border-radius: 999px; font-weight: 700; font-size: 0.75rem;
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1.5rem;
+    }
+    .page-hero h1 { font-size: clamp(2.5rem, 5vw, 4rem); margin-bottom: 1.5rem; letter-spacing: -0.04em; }
+    .page-hero p { color: var(--text-sub); font-size: 1.25rem; max-width: 700px; margin: 0 auto; }
+
+    /* ── FEATURES ── */
+    .features-section { padding: 4rem 2rem 8rem; max-width: 1400px; margin: 0 auto; }
+    .features-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; }
+    
+    .feature-card {
+      padding: 3rem; 
+      background: rgba(255, 255, 255, 0.6);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg); transition: var(--transition-smooth);
+      display: flex; flex-direction: column; gap: 1.5rem;
+      position: relative; overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+ 
+    .feature-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--primary);
+      background: #fff;
+      box-shadow: var(--shadow-xl);
+    }
+    
+    .feature-icon {
+      width: 64px; height: 64px; background: var(--bg-soft); color: var(--primary);
+      border-radius: 12px; display: flex; align-items: center; justify-content: center;
+      transition: var(--transition-base);
+    }
+    .feature-card:hover .feature-icon {
+      transform: scale(1.05);
+      background: var(--primary); color: #fff;
+    }
+    /* Icon removal requested by user */
+    .feature-icon { display: none; }
+    
+    .feature-card h3 { font-size: 1.5rem; color: var(--accent); }
+    .feature-card p { color: var(--text-sub); font-size: 1rem; line-height: 1.7; }
+
+    /* ── STATS ── */
+    .stats-bar {
+      background: #fff; padding: 4rem 0; border-top: 1px solid var(--border-light);
+      border-bottom: 1px solid var(--border-light); margin-bottom: 6rem;
+    }
+    .stats-container {
+      max-width: 1200px; margin: 0 auto; display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 4rem; text-align: left;
+    }
+    .stat-item h4 { font-size: 2.5rem; color: var(--primary); margin-bottom: 0.5rem; font-family: var(--font-heading); }
+    .stat-item p { color: var(--text-muted); font-weight: 500; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.1em; }
+
+    /* ── CTA ── */
+    .bottom-cta { 
+      padding: 8rem 2rem; text-align: center; 
+      background: var(--accent); color: #fff; 
+      border-radius: var(--radius-lg); margin: 0 1rem 6rem; 
+      position: relative; overflow: hidden; 
+    }
+    .bottom-cta h2 { font-size: 3rem; margin-bottom: 1.5rem; position: relative; z-index: 1; }
+    .bottom-cta p { font-size: 1.25rem; color: rgba(255,255,255,0.8); margin-bottom: 3rem; max-width: 600px; margin: 0 auto 3rem; position: relative; z-index: 1; }
+    .cta-btn { 
+      background: #fff; color: #000 !important; padding: 1.25rem 2.5rem; 
+      border-radius: var(--radius-md); font-weight: 700; text-decoration: none;
+      font-size: 1.125rem; display: inline-block; cursor: pointer; transition: var(--transition-base);
+    }
+    /* ── COMPARISON ── */
+    .comparison-section { padding: 6rem 2rem; max-width: 1400px; margin: 0 auto; }
+    .comparison-table {
+      width: 100%; border-collapse: separate; border-spacing: 0;
+      background: var(--bg-soft); border-radius: var(--radius-lg);
+      overflow: hidden; border: 1px solid var(--border-light);
+    }
+    .comparison-table th, .comparison-table td {
+      padding: 1.5rem 2rem; text-align: left; border-bottom: 1px solid var(--border-light);
+    }
+    .comparison-table th { background: #fff; font-weight: 700; color: var(--text); }
+    .comparison-table td:first-child { font-weight: 600; width: 40%; }
+    .comparison-table tr:last-child td { border-bottom: none; }
+    .check-mark { color: #10B981; font-weight: 800; font-size: 1.25rem; }
+    .cross-mark { color: #EF4444; font-weight: 800; font-size: 1.25rem; }
+    
+    .comparison-section h2 { margin-bottom: 2rem; }
+    .comparison-section p { margin-bottom: 3rem; color: var(--text-sub); }
+
+    /* ── TESTIMONIALS ── */
+    .testimonials { padding: 8rem 2rem; max-width: 1400px; margin: 0 auto; }
+    .testimonial-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+    .testimonial-card {
+      padding: 2.5rem; background: var(--bg-soft); border-radius: var(--radius-lg);
+      border: 1px solid var(--border-light);
+    }
+    .testimonial-text { font-style: italic; color: var(--text-sub); margin-bottom: 1.5rem; }
+    .testimonial-author { font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 0.75rem; }
+    .author-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--medium-gray); }
+
+    .cta-btn:hover { background: #f0f0f0 !important; transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+    /* Footer */
+    footer {
+      background: var(--bg-soft);
+      border-top: 1px solid var(--border-light);
+      padding: 5rem 0 3rem;
+      color: var(--accent);
+      text-align: left;
+    }
+
+    .footer-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
+      gap: 3rem;
+      margin-bottom: 3rem;
+    }
+
+    .footer-brand .logo {
+      margin-bottom: 0.5rem;
+      display: flex;
+    }
+
+    .footer-brand p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.75rem;
+      line-height: 1.7;
+      max-width: 280px;
+    }
+
+    .footer-column h4 {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-sub);
+      margin-bottom: 1rem;
+    }
+
+    .footer-column ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .footer-column a {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color .2s, transform .2s;
+      display: inline-block;
+    }
+
+    .footer-column a:hover {
+      color: var(--text);
+      transform: translateX(3px);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid var(--border-light);
+      padding-top: 1.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-bottom p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .footer-social {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .footer-social a {
+      width: 36px;
+      height: 36px;
+      border: 1.5px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      transition: background .2s, color .2s, border-color .2s, transform .2s;
+      background: var(--bg);
+    }
+
+    .footer-social a:hover {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+    /* Modern Thin Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { 
+      background: var(--bg-soft); 
+      border-radius: 10px; 
+      border: 2px solid var(--bg);
+    }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .header-container { height: 70px; }
+      nav { display: none; }
+      .page-hero { padding-top: 8rem; }
+      .bottom-cta h2 { font-size: 2rem; }
+    }
+  
+    /* ─────────────────────────────────────────
+       TOOL CONTENT REVERSION (LEFT ALIGN)
+    ───────────────────────────────────────── */
+    .tool-header, .tool-info, .tool-header h1, .tool-header p, .tool-info h1, .tool-info p {
+      text-align: left !important;
+    }
+    .tool-container {
+      align-items: flex-start !important;
+    }
+  
+    /* ─────────────────────────────────────────
+       FINAL NEUTRALIZATION & ALIGNMENT
+    ───────────────────────────────────────── */
+    main {
+      width: 100% !important;
+      max-width: none !important;
+      margin: 0 !important;
+    }
+    /* Inner container for alignment */
+    .container {
+      max-width: 1200px !important;
+      margin: 0 auto !important;
+      padding: 0 2rem !important;
+      width: 100% !important;
+    }
+    
+    .page-hero, .features-section, .comparison-section, .testimonials {
+      width: 100% !important;
+      max-width: none !important;
+      padding: 0 !important;
+      background: #fff !important; /* Force white background */
+    }
+    
+    .page-hero { padding-top: 10rem !important; padding-bottom: 6rem !important; }
+    .features-section { padding: 6rem 0 !important; }
+    .comparison-section { padding: 6rem 0 !important; }
+    .testimonials { padding: 8rem 0 !important; }
+
+    .footer-container {
+      max-width: 1080px !important;
+      margin: 0 auto !important;
+      padding: 0 2rem !important;
+    }
+    footer { background: #fff !important; border-top: 1px solid var(--border-light); }
+    .tool-header, .tool-info, .tool-header h1, .tool-header p, .tool-info h1, .tool-info p, .tool-icon {
+      text-align: left !important;
+      margin-inline: auto !important;
+      margin-right: auto !important;
+    }
+    .btn-primary {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    }
+    .btn-primary:hover {
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2) !important;
+    }
+    /* Ensure dropdown text is strictly black */
+    .dropdown-title, .dropdown-desc, .nav-link, .mobile-nav-link, .mobile-tool-item span {
+      color: #000000 !important;
+    }
+
+  
+    .dropdown-view-all { 
+      grid-column: 1 / -1 !important; 
+      border-top: 1px solid var(--border-light); 
+      margin-top: 0.5rem; 
+      padding-top: 0.75rem; 
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header id="mainHeader">
+    <div class="header-container">
+      <a href="index.html" class="logo">PDF<span>Tools</span></a>
+      
+      <nav>
+        <ul class="nav-list">
+                    <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+          <li class="nav-item"><a href="features.html" class="nav-link">Features</a></li>
+
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              Tools 
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </a>
+            <div class="dropdown-menu">
+              <a href="merge.html" class="dropdown-item">
+                <div class="dropdown-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 7v8a2 2 0 0 0 2 2h6M8 7V5a2 2 0 0 1 2-2h4.586a1 1 0 0 1 .707.293l4.414 4.414a1 1 0 0 1 .293.707V15a2 2 0 0 1-2 2h-2"/><path d="M12 12v6"/><path d="M9 15l3 3 3-3"/></svg>
+                </div>
+                <div class="dropdown-info">
+                  <span class="dropdown-title">Merge PDF</span>
+                  <span class="dropdown-desc">Combine multiple files</span>
+                </div>
+              </a>
+              <a href="compress.html" class="dropdown-item">
+                <div class="dropdown-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 14V4a2 2 0 0 1 2-2h10l4 4v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4"/><path d="M4 14h16"/><path d="m15 9-3 3-3-3"/></svg>
+                </div>
+                <div class="dropdown-info">
+                  <span class="dropdown-title">Compress PDF</span>
+                  <span class="dropdown-desc">Reduce file size</span>
+                </div>
+              </a>
+              <a href="protect.html" class="dropdown-item">
+                <div class="dropdown-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <div class="dropdown-info">
+                  <span class="dropdown-title">Protect PDF</span>
+                  <span class="dropdown-desc">Encrypted security</span>
+                </div>
+              </a>
+              <a href="imagetopdf.html" class="dropdown-item">
+                <div class="dropdown-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                </div>
+                <div class="dropdown-info">
+                  <span class="dropdown-title">Image to PDF</span>
+                  <span class="dropdown-desc">Convert JPG/PNG</span>
+                </div>
+              </a>
+              <a href="redact.html" class="dropdown-item">
+                <div class="dropdown-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h12"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                </div>
+                <div class="dropdown-info">
+                  <span class="dropdown-title">Redact PDF</span>
+                  <span class="dropdown-desc">Hide sensitive info</span>
+                </div>
+              </a>
+              <a href="remove.html" class="dropdown-item">
+                <div class="dropdown-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h12"/><circle cx="18" cy="17" r="3"/><line x1="16.5" y1="17" x2="19.5" y2="17"/></svg>
+                </div>
+                <div class="dropdown-info">
+                  <span class="dropdown-title">Remove Pages</span>
+                  <span class="dropdown-desc">Delete PDF pages</span>
+                </div>
+              </a>
+              <a href="rotate.html" class="dropdown-item">
+                <div class="dropdown-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+                </div>
+                <div class="dropdown-info">
+                  <span class="dropdown-title">Rotate PDF</span>
+                  <span class="dropdown-desc">Change orientation</span>
+                </div>
+              </a>
+              <a href="watermark.html" class="dropdown-item">
+                <div class="dropdown-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                </div>
+                <div class="dropdown-info">
+                  <span class="dropdown-title">Watermark</span>
+                  <span class="dropdown-desc">Text protection</span>
+                </div>
+              </a>
+              <a href="unlock.html" class="dropdown-item">
+                <div class="dropdown-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 1 1 10 0v4"/><path d="M11 11h2v3h-2z"/></svg>
+                </div>
+                <div class="dropdown-info">
+                  <span class="dropdown-title">Unlock PDF</span>
+                  <span class="dropdown-desc">Remove passwords</span>
+                </div>
+              </a>
+              <a href="all-tools.html" class="dropdown-item dropdown-view-all">
+                <div class="dropdown-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+                </div>
+                <div class="dropdown-info">
+                  <span class="dropdown-title">View All Tools</span>
+                  <span class="dropdown-desc">9+ PDF utilities</span>
+                </div>
+              </a>
+            </div>
+          </li>
+        </ul>
+      </nav>
+
+      <a href="all-tools.html" class="nav-cta">Get Started</a>
+
+      <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Toggle Menu">
+        <svg id="menuIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <ul class="mobile-nav-list">
+            <li><a href="index.html" class="mobile-nav-link">Home</a></li>
+      <li><a href="features.html" class="mobile-nav-link">Features</a></li>
+
+      <li>
+        <div class="mobile-nav-link" onclick="this.nextElementSibling.style.display = (this.nextElementSibling.style.display === 'grid' ? 'none' : 'grid')">
+          Tools 
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="mobile-tools-grid">
+          <a href="merge.html" class="mobile-tool-item"><span>Merge PDF</span></a>
+          <a href="compress.html" class="mobile-tool-item"><span>Compress PDF</span></a>
+          <a href="protect.html" class="mobile-tool-item"><span>Protect PDF</span></a>
+          <a href="imagetopdf.html" class="mobile-tool-item"><span>Image to PDF</span></a>
+          <a href="redact.html" class="mobile-tool-item"><span>Redact PDF</span></a>
+          <a href="remove.html" class="mobile-tool-item"><span>Remove Pages</span></a>
+          <a href="rotate.html" class="mobile-tool-item"><span>Rotate PDF</span></a>
+          <a href="watermark.html" class="mobile-tool-item"><span>Watermark</span></a>
+          <a href="unlock.html" class="mobile-tool-item"><span>Unlock PDF</span></a>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Hero Section -->
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <div class="hero-inner">
+          <div class="page-badge">The Future of File Editing</div>
+          <h1>Why Professionals Trust PDFTools</h1>
+          <p>Experience the most secure, private, and efficient way to manage your PDF documents without ever leaving your browser.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="stats-bar">
+      <div class="container">
+        <div class="stats-container">
+          <div class="stat-item"><h4>0</h4><p>Files Stored</p></div>
+          <div class="stat-item"><h4>100%</h4><p>Local Processing</p></div>
+          <div class="stat-item"><h4>Unlimited</h4><p>Free Usage</p></div>
+          <div class="stat-item"><h4>∞</h4><p>Privacy</p></div>
+        </div>
+      </div>
+    </div>
+
+    <section class="features-section">
+      <div class="container">
+        <div class="features-grid">
+          <div class="feature-card">
+            <h3>Unbeatable Privacy</h3>
+            <p>Unlike other tools, we don't upload your files to any server. All processing happens right in your web browser, ensuring your sensitive data remains on your machine.</p>
+          </div>
+
+          <div class="feature-card">
+            <h3>Blazing Fast Performance</h3>
+            <p>Skip the wait. Browser-based processing means no upload or download latency. Get your edited PDF instantly, no matter how large the file is.</p>
+          </div>
+
+          <div class="feature-card">
+            <h3>Zero Cost, No Limits</h3>
+            <p>Enjoy premium PDF features without the price tag. We don't believe in limits, watermarks, or hidden subscriptions. Just professional tools for everyone.</p>
+          </div>
+
+          <div class="feature-card">
+            <h3>No Installation Required</h3>
+            <p>Forget bulky software installations. Access our complete suite of tools from any device with a modern browser. Work on the go, anywhere, anytime.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="comparison-section">
+      <div class="container">
+        <div class="section-header reveal">
+          <h2>Online Tools vs. PDFTools</h2>
+          <p>Why settled for less when you can have complete control?</p>
+        </div>
+        <div class="reveal">
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>Other Online Editors</th>
+                <th>PDFTools (Local)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Data Privacy</td>
+                <td><span class="cross-mark">✗</span> Files uploaded to cloud</td>
+                <td><span class="check-mark">✓</span> 100% In-Browser RAM</td>
+              </tr>
+              <tr>
+                <td>Processing Speed</td>
+                <td><span class="cross-mark">✗</span> Dependent on upload</td>
+                <td><span class="check-mark">✓</span> Instant (Local CPU)</td>
+              </tr>
+              <tr>
+                <td>Security Risk</td>
+                <td><span class="cross-mark">✗</span> Third-party server access</td>
+                <td><span class="check-mark">✓</span> Non-traceable, no logs</td>
+              </tr>
+              <tr>
+                <td>Quality Limits</td>
+                <td><span class="cross-mark">✗</span> Often compressed</td>
+                <td><span class="check-mark">✓</span> Original resolution</td>
+              </tr>
+              <tr>
+                <td>Watermarks</td>
+                <td><span class="cross-mark">✗</span> Added on free versions</td>
+                <td><span class="check-mark">✓</span> No watermarks, ever</td>
+              </tr>
+            <tr>
+              <td>Usage Limits</td>
+              <td><span class="cross-mark">✗</span> Daily file/size caps</td>
+              <td><span class="check-mark">✓</span> Unlimited, Forever Free</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="testimonials reveal">
+      <div class="container">
+        <div class="section-header">
+          <div class="page-badge">Trusted by Thousands</div>
+          <h2>What Our Users Say</h2>
+        </div>
+        <div class="testimonial-grid">
+          <div class="testimonial-card">
+            <p class="testimonial-text">"The only tool I trust with my client's legal documents. Knowing it never leaves my RAM is a game-changer."</p>
+            <div class="testimonial-author">
+              <div class="author-avatar"></div>
+              <span>Sarah J., Legal Consultant</span>
+            </div>
+          </div>
+          <div class="testimonial-card">
+            <p class="testimonial-text">"Incredibly fast. Merging 50+ page PDFs used to take minutes of uploading, now it's done in a second."</p>
+            <div class="testimonial-author">
+              <div class="author-avatar"></div>
+              <span>Mark D., Project Manager</span>
+            </div>
+          </div>
+          <div class="testimonial-card">
+            <p class="testimonial-text">"Simple, clean, and completely achromatic. Finally a tool that doesn't look like it's from 2005."</p>
+            <div class="testimonial-author">
+              <div class="author-avatar"></div>
+              <span>Elena R., UI Designer</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bottom-cta">
+      <div class="container">
+        <h2>Ready to Experience Privacy?</h2>
+        <p>Join thousands of users who have switched to local document management for a safer, faster web.</p>
+        <a href="all-tools.html" class="cta-btn">Explore All 9 Tools</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="logo">PDF<span>Tools</span></a>
+          <p>Professional PDF utilities that run entirely in your browser. No uploads, no watermarks, complete privacy.</p>
+        </div>
+        <div class="footer-column">
+          <h4>Tools</h4>
+          <ul>
+            <li><a href="merge.html">Merge PDFs</a></li>
+            <li><a href="compress.html">Compress PDF</a></li>
+            <li><a href="protect.html">Password Protect</a></li>
+            <li><a href="redact.html">Redact PDF</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4>More Tools</h4>
+          <ul>
+            <li><a href="remove.html">Remove Pages</a></li>
+            <li><a href="rotate.html">Rotate PDF</a></li>
+            <li><a href="imagetopdf.html">Image to PDF</a></li>
+            <li><a href="watermark.html">Add Watermark</a></li>
+          </ul>
+        </div>
+        <div class="footer-column">
+          <h4>Legal</h4>
+          <ul>
+            <li><a href="privacy-policy.html">Privacy Policy</a></li>
+            <li><a href="terms-of-service.html">Terms of Service</a></li>
+            <li><a href="cookie-policy.html">Cookie Policy</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p class="footer-copy">© 2026 PDFTools. All Right Reserve. Made With ❤ By AMANXR. Free & Fast — No server uploads, no installs, no watermarks.</p>
+        <div class="footer-social">
+          <a href="https://x.com/home" aria-label="Twitter">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+            </svg>
+          </a>
+          <a href="https://github.com/xraman-71" aria-label="GitHub">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobileMenu');
+      menu.classList.toggle('active');
+      document.body.style.overflow = menu.classList.contains('active') ? 'hidden' : '';
+    }
+
+    function toggleMobileTools() {
+      const grid = document.querySelector('.mobile-tools-grid');
+      grid.style.display = grid.style.display === 'grid' ? 'none' : 'grid';
+    }
+
+    // Scroll reveal effect
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.style.opacity = '1';
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.feature-card').forEach(card => {
+      card.style.opacity = '0';
+      card.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+      observer.observe(card);
+    });
+  </script>
+</body>
+</html>
